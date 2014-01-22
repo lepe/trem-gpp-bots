@@ -334,7 +334,8 @@ void G_ShutdownGame( int restart );
 void CheckExitRules( void );
 
 void G_CountSpawns( void );
-void G_StartBots( );
+void G_StartBots( void );
+void G_StopBots( void );
 void G_CalculateBuildPoints( void );
 
 /*
@@ -357,6 +358,7 @@ Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, i
 
     case GAME_SHUTDOWN:
       G_ShutdownGame( arg0 );
+      G_StopBots( ); //LEPE
       return 0;
 
     case GAME_CLIENT_CONNECT:
@@ -1972,6 +1974,7 @@ void LogExit( const char *string )
   gclient_t   *cl;
   gentity_t   *ent;
 
+  G_StopBots( ); //LEPE
   G_LogPrintf( "Exit: %s\n", string );
 
   level.intermissionQueued = level.time;
@@ -2629,24 +2632,11 @@ void G_RunFrame( int levelTime )
 void G_StartBots( ) 
 {
    trap_SendConsoleCommand( EXEC_APPEND, "g_bot 1\n" );
-  //int 	loadit = 0;
-  //Com_Printf("**** Clients: %d\n", level.numAlienClients + level.numHumanClients);
-/*  if ( randomSeed == 0 ) {
-      if(level.numAlienClients + level.numHumanClients == 4) {
-	  trap_SendConsoleCommand( EXEC_APPEND, "restart\n" ); //LEPE
-      }
-  } else {*/
-/*
-	  if(level.numAlienClients + level.numHumanClients == 0)
-	  {
-		  srand( trap_Milliseconds() );
-		  loadit = rand() % 2;
-		  if(loadit == 1) {
-		     trap_SendConsoleCommand( EXEC_APPEND, "exec bots/4humans.cfg\n" ); //LEPE
-		  } else {
-		     trap_SendConsoleCommand( EXEC_APPEND, "exec bots/4aliens.cfg\n" ); //LEPE
-		  }
-	  }
-*/
-//   }
+}
+/**
+ * Stop bots
+**/
+void G_StopBots( ) 
+{
+   trap_SendConsoleCommand( EXEC_APPEND, "g_bot 0\n" );
 }

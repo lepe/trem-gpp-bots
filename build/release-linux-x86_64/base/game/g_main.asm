@@ -856,6 +856,9 @@ ARGI4
 ADDRGP4 G_ShutdownGame
 CALLV
 pop
+ADDRGP4 G_StopBots
+CALLV
+pop
 CNSTI4 0
 RETI4
 ADDRGP4 $234
@@ -4243,7 +4246,7 @@ ADDRGP4 $695
 ARGP4
 ADDRGP4 $696
 ARGP4
-CNSTI4 1322
+CNSTI4 1324
 ARGI4
 ADDRGP4 $697
 ARGP4
@@ -6858,6 +6861,9 @@ LABELV $1046
 endproc G_SendGameStat 10300 72
 export LogExit
 proc LogExit 28 20
+ADDRGP4 G_StopBots
+CALLV
+pop
 ADDRGP4 $1096
 ARGP4
 ADDRFP4 0
@@ -9434,6 +9440,17 @@ CALLV
 pop
 LABELV $1490
 endproc G_StartBots 0 8
+export G_StopBots
+proc G_StopBots 0 8
+CNSTI4 2
+ARGI4
+ADDRGP4 $1493
+ARGP4
+ADDRGP4 trap_SendConsoleCommand
+CALLV
+pop
+LABELV $1492
+endproc G_StopBots 0 8
 bss
 align 1
 LABELV cv_alienMaxStage
@@ -10455,6 +10472,17 @@ import rand
 import srand
 import qsort
 lit
+align 1
+LABELV $1493
+byte 1 103
+byte 1 95
+byte 1 98
+byte 1 111
+byte 1 116
+byte 1 32
+byte 1 48
+byte 1 10
+byte 1 0
 align 1
 LABELV $1491
 byte 1 103
@@ -14687,7 +14715,7 @@ byte 1 97
 byte 1 110
 byte 1 32
 byte 1 50
-byte 1 49
+byte 1 50
 byte 1 32
 byte 1 50
 byte 1 48
