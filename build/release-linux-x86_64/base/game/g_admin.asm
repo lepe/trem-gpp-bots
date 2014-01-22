@@ -20869,6 +20869,7 @@ import botGetDistanceBetweenPlayer
 import botTargetInRange
 import botFindClosestEnemy
 import botAimAtTarget
+import G_BotIntermissionThink
 import G_BotSpectatorThink
 import G_FastThink
 import G_FrameAim
@@ -32392,6 +32393,11 @@ byte 1 107
 byte 1 105
 byte 1 108
 byte 1 108
+byte 1 47
+byte 1 103
+byte 1 105
+byte 1 118
+byte 1 101
 byte 1 94
 byte 1 55
 byte 1 93

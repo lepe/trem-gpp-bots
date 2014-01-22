@@ -83,7 +83,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
     
     {"botcmd", G_admin_botcmd, qfalse, "botcmd",
       "Change bot behavior.",
-      "[^3name^7] [^5regular/idle/attack/standground/defensive/followprotect/followattack/followidle/teamkill^7]"
+      "[^3name^7] [^5regular/idle/attack/standground/defensive/followprotect/followattack/followidle/teamkill/give^7]"
     },
 
     {"builder", G_admin_builder, qtrue, "builder",
@@ -3391,7 +3391,7 @@ qboolean G_admin_botcmd( gentity_t *ent ) {
         char name[ MAX_NAME_LENGTH ];
         char name_s[ MAX_NAME_LENGTH ];
         char name2_s[ MAX_NAME_LENGTH ];
-        char skill[100];
+        char skill[ 100 ];
         char command[ 32 ];
         int i, j;
         qboolean success = qfalse;

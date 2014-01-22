@@ -1,4 +1,5 @@
 #!/bin/bash
+make
 #VERSION=$(cat /var/games/trem_src/trem-pbot/version);
 #VERSION=$[$VERSION+1];
 #echo $VERSION > /var/games/trem_src/trem-pbot/version

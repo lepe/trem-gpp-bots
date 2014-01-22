@@ -88,8 +88,10 @@ void G_AddCreditToClient( gclient_t *client, short credit, qboolean cap )
 {
   int capAmount;
 
-  if( !client )
+  if( !client ) { 
+    G_Printf("No client identified to credit: %d\n", credit); 
     return;
+  }
 
   if( cap && credit > 0 )
   {

@@ -212,6 +212,8 @@ void G_BotCmd( gentity_t *master, int clientNum, char *command, int skill ) {
   } else if( !Q_stricmp( command, "skill" ) ) {
     bot->botSkillLevel = skill;
     //trap_SendServerCommand(-1, "print \"team kill mode\n\"");
+  } else if( !Q_stricmp( command, "give" ) ) { //LEPE: give money/evos to bot
+    G_AddCreditToClient( bot->client, (short)skill, qfalse );
     
   } else {
 	
