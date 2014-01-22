@@ -1733,9 +1733,11 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target ) {
 
 	// Create our vector that points our gun to his face
 	VectorAdd( targetStraight, targetUp, dirToTarget );
-	
-	dirToTarget[0] += self->botSkillLevel * sin( self->client->time1000 );
-	dirToTarget[1] += self->botSkillLevel * cos( self->client->time1000 );
+
+	if( target->s.eType != ET_BUILDABLE ) {	//LEPE: except when are buildables 
+	    dirToTarget[0] += self->botSkillLevel * sin( self->client->time1000 );
+	    dirToTarget[1] += self->botSkillLevel * cos( self->client->time1000 );
+	}
 	// Grab the angles to use with delta_angles
 	vectoangles( dirToTarget, angleToTarget );
 	self->client->ps.delta_angles[ 0 ] = ANGLE2SHORT( angleToTarget[ 0 ] );
