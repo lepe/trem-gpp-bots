@@ -1336,7 +1336,10 @@ void ClientThink_real( gentity_t *ent )
   //
   if( level.intermissiontime )
   {
-    ClientIntermissionThink( client );
+    if( ent->r.svFlags & SVF_BOT )
+      G_BotIntermissionThink( client );
+    else
+      ClientIntermissionThink( client );
     return;
   }
 

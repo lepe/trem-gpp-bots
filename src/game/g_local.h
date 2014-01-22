@@ -798,6 +798,7 @@ void G_BotThink( gentity_t *self );
 void G_FrameAim( gentity_t *self );
 void G_FastThink( gentity_t *self );
 void G_BotSpectatorThink( gentity_t *self );
+void G_BotIntermissionThink( gclient_t *client );
 // todo: are these suppose to be out here?! Why not?
 qboolean botAimAtTarget( gentity_t *self, gentity_t *target );
 int botFindClosestEnemy( gentity_t *self, qboolean includeTeam );

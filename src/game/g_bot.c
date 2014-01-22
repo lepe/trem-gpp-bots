@@ -1703,6 +1703,15 @@ void G_BotSpectatorThink( gentity_t *self )
 // 	return qtrue;
 // }
 
+/*
+ * Called when we are in intermission.
+ * Just flag that we are ready to proceed.
+ */
+void G_BotIntermissionThink( gclient_t *client ) //does/must not accept gentity_t because it can't identify the client owner in g_active.c
+{
+    client->readyToExit = qtrue;
+}
+
 qboolean botAimAtTarget( gentity_t *self, gentity_t *target ) {
 	vec3_t dirToTarget, angleToTarget, highPoint, targetUp, targetStraight, realBase;
 
