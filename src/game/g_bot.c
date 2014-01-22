@@ -743,6 +743,13 @@ void Bot_Buy( gentity_t *self )
 			boughtweap = qtrue;
 		}
 	}
+	//Buy Nades
+	upgrade = UP_GRENADE;
+	if(!BG_InventoryContainsUpgrade( upgrade, self->client->ps.stats ) && g_humanStage.integer > 1 && BG_Upgrade( upgrade )->price <= (short)self->client->ps.persistant[ PERS_CREDIT ]) {
+		BG_AddUpgradeToInventory( upgrade, self->client->ps.stats );
+		G_AddCreditToClient( self->client, -(short)BG_Upgrade( upgrade )->price, qfalse );
+		G_Printf("NADE Bought\n");
+	}
 	if(boughtweap == qtrue)
 	{
 // 		BG_AddWeaponToInventory( weapon, self->client->ps.stats );
@@ -1713,7 +1720,10 @@ void G_BotIntermissionThink( gclient_t *client ) //does/must not accept gentity_
 {
     client->readyToExit = qtrue;
 }
-
+/*
+ * Bot AIM at target
+ * Calculates aiming
+ */
 qboolean botAimAtTarget( gentity_t *self, gentity_t *target ) {
 	vec3_t dirToTarget, angleToTarget, highPoint, targetUp, targetStraight, realBase;
 
@@ -1737,6 +1747,11 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target ) {
 	if( target->s.eType != ET_BUILDABLE ) {	//LEPE: except when are buildables 
 	    dirToTarget[0] += self->botSkillLevel * sin( self->client->time1000 );
 	    dirToTarget[1] += self->botSkillLevel * cos( self->client->time1000 );
+	} else {
+	    if(BG_InventoryContainsUpgrade(UP_GRENADE,self->client->ps.stats)) {
+		G_Printf("NADE ACTIVATED!\n");
+		BG_ActivateUpgrade(UP_GRENADE,self->client->ps.stats);
+	    }
 	}
 	// Grab the angles to use with delta_angles
 	vectoangles( dirToTarget, angleToTarget );
