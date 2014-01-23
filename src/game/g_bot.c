@@ -745,7 +745,7 @@ void Bot_Buy( gentity_t *self )
 	}
 	//Buy Nades
 	upgrade = UP_GRENADE;
-	if(!BG_InventoryContainsUpgrade( upgrade, self->client->ps.stats ) && g_humanStage.integer > 1 && BG_Upgrade( upgrade )->price <= (short)self->client->ps.persistant[ PERS_CREDIT ]) {
+	if(!BG_InventoryContainsUpgrade( upgrade, self->client->ps.stats ) && g_humanStage.integer > 0 && BG_Upgrade( upgrade )->price <= (short)self->client->ps.persistant[ PERS_CREDIT ]) {
 		BG_AddUpgradeToInventory( upgrade, self->client->ps.stats );
 		G_AddCreditToClient( self->client, -(short)BG_Upgrade( upgrade )->price, qfalse );
 		G_Printf("NADE Bought\n");
@@ -1239,7 +1239,7 @@ void G_BotThink( gentity_t *self )
 				}
 			}
 			
-			if(!self->botEnemy) {
+			if(!self->botEnemy || G_Rand() > 10) { //LEPE: Give 10% of chances to continue to next path (ignore target)
 				pathfinding(self); //Roam the map!!!
 			} else {
 				self->timeFoundPath = level.time;
@@ -2164,4 +2164,11 @@ qboolean botShootIfTargetInRange( gentity_t *self, gentity_t *target )
 	}
 	self->botEnemy = NULL;
 	return qfalse;
+}
+/*
+ * Generates a number between 0-100
+ */
+int G_Rand( ) {
+    srand( trap_Milliseconds() );
+    return (int)rand() % 101;
 }

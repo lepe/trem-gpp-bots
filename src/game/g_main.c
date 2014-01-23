@@ -2632,6 +2632,7 @@ void G_RunFrame( int levelTime )
 void G_StartBots( ) 
 {
    trap_SendConsoleCommand( EXEC_APPEND, "g_bot 1\n" );
+   trap_SendConsoleCommand( EXEC_APPEND, "exec bots/4h.cfg\n" ); //LEPE
 }
 /**
  * Stop bots

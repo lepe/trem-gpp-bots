@@ -789,6 +789,7 @@ char      *G_NewString( const char *string );
 //ROTAX
 // g_bot.c
 //
+int G_Rand( void );
 void G_BotAdd( char *name, team_t team, int skill, int ignore );
 void G_BotDel( int clientNum );
 void G_DeleteBots( void );

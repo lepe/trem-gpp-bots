@@ -9438,18 +9438,25 @@ ARGP4
 ADDRGP4 trap_SendConsoleCommand
 CALLV
 pop
+CNSTI4 2
+ARGI4
+ADDRGP4 $1492
+ARGP4
+ADDRGP4 trap_SendConsoleCommand
+CALLV
+pop
 LABELV $1490
 endproc G_StartBots 0 8
 export G_StopBots
 proc G_StopBots 0 8
 CNSTI4 2
 ARGI4
-ADDRGP4 $1493
+ADDRGP4 $1494
 ARGP4
 ADDRGP4 trap_SendConsoleCommand
 CALLV
 pop
-LABELV $1492
+LABELV $1493
 endproc G_StopBots 0 8
 bss
 align 1
@@ -10147,6 +10154,7 @@ import botGetDistanceBetweenPlayer
 import botTargetInRange
 import botFindClosestEnemy
 import botAimAtTarget
+import G_BotIntermissionThink
 import G_BotSpectatorThink
 import G_FastThink
 import G_FrameAim
@@ -10473,7 +10481,7 @@ import srand
 import qsort
 lit
 align 1
-LABELV $1493
+LABELV $1494
 byte 1 103
 byte 1 95
 byte 1 98
@@ -10481,6 +10489,26 @@ byte 1 111
 byte 1 116
 byte 1 32
 byte 1 48
+byte 1 10
+byte 1 0
+align 1
+LABELV $1492
+byte 1 101
+byte 1 120
+byte 1 101
+byte 1 99
+byte 1 32
+byte 1 98
+byte 1 111
+byte 1 116
+byte 1 115
+byte 1 47
+byte 1 52
+byte 1 104
+byte 1 46
+byte 1 99
+byte 1 102
+byte 1 103
 byte 1 10
 byte 1 0
 align 1
