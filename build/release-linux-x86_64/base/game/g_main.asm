@@ -10164,6 +10164,7 @@ import G_BotReload
 import G_DeleteBots
 import G_BotDel
 import G_BotAdd
+import G_Rand
 import G_NewString
 import G_SpawnEntitiesFromString
 import G_SpawnVector
@@ -14743,7 +14744,7 @@ byte 1 97
 byte 1 110
 byte 1 32
 byte 1 50
-byte 1 50
+byte 1 52
 byte 1 32
 byte 1 50
 byte 1 48

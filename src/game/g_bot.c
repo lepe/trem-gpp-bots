@@ -537,6 +537,7 @@ void Bot_Buy( gentity_t *self )
 	qboolean energyweap = qfalse;
 	weapon_t weapon;
 	upgrade_t upgrade;
+    vec3_t newOrigin;
 	//int maxAmmo, maxClips;
 	int clientNum = self->client - level.clients;
 	if(self->client->ps.stats[ STAT_TEAM ] != TEAM_HUMANS){return;}
@@ -621,6 +622,11 @@ void Bot_Buy( gentity_t *self )
 			!(BG_Weapon( upgrade )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			BG_AddUpgradeToInventory( upgrade, self->client->ps.stats );
+            VectorCopy( newOrigin, self->s.pos.trBase );
+            self->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN_BSUIT;
+            self->client->pers.classSelection = PCL_HUMAN_BSUIT;
+            self->client->ps.eFlags ^= EF_TELEPORT_BIT;
+		    ClientUserinfoChanged( clientNum, qfalse );
 			G_AddCreditToClient( self->client, -(short)BG_Upgrade( upgrade )->price, qfalse );
 		}
 	}
@@ -1238,8 +1244,8 @@ void G_BotThink( gentity_t *self )
 						self->botEnemy = &g_entities[tempEntityIndex];
 				}
 			}
-			
-			if(!self->botEnemy || G_Rand() > 10) { //LEPE: Give 10% of chances to continue to next path (ignore target)
+		    	
+			if(!self->botEnemy || G_Rand() < 50) { //LEPE: Give 50% of chances to continue to next path (ignore target for a sec)
 				pathfinding(self); //Roam the map!!!
 			} else {
 				self->timeFoundPath = level.time;
