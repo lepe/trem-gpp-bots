@@ -1,5 +1,5 @@
 Tremulous GPP bots module by GlobalWarming
-==========================================
+------------------------------------------
 
 The current code was based on a P-Bot 2.x GPP port from Tremulous 1.1 P-Bot (http://tremulous.net/forum/index.php?topic=15329.0) which uses Tremulous version SVN2279 (from http://svn.icculus.org/tremulous/trunk/).
 
