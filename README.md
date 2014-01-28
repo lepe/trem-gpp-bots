@@ -7,7 +7,6 @@ After that, several things has been improved:
 
 * Aliens wall-walking (when available) was prioritized over jumping
 * Humans bots can buy and use granades (they use them against buildings)
-* ATCS Path was improved
 * Battlesuits are now displayed (before they were not shown)
 * Humans bots aim against buildings fixed
 * Weird "possesion" bug (player replaced bot) fixed
