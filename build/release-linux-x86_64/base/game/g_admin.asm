@@ -20879,6 +20879,7 @@ import G_BotReload
 import G_DeleteBots
 import G_BotDel
 import G_BotAdd
+import G_Rand
 import G_NewString
 import G_SpawnEntitiesFromString
 import G_SpawnVector

@@ -2202,6 +2202,7 @@ import botGetDistanceBetweenPlayer
 import botTargetInRange
 import botFindClosestEnemy
 import botAimAtTarget
+import G_BotIntermissionThink
 import G_BotSpectatorThink
 import G_FastThink
 import G_FrameAim
@@ -2211,6 +2212,7 @@ import G_BotReload
 import G_DeleteBots
 import G_BotDel
 import G_BotAdd
+import G_Rand
 import G_PrintSpawnQueue
 import G_GetPosInSpawnQueue
 import G_RemoveFromSpawnQueue

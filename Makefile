@@ -27,7 +27,7 @@ ifndef BUILD_CLIENT_SMP
   BUILD_CLIENT_SMP =0
 endif
 ifndef BUILD_SERVER
-  BUILD_SERVER     =0
+  BUILD_SERVER     =
 endif
 ifndef BUILD_GAME_SO
   BUILD_GAME_SO    =0

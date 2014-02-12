@@ -314,13 +314,11 @@ SV_RemoveOperatorCommands
 ==================
 */
 void SV_RemoveOperatorCommands( void ) {
-#if 0
 	// removing these won't let the server start again
-	Cmd_RemoveCommand ("heartbeat");
-	Cmd_RemoveCommand ("serverinfo");
-	Cmd_RemoveCommand ("systeminfo");
-	Cmd_RemoveCommand ("map_restart");
-	Cmd_RemoveCommand ("sectorlist");
-#endif
+	Cmd_RemoveCommand ("heartbeat"); //no need for it
+	//Cmd_RemoveCommand ("serverinfo");
+	Cmd_RemoveCommand ("systeminfo"); //LEPE: this one is crashing the server
+	Cmd_RemoveCommand ("map_restart"); //use: restart
+	//Cmd_RemoveCommand ("sectorlist");
 }
 

@@ -607,7 +607,6 @@ static void SVC_Status( netadr_t from ) {
 			statusLength += playerLength;
 		}
 	}
-
 	NET_OutOfBandPrint( NS_SERVER, from, "statusResponse\n%s\n%s", infostring, status );
 }
 
@@ -635,12 +634,19 @@ void SVC_Info( netadr_t from ) {
 
 	// don't count privateclients
 	count = 0;
+/*
 	for ( i = sv_privateClients->integer ; i < sv_maxclients->integer ; i++ ) {
 		if ( svs.clients[i].state >= CS_CONNECTED ) {
 			count++;
 		}
 	}
-
+*/
+    //LEPE: client count not showing correctly on server browser
+	for ( i = 0 ; i < sv_maxclients->integer ; i++ ) {
+		if ( svs.clients[i].state >= CS_CONNECTED ) {
+			count++;
+		}
+	}
 	infostring[0] = 0;
 
 	// echo back the parameter to status. so servers can use it as a challenge
