@@ -43,8 +43,7 @@ typedef struct gclient_s gclient_t;
 #define INTERMISSION_DELAY_TIME 1000
 #define SP_INTERMISSION_DELAY_TIME 5000
 
-#define MAX_PATHS	200 //try not to make it over 1000 or there will be problems.
-#define MAX_PATH_NODES	5 //do not change
+#define MAX_PATHS	300 //try not to make it over 1000 or there will be problems.
 
 // gentity->flags
 #define FL_GODMODE        0x00000010
@@ -57,7 +56,7 @@ typedef struct gclient_s gclient_t;
 #define FL_FORCE_GESTURE  0x00008000  // spawn point just for bots
 
 #define BOT_JUMP		1
-#define BOT_WALLCLIMB		2
+#define BOT_WALLCLIMB	2
 #define BOT_KNEEL		3
 #define BOT_POUNCE		4
 
@@ -103,6 +102,7 @@ typedef struct
 	int	random;
 	int	timeout;
 	int	action;
+    int essence; //LEPE: used for ant colony algorithm
 } path;
 
 
@@ -247,14 +247,14 @@ struct gentity_s
   int			buytime;
   int			evolvetime;
   qboolean		isblocked;
-  //vec3_t		OldPos[20];
   int			pathid;
   int			movepathid;
   int			discpathid;
   int			lastpathid;
   qboolean		patheditor;
-  
-  
+  //LEPE
+  int		    crumb[MAX_PATHS]; //path node history
+  int           numCrumb; //counter of max path length
   
   // timing variables
   float             wait;
@@ -756,6 +756,10 @@ typedef struct
   buildLog_t        buildLog[ MAX_BUILDLOG ];
   int               buildId;
   int               numBuildLogs;
+
+  //LEPE
+  int               essenceFadeTimer; //used to control how essence is faded in ant algorithm
+
 } level_locals_t;
 
 #define CMD_CHEAT         0x0001
@@ -789,7 +793,7 @@ char      *G_NewString( const char *string );
 //ROTAX
 // g_bot.c
 //
-int G_Rand( void );
+int G_Rand( void ); //LEPE
 void G_BotAdd( char *name, team_t team, int skill, int ignore );
 void G_BotDel( int clientNum );
 void G_DeleteBots( void );

@@ -3452,6 +3452,7 @@ qboolean G_drawnodes( gentity_t *ent )
 		ADMP( "^2Drawing Paths\n" );
 		for(i = 0;i < level.numPaths;i++)
 		{
+            //G_Printf("%i : %i\n", i+1, level.paths[i].essence); //LEPE
 			draw = qtrue;
 			for(i2 = 0;i2 < 5;i2++)
 			{
@@ -3527,7 +3528,7 @@ gentity_t *spawnnode( gentity_t *self, long id )
   bolt->think = nodethink;
   bolt->s.eType = ET_MISSILE;
   bolt->r.svFlags = SVF_USE_CURRENT_ORIGIN;
-  bolt->s.weapon = WP_PULSE_RIFLE;
+  bolt->s.weapon = level.paths[id].essence > 40 ? WP_LUCIFER_CANNON : (level.paths[id].essence < 6 ? WP_PULSE_RIFLE : WP_BLASTER ); //LEPE
   bolt->s.generic1 = WPM_PRIMARY; //weaponMode
   bolt->r.ownerNum = self->r.ownerNum;
   bolt->parent = self;

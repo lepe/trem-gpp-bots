@@ -1,4 +1,5 @@
 #!/bin/bash
+make clean
 make
 DEPLOY_DIR=/var/games/tremulous/pbot-gpp
 VERSION=0;

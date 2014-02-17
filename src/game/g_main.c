@@ -613,6 +613,7 @@ void G_PathLoad( void )
 		level.paths[i].random = -1;
 		level.paths[i].timeout = 10000;
 		level.paths[i].action = 0;
+		level.paths[i].essence= 1; //LEPE: default value for ant algorithm
 	}
 	len = trap_FS_FOpenFile( va( "paths/%s/path.dat", map ), &f, FS_READ );
 	if( len < 0 )
@@ -2500,6 +2501,19 @@ void G_RunFrame( int levelTime )
 
     return;
   }
+
+  //LEPE: reduce the essence of paths
+  if( level.essenceFadeTimer > 5000 ) {
+        level.essenceFadeTimer = 0;
+        for( i = 0; i < level.numPaths; i++ ) {
+            if(level.paths[i].essence > 1) {
+                //G_Printf("Reducing Essence of path %i to %i", i, level.paths[i].essence);
+                level.paths[i].essence--;
+                //G_Printf(" +E\n");
+            }
+        }
+  }
+  level.essenceFadeTimer += (levelTime - level.time);
 
   level.framenum++;
   level.previousTime = level.time;

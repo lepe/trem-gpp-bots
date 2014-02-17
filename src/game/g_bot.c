@@ -99,17 +99,9 @@ void G_BotAdd( char *name, team_t team, int skill, int ignore ) {
 	bot->checktime = level.time;
 	bot->patheditor = qfalse;
 	bot->r.svFlags |= SVF_BOT;
-	//ResetPaths(bot,0);
-	/*
-	for(i2 = 0;i2 < level.numPaths;i2++)
-	{
-		bot->OldPaths[i2].nextid[0] = -1;
-		bot->OldPaths[i2].nextid[1] = -1;
-		bot->OldPaths[i2].nextid[2] = -1;
-		bot->OldPaths[i2].nextid[3] = -1;
-		bot->OldPaths[i2].nextid[4] = -1;
-		bot->SkipPaths[i2] = -1;
-	}*/
+    //LEPE: used in ant algorithm
+    //G_Printf("Setting crumbs to 0\n");
+    bot->numCrumb = 0;
 	// register user information
 	userinfo[0] = '\0';
 	Info_SetValueForKey( userinfo, "name", name );
@@ -408,6 +400,25 @@ void G_FastThink( gentity_t *self )
 	//}
 }
 
+//LEPE: remove crumb redundancy
+/**
+ * If a crumb already existed, go back to that one.
+ */
+void setCrumb( gentity_t *self, int closestpath ) {
+    int i;
+    for(i = 0; i < self->numCrumb; i++) {
+        if(self->crumb[i] == closestpath) {
+            //G_Printf("Returning to: %i to node: %i\n",self->numCrumb,closestpath);
+            self->numCrumb = i;
+            return;
+        }
+    }
+    //G_Printf("Setting crumb : %i to node: %i\n",self->numCrumb,closestpath);
+    self->crumb[ self->numCrumb ] = closestpath;
+    self->numCrumb++;
+    return;
+}
+
 void findnewpath( gentity_t *self )
 {
 	trace_t trace;
@@ -459,11 +470,13 @@ void findnewpath( gentity_t *self )
 
 void findnextpath( gentity_t *self )
 {
-	int randnum = 0;
-	int i,nextpath = 0;
+	int totalessence = 0; //LEPE: ant algorithm
+    int accumessence = 0;
+	int pathessence[5];
+    int randnum = 0;
+	int i,j,nextpath = 0;
 	int possiblenextpath = 0;
 	int possiblepaths[5];
-	int lasttarget = self->targetPath;
 	possiblepaths[0] = possiblepaths[1] = possiblepaths[2] = possiblepaths[3] = possiblepaths[4] = 0;
 	for(i = 0; i < 5; i++)
 	{
@@ -495,22 +508,35 @@ void findnextpath( gentity_t *self )
 		}
 		else
 		{
-			srand( trap_Milliseconds( ) );
-			randnum = (int)(( (double)rand() / ((double)(RAND_MAX)+(double)(1)) ) * possiblenextpath);
-			nextpath = randnum;
-			//if(nextpath == possiblenextpath)
-			//{nextpath = possiblenextpath - 1;}
+            //LEPE: bots decide which path to follow based on the strength of the essence (its a chance %)
+            /*
+             * We reduce the essence of previous node to make the bot to continue
+             * We increase the values by 10 so we can set return path to 1/10th
+             */
+            for(i =0; i < possiblenextpath; i++) {
+                pathessence[i] = level.paths[possiblepaths[i]].essence * 10;
+                for(j=0; j < self->numCrumb; j++) {
+                    if(self->crumb[j] == possiblepaths[i]) {
+                        pathessence[i] = 1; //reduce it to the minimum
+                        break;
+                    } 
+                }
+                totalessence += pathessence[i];
+            } 
+            //G_Printf("Options: %i, %i, %i, %i, %i\n",pathessence[0],pathessence[1],pathessence[2],pathessence[3],pathessence[4]);
+            randnum = G_Rand();
+            for(i =0; i < possiblenextpath; i++) {
+                accumessence += (pathessence[i] * 1000) / totalessence;
+                if(randnum <= accumessence) {
+                    nextpath = i;
+                    break;
+                }
+            } 
+            //LEPE: set next crumb
+            setCrumb( self, possiblepaths[nextpath] );
 		}
 		self->lastpathid = self->targetPath;
 		self->targetPath = possiblepaths[nextpath];
-		for(i = 0;i < 5;i++)
-		{
-			if(level.paths[self->targetPath].nextid[i] == lasttarget)
-			{
-				i = 5;
-			}
-		}
-
 		self->timeFoundPath = level.time;
 		return;
 	}
@@ -1632,7 +1658,7 @@ void G_BotSpectatorThink( gentity_t *self )
 			self->client->pers.classSelection = PCL_HUMAN;
 			self->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
 			self->client->pers.humanItemSelection = WP_MACHINEGUN;
-			//self->client->pers.humanItemSelection = WP_HBUILD; //LEPE
+			//self->client->pers.humanItemSelection = WP_HBUILD; //LEPE (for future reference when builders become a reality)
 			G_PushSpawnQueue( &level.humanSpawnQueue, clientNum );
 		}
 		else if( teamnum == TEAM_ALIENS)
@@ -2081,6 +2107,7 @@ qboolean botShootIfTargetInRange( gentity_t *self, gentity_t *target )
 	{
 	  //ROTAX
 			int nahoda = 0;
+            int i = 0;
 			srand( trap_Milliseconds( ) );
 			//nahoda = (rand() % 20);
 			nahoda = (int)(( (double)rand() / ((double)(RAND_MAX)+(double)(1)) ) * 20);
@@ -2162,6 +2189,15 @@ qboolean botShootIfTargetInRange( gentity_t *self, gentity_t *target )
 					self->client->pers.cmd.buttons |= BUTTON_ATTACK;
 				}
 			}
+            //LEPE: ant algorithm
+            //TODO: set target values
+            for(i = 0; i < self->numCrumb; i++) {
+                if(level.paths[ self->crumb[i] ].essence < 50) {
+                    level.paths[ self->crumb[i] ].essence ++ ; //for now just increment in 1...
+                    //G_Printf("Increasing: %i of total: %i (value: %i)\n",self->crumb[i], self->numCrumb, level.paths[ self->crumb[i] ].essence);
+                }
+            }
+
 			return qtrue;
 			//if (nahoda == 15 || nahoda == 16)
         		//	self->client->pers.cmd.buttons |= BUTTON_GESTURE;
@@ -2171,7 +2207,8 @@ qboolean botShootIfTargetInRange( gentity_t *self, gentity_t *target )
 	self->botEnemy = NULL;
 	return qfalse;
 }
-/*
+/*LEPE
+ * 
  * Generates a number between 0-100
  */
 int G_Rand( ) {

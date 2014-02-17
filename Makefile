@@ -26,8 +26,9 @@ endif
 ifndef BUILD_CLIENT_SMP
   BUILD_CLIENT_SMP =0
 endif
+#Turn this to empty the first time and everytime /src/server/* is modified
 ifndef BUILD_SERVER
-  BUILD_SERVER     =
+  BUILD_SERVER     =0
 endif
 ifndef BUILD_GAME_SO
   BUILD_GAME_SO    =0
@@ -322,7 +323,7 @@ ifneq (,$(findstring "$(PLATFORM)", "linux" "gnu_kfreebsd" "kfreebsd-gnu"))
 
   SHLIBEXT=so
   SHLIBCFLAGS=-fPIC -fvisibility=hidden
-  SHLIBLDFLAGS=-shared $(LDFLAGS)
+  SHLIBLDFLAGS= -shared $(LDFLAGS)
 
   THREAD_LIBS=-lpthread
   LIBS=-ldl -lm
