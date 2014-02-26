@@ -334,8 +334,6 @@ void G_ShutdownGame( int restart );
 void CheckExitRules( void );
 
 void G_CountSpawns( void );
-void G_StartBots( void );
-void G_StopBots( void );
 void G_CalculateBuildPoints( void );
 
 /*
@@ -358,7 +356,6 @@ Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, i
 
     case GAME_SHUTDOWN:
       G_ShutdownGame( arg0 );
-      G_StopBots( ); //LEPE
       return 0;
 
     case GAME_CLIENT_CONNECT:
@@ -373,12 +370,14 @@ Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, i
       return 0;
 
     case GAME_CLIENT_DISCONNECT:
+      G_Bots( &g_entities[ arg0 ] ); //LEPE
       ClientDisconnect( arg0 );
       return 0;
 
     case GAME_CLIENT_BEGIN:
       ClientBegin( arg0 );
-      G_StartBots( ); //LEPE
+      G_Bots( &g_entities[ arg0 ] ); //LEPE
+      G_SayTo( NULL, &g_entities[ arg0 ], SAY_TPRIVMSG, "Please join ANY TEAM to start!" );
       return 0;
 
     case GAME_CLIENT_COMMAND:
@@ -752,6 +751,10 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   // range are NEVER anything but clients
   level.num_entities = MAX_CLIENTS;
 
+  // LEPE: initialize bots count
+  level.alienBots = 0;
+  level.humanBots = 0;
+
   // let the server system know where the entites are
   trap_LocateGameData( level.gentities, level.num_entities, sizeof( gentity_t ),
     &level.clients[ 0 ].ps, sizeof( level.clients[ 0 ] ) );
@@ -1040,6 +1043,7 @@ qboolean G_PushSpawnQueue( spawnQueue_t *sq, int clientNum )
   sq->clients[ sq->back ] = clientNum;
 
   g_entities[ clientNum ].client->ps.pm_flags |= PMF_QUEUED;
+  G_Bots( &g_entities[ clientNum ] ); //LEPE
   return qtrue;
 }
 
@@ -1975,7 +1979,6 @@ void LogExit( const char *string )
   gclient_t   *cl;
   gentity_t   *ent;
 
-  G_StopBots( ); //LEPE
   G_LogPrintf( "Exit: %s\n", string );
 
   level.intermissionQueued = level.time;
@@ -2503,13 +2506,15 @@ void G_RunFrame( int levelTime )
   }
 
   //LEPE: reduce the essence of paths
-  if( level.essenceFadeTimer > 5000 ) {
+  if( level.essenceFadeTimer > 100000 ) {
         level.essenceFadeTimer = 0;
         for( i = 0; i < level.numPaths; i++ ) {
-            if(level.paths[i].essence > 1) {
+            if(level.paths[i].essence > 10) {
                 //G_Printf("Reducing Essence of path %i to %i", i, level.paths[i].essence);
-                level.paths[i].essence--;
+                level.paths[i].essence = level.paths[i].essence - 10;
                 //G_Printf(" +E\n");
+            } else {
+                level.paths[i].essence = 1;
             }
         }
   }
@@ -2641,17 +2646,17 @@ void G_RunFrame( int levelTime )
   level.frameMsec = trap_Milliseconds();
 }
 /**
- * Start bots
+ * Start bots //LEPE
 **/
-void G_StartBots( ) 
+void G_Bots( gentity_t *ent ) 
 {
-   trap_SendConsoleCommand( EXEC_APPEND, "g_bot 1\n" );
-   trap_SendConsoleCommand( EXEC_APPEND, "exec bots/4h.cfg\n" ); //LEPE
-}
-/**
- * Stop bots
-**/
-void G_StopBots( ) 
-{
-   trap_SendConsoleCommand( EXEC_APPEND, "g_bot 0\n" );
+    if(level.numAlienClients - level.alienBots > 0) {
+        trap_SendConsoleCommand( EXEC_APPEND, va("exec bots/A%d.cfg\n", level.numAlienClients) ); 
+    } 
+    if(level.numHumanClients - level.humanBots > 0) {
+        trap_SendConsoleCommand( EXEC_APPEND, va("exec bots/H%d.cfg\n", level.numHumanClients) ); 
+    }
+    if(level.numAlienClients == 0 && level.numHumanClients == 0 &&! (ent->r.svFlags & SVF_BOT) ) {
+        trap_SendConsoleCommand( EXEC_APPEND, "exec bots/start.cfg\n" ); 
+    }
 }

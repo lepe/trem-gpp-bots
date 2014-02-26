@@ -758,6 +758,8 @@ typedef struct
   int               numBuildLogs;
 
   //LEPE
+  int               alienBots;
+  int               humanBots;
   int               essenceFadeTimer; //used to control how essence is faded in ant algorithm
 
 } level_locals_t;
@@ -794,6 +796,7 @@ char      *G_NewString( const char *string );
 // g_bot.c
 //
 int G_Rand( void ); //LEPE
+void G_Bots( gentity_t *ent ); 
 void G_BotAdd( char *name, team_t team, int skill, int ignore );
 void G_BotDel( int clientNum );
 void G_DeleteBots( void );

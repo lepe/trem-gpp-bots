@@ -2212,6 +2212,7 @@ import G_BotReload
 import G_DeleteBots
 import G_BotDel
 import G_BotAdd
+import G_Bots
 import G_Rand
 import G_PrintSpawnQueue
 import G_GetPosInSpawnQueue

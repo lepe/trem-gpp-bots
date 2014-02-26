@@ -36,7 +36,7 @@ void G_BotReload( gentity_t *ent, int clientNum )
 	G_BotAdd( ent->client->pers.netname, ent->client->pers.teamSelection, ent->botSkillLevel, clientNum );
 	trap_SendServerCommand( -1, "print \"Interfering bot reloaded\n\"" );
 }
-
+// Deletes all bots
 void G_DeleteBots( void )
 {
 	int i;
@@ -47,17 +47,35 @@ void G_DeleteBots( void )
 		if(bot->r.svFlags & SVF_BOT) 
 		{ClientDisconnect(bot->client->ps.clientNum);}
 	}
+    level.alienBots = 0;
+    level.humanBots = 0;
 }
-
+// Add one bot into a team
 void G_BotAdd( char *name, team_t team, int skill, int ignore ) {
 	int i;
 	int clientNum;
 	char userinfo[MAX_INFO_STRING];
 	int reservedSlots = 0;
 	gentity_t *bot;
+    namelog_t *namelog;
+    char name_s[ MAX_NAME_LENGTH ];
+    char name_tmp_s[ MAX_NAME_LENGTH ];
 	
 	reservedSlots = trap_Cvar_VariableIntegerValue( "sv_privateclients" );
-	
+
+    // LEPE: check if no player/bot exists with that name	
+    G_SanitiseString(name, name_s, sizeof(name_s) );
+    for( namelog = level.namelogs; namelog; namelog = namelog->next ) {
+        if( namelog->slot >= 0 ) {
+            for( i = 0; i < MAX_NAMELOG_NAMES && namelog->name[ i ][ 0 ]; i++ ) {
+                G_SanitiseString(namelog->name[ i ], name_tmp_s, sizeof(name_tmp_s) );
+                if( i == namelog->nameOffset && namelog->slot > -1 && !strcmp( name_s, name_tmp_s ) ) {
+                    trap_Print("Nick already exists\n");
+                    return;
+                }
+            }
+        }
+    }
 	// find what clientNum to use for bot
 	// LEPE: clientNum calculation was modified to prevent player hijacking
         // We will assign slots from maxclients - 1 to maxclients - reservedSlots - 1
@@ -120,8 +138,10 @@ void G_BotAdd( char *name, team_t team, int skill, int ignore ) {
 	ClientBegin( clientNum );
 	Com_Printf("Bot added!\n");
 	G_ChangeTeam( bot, team );
+    if(team == TEAM_HUMANS) level.humanBots++;
+    else if(team == TEAM_ALIENS) level.alienBots++;
 }
-
+//Delete a specific bot
 void G_BotDel( int clientNum ) {
 	gentity_t *bot;
 
@@ -131,6 +151,12 @@ void G_BotDel( int clientNum ) {
 		return;
 	}
 	bot->inuse = qfalse;
+    //LEPE:
+    if(bot->botTeam == TEAM_HUMANS && level.humanBots > 0) {
+        level.humanBots--;
+    } else if(bot->botTeam == TEAM_ALIENS && level.alienBots > 0) {
+        level.alienBots--;
+    }
 	ClientDisconnect(clientNum);
 }
 
@@ -511,10 +537,10 @@ void findnextpath( gentity_t *self )
             //LEPE: bots decide which path to follow based on the strength of the essence (its a chance %)
             /*
              * We reduce the essence of previous node to make the bot to continue
-             * We increase the values by 10 so we can set return path to 1/10th
              */
             for(i =0; i < possiblenextpath; i++) {
-                pathessence[i] = level.paths[possiblepaths[i]].essence * 10;
+                pathessence[i] = level.paths[possiblepaths[i]].essence;
+                if(pathessence[i] == 1) pathessence[i] = 50; //give around 30% chance vs 100 to new paths
                 for(j=0; j < self->numCrumb; j++) {
                     if(self->crumb[j] == possiblepaths[i]) {
                         pathessence[i] = 1; //reduce it to the minimum
@@ -526,7 +552,7 @@ void findnextpath( gentity_t *self )
             //G_Printf("Options: %i, %i, %i, %i, %i\n",pathessence[0],pathessence[1],pathessence[2],pathessence[3],pathessence[4]);
             randnum = G_Rand();
             for(i =0; i < possiblenextpath; i++) {
-                accumessence += (pathessence[i] * 1000) / totalessence;
+                accumessence += (pathessence[i] * 100) / totalessence;
                 if(randnum <= accumessence) {
                     nextpath = i;
                     break;
@@ -1779,10 +1805,12 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target ) {
 	if( target->s.eType != ET_BUILDABLE ) {	//LEPE: except when are buildables 
 	    dirToTarget[0] += self->botSkillLevel * sin( self->client->time1000 );
 	    dirToTarget[1] += self->botSkillLevel * cos( self->client->time1000 );
-	} else {
+	} 
+
+	if( target->s.eType == ET_BUILDABLE || target->s.eType == PCL_ALIEN_LEVEL4 ) {	//LEPE: Nades on buildings or tyrants
 	    if(BG_InventoryContainsUpgrade(UP_GRENADE,self->client->ps.stats)) {
-		G_Printf("NADE ACTIVATED!\n");
-		BG_ActivateUpgrade(UP_GRENADE,self->client->ps.stats);
+            G_Printf("NADE ACTIVATED!\n");
+            BG_ActivateUpgrade(UP_GRENADE,self->client->ps.stats);
 	    }
 	}
 	// Grab the angles to use with delta_angles
@@ -2192,7 +2220,7 @@ qboolean botShootIfTargetInRange( gentity_t *self, gentity_t *target )
             //LEPE: ant algorithm
             //TODO: set target values
             for(i = 0; i < self->numCrumb; i++) {
-                if(level.paths[ self->crumb[i] ].essence < 50) {
+                if(level.paths[ self->crumb[i] ].essence < 100) {
                     level.paths[ self->crumb[i] ].essence ++ ; //for now just increment in 1...
                     //G_Printf("Increasing: %i of total: %i (value: %i)\n",self->crumb[i], self->numCrumb, level.paths[ self->crumb[i] ].essence);
                 }
