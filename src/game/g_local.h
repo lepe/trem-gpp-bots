@@ -255,6 +255,7 @@ struct gentity_s
   //LEPE
   int		    crumb[MAX_PATHS]; //path node history
   int           numCrumb; //counter of max path length
+  int           lastJoint; //keep id of last junction
   
   // timing variables
   float             wait;
@@ -747,6 +748,7 @@ typedef struct
   path		paths[MAX_PATHS];
   int		numPaths;
   qboolean	drawpath;
+  gentity_t *drawent; //LEPE: added so we can keep nodes refreshing
 
   emoticon_t        emoticons[ MAX_EMOTICONS ];
   int               emoticonCount;
@@ -807,7 +809,7 @@ void G_FrameAim( gentity_t *self );
 void G_FastThink( gentity_t *self );
 void G_BotSpectatorThink( gentity_t *self );
 void G_BotIntermissionThink( gclient_t *client );
-// todo: are these suppose to be out here?! Why not?
+// are these suppose to be out here?! Why not?
 qboolean botAimAtTarget( gentity_t *self, gentity_t *target );
 int botFindClosestEnemy( gentity_t *self, qboolean includeTeam );
 qboolean botTargetInRange( gentity_t *self, gentity_t *target );

@@ -277,7 +277,7 @@ byte 4 116
 byte 4 4
 skip 4
 address $107
-byte 4 2560
+byte 4 2564
 byte 4 5
 skip 4
 address $108
@@ -325,7 +325,7 @@ byte 4 632
 byte 4 4
 skip 4
 address $119
-byte 4 2168
+byte 4 2172
 byte 4 1
 skip 4
 address $120
@@ -361,7 +361,7 @@ byte 4 672
 byte 4 2
 skip 4
 address $128
-byte 4 2164
+byte 4 2168
 byte 4 1
 skip 4
 export spawns
@@ -1666,10 +1666,10 @@ ARGP4
 ADDRGP4 trap_Cvar_Set
 CALLV
 pop
-ADDRGP4 g_entities+2935184
+ADDRGP4 g_entities+2939272
 CNSTI4 1022
 ASGNI4
-ADDRGP4 g_entities+2935184+532
+ADDRGP4 g_entities+2939272+532
 ADDRGP4 $292
 ASGNP4
 ADDRGP4 g_restarted+12

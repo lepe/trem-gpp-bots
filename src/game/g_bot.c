@@ -30,6 +30,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define RAND_MAX 32768
 #endif
 
+#define GOOD_ESSENCE 1
+#define BAD_ESSENCE -1
+#define NO_ESSENCE 0
+
 void G_BotReload( gentity_t *ent, int clientNum )
 {
 	ClientDisconnect( clientNum );
@@ -426,18 +430,30 @@ void G_FastThink( gentity_t *self )
 	//}
 }
 
-//LEPE: remove crumb redundancy
 /**
+ * LEPE: Ant algorithm.
+ * It sets crumbs for each bot.
  * If a crumb already existed, go back to that one.
  */
 void setCrumb( gentity_t *self, int closestpath ) {
     int i;
+    int nc = 0; //temp store numCrumb
+    qboolean regret = qfalse; //regret last decision: mark as negative essence
     for(i = 0; i < self->numCrumb; i++) {
         if(self->crumb[i] == closestpath) {
             //G_Printf("Returning to: %i to node: %i\n",self->numCrumb,closestpath);
-            self->numCrumb = i;
-            return;
+            nc = i;
+        } else if(nc > 0) {
+            if(self->crumb[i] == self->lastJoint) {
+                regret = qtrue;
+            } 
         }
+        if(regret == qtrue) {
+           level.paths[self->crumb[i]].essence = 1; 
+        }
+    }
+    if(nc > 0) {
+        self->numCrumb = nc;
     }
     //G_Printf("Setting crumb : %i to node: %i\n",self->numCrumb,closestpath);
     self->crumb[ self->numCrumb ] = closestpath;
@@ -499,10 +515,14 @@ void findnextpath( gentity_t *self )
 	int totalessence = 0; //LEPE: ant algorithm
     int accumessence = 0;
 	int pathessence[5];
+	int pathrank[5];
+    int essence = NO_ESSENCE;
     int randnum = 0;
 	int i,j,nextpath = 0;
 	int possiblenextpath = 0;
 	int possiblepaths[5];
+    qboolean known = qfalse;
+
 	possiblepaths[0] = possiblepaths[1] = possiblepaths[2] = possiblepaths[3] = possiblepaths[4] = 0;
 	for(i = 0; i < 5; i++)
 	{
@@ -534,30 +554,45 @@ void findnextpath( gentity_t *self )
 		}
 		else
 		{
-            //LEPE: bots decide which path to follow based on the strength of the essence (its a chance %)
-            /*
-             * We reduce the essence of previous node to make the bot to continue
-             */
-            for(i =0; i < possiblenextpath; i++) {
-                pathessence[i] = level.paths[possiblepaths[i]].essence;
-                if(pathessence[i] == 1) pathessence[i] = 50; //give around 30% chance vs 100 to new paths
-                for(j=0; j < self->numCrumb; j++) {
-                    if(self->crumb[j] == possiblepaths[i]) {
-                        pathessence[i] = 1; //reduce it to the minimum
-                        break;
+            //LEPE: bots decide here which path to follow based on the strength of the essence, previous nodes and posible unexplored nodes
+            //-------------
+			nextpath = 0;
+            if(possiblenextpath > 1) {
+                for(i =0; i < possiblenextpath; i++) {
+                    known = qfalse;
+                    for(j=0; j < self->numCrumb; j++) {
+                        if(self->crumb[j] == possiblepaths[i]) {
+                            known = qtrue;
+                            break;
+                        }
                     } 
+                    pathessence[i] = level.paths[possiblepaths[i]].essence;
+                    essence = pathessence[i] > 50 ? GOOD_ESSENCE : (pathessence[i] < 50 ? BAD_ESSENCE : NO_ESSENCE);
+                    if(known == qfalse && essence == GOOD_ESSENCE) {
+                        pathrank[i] = 50;                    
+                    } else if(known == qfalse && essence == NO_ESSENCE) {
+                        pathrank[i] = 30;                    
+                    } else if(known == qtrue && (essence == GOOD_ESSENCE || essence == NO_ESSENCE)) {
+                        pathrank[i] = 15;                    
+                    } else if(known == qfalse) { //bad essence implied
+                        pathrank[i] = 5;                    
+                    } else { //known && bad essence implied
+                        pathrank[i] = 1;                    
+                    }
+                    totalessence += pathessence[i] * pathrank[i];
                 }
-                totalessence += pathessence[i];
-            } 
-            //G_Printf("Options: %i, %i, %i, %i, %i\n",pathessence[0],pathessence[1],pathessence[2],pathessence[3],pathessence[4]);
-            randnum = G_Rand();
-            for(i =0; i < possiblenextpath; i++) {
-                accumessence += (pathessence[i] * 100) / totalessence;
-                if(randnum <= accumessence) {
-                    nextpath = i;
-                    break;
-                }
-            } 
+                self->lastJoint = self->targetPath; //when was the last time we had to choose a path (used to create negative essence)
+
+                //G_Printf("Options: %i, %i, %i, %i, %i\n",pathessence[0],pathessence[1],pathessence[2],pathessence[3],pathessence[4]);
+                randnum = G_Rand();
+                for(i =0; i < possiblenextpath; i++) {
+                    accumessence += ((pathessence[i] * pathrank[i]) * 100) / totalessence;
+                    if(randnum <= accumessence) {
+                        nextpath = i;
+                        break;
+                    }
+                } 
+            }
             //LEPE: set next crumb
             setCrumb( self, possiblepaths[nextpath] );
 		}
@@ -591,8 +626,12 @@ void Bot_Buy( gentity_t *self )
 	upgrade_t upgrade;
     vec3_t newOrigin;
 	//int maxAmmo, maxClips;
+    int prob = 0; //probability to buy item //LEPE
 	int clientNum = self->client - level.clients;
 	if(self->client->ps.stats[ STAT_TEAM ] != TEAM_HUMANS){return;}
+    
+    /************************ SELL WEAPONS *******************************/
+
 	upgrade = UP_LIGHTARMOUR;
 	if(BG_InventoryContainsUpgrade( upgrade, self->client->ps.stats ))
 	{
@@ -666,6 +705,9 @@ void Bot_Buy( gentity_t *self )
 		self->client->ps.stats[ STAT_WEAPON ] = WP_NONE;
 		G_AddCreditToClient( self->client, (short)BG_Weapon( weapon )->price, qfalse );
 	}
+
+    /****************************** BUY WEAPONS AND EQUIP *********************************/
+
 	if(g_humanStage.integer == 2)
 	{
 		upgrade = UP_BATTLESUIT;
@@ -703,7 +745,9 @@ void Bot_Buy( gentity_t *self )
 			G_AddCreditToClient( self->client, -(short)BG_Upgrade( upgrade )->price, qfalse );
 		}
 	}
-	if(g_humanStage.integer == 2 && g_bot_lcannon.integer > 0)
+    //LEPE: from here, we add some % of buying weapons
+    prob = 50;
+	if(G_Rand() < prob && g_humanStage.integer == 2 && g_bot_lcannon.integer > 0) 
 	{
 		weapon = WP_LUCIFER_CANNON;
 		if( !BG_InventoryContainsWeapon( weapon, self->client->ps.stats ) &&
@@ -713,19 +757,11 @@ void Bot_Buy( gentity_t *self )
 			boughtweap = qtrue;
 			buybatt = qtrue;
 			energyweap = qtrue;
+            if(level.drawpath == qtrue) G_Printf("Bought LUCIFER_CANNON\n");
 		}
 	}
-	if(g_humanStage.integer == 1 && boughtweap == qfalse && g_bot_flamer.integer > 0)
-	{
-		weapon = WP_FLAMER;
-		if( !BG_InventoryContainsWeapon( weapon, self->client->ps.stats ) &&
-			BG_Weapon( weapon )->price <= (short)self->client->ps.persistant[ PERS_CREDIT ] &&
-			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
-		{
-			boughtweap = qtrue;
-		}
-	}
-	if(g_humanStage.integer == 1 && boughtweap == qfalse && g_bot_prifle.integer > 0)
+    prob = g_humanStage.integer == 2 ? 40 : 50;
+	if(G_Rand() < prob && g_humanStage.integer == 1 && boughtweap == qfalse && g_bot_prifle.integer > 0)
 	{
 		weapon = WP_PULSE_RIFLE;
 		if( !BG_InventoryContainsWeapon( weapon, self->client->ps.stats ) &&
@@ -735,9 +771,11 @@ void Bot_Buy( gentity_t *self )
 			boughtweap = qtrue;
 			buybatt = qtrue;
 			energyweap = qtrue;
+            if(level.drawpath == qtrue) G_Printf("Bought PULSE\n");
 		}
 	}
-	if(boughtweap == qfalse && g_bot_chaingun.integer > 0)
+    prob = g_humanStage.integer == 2 ? 50 : (g_humanStage.integer == 1 ? 40 : 50);
+	if(G_Rand() < prob && boughtweap == qfalse && g_bot_chaingun.integer > 0)
 	{
 		weapon = WP_CHAINGUN;
 		if( !BG_InventoryContainsWeapon( weapon, self->client->ps.stats ) &&
@@ -745,9 +783,23 @@ void Bot_Buy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
+            if(level.drawpath == qtrue) G_Printf("Bought CHAINGUN\n");
 		}
 	}
-	if(boughtweap == qfalse && g_bot_mdriver.integer > 0)
+    prob = g_humanStage.integer == 2 ? 30 : 60;
+	if(G_Rand() < prob && g_humanStage.integer == 1 && boughtweap == qfalse && g_bot_flamer.integer > 0) 
+	{
+		weapon = WP_FLAMER;
+		if( !BG_InventoryContainsWeapon( weapon, self->client->ps.stats ) &&
+			BG_Weapon( weapon )->price <= (short)self->client->ps.persistant[ PERS_CREDIT ] &&
+			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
+		{
+			boughtweap = qtrue;
+            if(level.drawpath == qtrue) G_Printf("Bought FLAMER\n");
+		}
+	}
+    prob = g_humanStage.integer == 2 ? 20 : (g_humanStage.integer == 1 ? 50 : 80);
+	if(G_Rand() < prob && boughtweap == qfalse && g_bot_mdriver.integer > 0)
 	{
 		weapon = WP_MASS_DRIVER;
 		if( !BG_InventoryContainsWeapon( weapon, self->client->ps.stats ) &&
@@ -757,9 +809,11 @@ void Bot_Buy( gentity_t *self )
 			boughtweap = qtrue;
 			buybatt = qtrue;
 			energyweap = qtrue;
+            if(level.drawpath == qtrue) G_Printf("Bought MASS_DRIVER\n");
 		}
 	}
-	if(boughtweap == qfalse && g_bot_lasgun.integer > 0)
+    prob = g_humanStage.integer == 2 ? 40 : (g_humanStage.integer == 1 ? 50 : 80);
+	if(G_Rand() < prob && boughtweap == qfalse && g_bot_lasgun.integer > 0)
 	{
 		weapon = WP_LAS_GUN;
 		if( !BG_InventoryContainsWeapon( weapon, self->client->ps.stats ) &&
@@ -769,9 +823,11 @@ void Bot_Buy( gentity_t *self )
 			boughtweap = qtrue;
 			buybatt = qtrue;
 			energyweap = qtrue;
+            if(level.drawpath == qtrue) G_Printf("Bought LAS_GUN\n");
 		}
 	}
-	if(boughtweap == qfalse && g_bot_shotgun.integer > 0)
+    prob = g_humanStage.integer == 2 ? 10 : (g_humanStage.integer == 1 ? 20 : 80);
+	if(G_Rand() < prob && boughtweap == qfalse && g_bot_shotgun.integer > 0)
 	{
 		weapon = WP_SHOTGUN;
 		if( !BG_InventoryContainsWeapon( weapon, self->client->ps.stats ) &&
@@ -779,9 +835,11 @@ void Bot_Buy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
+            if(level.drawpath == qtrue) G_Printf("Bought SHOTGUN\n");
 		}
 	}
-	if(boughtweap == qfalse && g_bot_psaw.integer > 0)
+    prob = g_humanStage.integer == 2 ? 40 : (g_humanStage.integer == 1 ? 40 : 40);
+	if(G_Rand() < prob && boughtweap == qfalse && g_bot_psaw.integer > 0)
 	{
 		weapon = WP_PAIN_SAW;
 		if( !BG_InventoryContainsWeapon( weapon, self->client->ps.stats ) &&
@@ -789,8 +847,10 @@ void Bot_Buy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
+            if(level.drawpath == qtrue) G_Printf("Bought PAIN_SAW\n");
 		}
 	}
+    //100% prob if reached this point
 	if(boughtweap == qfalse && g_bot_mgun.integer > 0)
 	{
 		weapon = WP_MACHINEGUN;
@@ -799,14 +859,16 @@ void Bot_Buy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
+            if(level.drawpath == qtrue) G_Printf("MACHINEGUN for FREE!\n");
 		}
 	}
 	//Buy Nades
 	upgrade = UP_GRENADE;
-	if(!BG_InventoryContainsUpgrade( upgrade, self->client->ps.stats ) && g_humanStage.integer > 0 && BG_Upgrade( upgrade )->price <= (short)self->client->ps.persistant[ PERS_CREDIT ]) {
+    prob = 80;
+	if(G_Rand() < prob &! BG_InventoryContainsUpgrade( upgrade, self->client->ps.stats ) && g_humanStage.integer > 0 && BG_Upgrade( upgrade )->price <= (short)self->client->ps.persistant[ PERS_CREDIT ]) {
 		BG_AddUpgradeToInventory( upgrade, self->client->ps.stats );
 		G_AddCreditToClient( self->client, -(short)BG_Upgrade( upgrade )->price, qfalse );
-		G_Printf("NADE Bought\n");
+		if(level.drawpath == qtrue) G_Printf("NADE Bought\n");
 	}
 	if(boughtweap == qtrue)
 	{
@@ -821,9 +883,11 @@ void Bot_Buy( gentity_t *self )
 	{
 		weapon = WP_BLASTER;
 		G_ForceWeaponChange( self, weapon );
+		if(level.drawpath == qtrue) G_Printf("BLASTER?\n");
 	}
 	upgrade = UP_BATTPACK;
-	if(!BG_InventoryContainsUpgrade( upgrade, self->client->ps.stats ) && 
+    prob = 50;
+	if(G_Rand() < prob &! BG_InventoryContainsUpgrade( upgrade, self->client->ps.stats ) && 
 		BG_Upgrade( upgrade )->price <= (short)self->client->ps.persistant[ PERS_CREDIT ] &&
 		!(BG_Weapon( upgrade )->slots & BG_SlotsForInventory( self->client->ps.stats )) && 
 		!BG_InventoryContainsUpgrade( UP_BATTLESUIT, self->client->ps.stats ) && 
@@ -831,6 +895,7 @@ void Bot_Buy( gentity_t *self )
 	{
 		BG_AddUpgradeToInventory( upgrade, self->client->ps.stats );
 		G_AddCreditToClient( self->client, -(short)BG_Upgrade( upgrade )->price, qfalse );
+		if(level.drawpath == qtrue) G_Printf("Bought BATTPACK\n");
 	}
 	else
 	{buybatt = qfalse;}
@@ -1213,6 +1278,7 @@ void G_BotThink( gentity_t *self )
 	{
 		Bot_Buy(self);
 	}
+    //TODO: if there is medipad nearby, use it //LEPE
 	if( self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS && 
 		(G_BuildableRange( self->client->ps.origin, 100, BA_H_REACTOR ) ||
 		G_BuildableRange( self->client->ps.origin, 100, BA_H_REPEATER )) && 
@@ -1285,7 +1351,7 @@ void G_BotThink( gentity_t *self )
 				}
 			}
 			
-			if(!self->botEnemy) {
+			//if(!self->botEnemy) { LEPE: even if you already have an enemy, attack the one is nearest to you.
 				// try to find closest enemy
 				if(level.time - self->searchtime >  self->botSkillLevel)
 				{
@@ -1295,7 +1361,6 @@ void G_BotThink( gentity_t *self )
 					if(tempEntityIndex >= 0)
 						self->botEnemy = &g_entities[tempEntityIndex];
 				}
-			}
 		    	
 			if(!self->botEnemy || G_Rand() < 50) { //LEPE: Give 50% of chances to continue to next path (ignore target for a sec)
 				pathfinding(self); //Roam the map!!!
@@ -1414,7 +1479,7 @@ void G_BotThink( gentity_t *self )
 				tempEntityIndex = botFindClosestEnemy(self, qfalse);
 				if(tempEntityIndex >= 0)
 					self->botEnemy = &g_entities[tempEntityIndex];
-			}
+            }
 			
 			if(!self->botEnemy) {
 				// no enemy
@@ -1552,7 +1617,7 @@ void G_BotThink( gentity_t *self )
 						}
 						
 						//botShootIfTargetInRange(self,self->botEnemy);
-						if(distance>tooCloseDistance) {
+						if(distance > tooCloseDistance) {
 							self->client->pers.cmd.forwardmove = forwardMove;
 							self->client->pers.cmd.rightmove = -100;
 							if(self->client->time1000 >= 500)
@@ -1610,7 +1675,7 @@ void G_BotThink( gentity_t *self )
 					}
 					
 					//botShootIfTargetInRange(self,self->botFriend);
-					if(distance>tooCloseDistance) {
+					if(distance > tooCloseDistance) {
 						self->client->pers.cmd.forwardmove = forwardMove;
 						self->client->pers.cmd.rightmove = -100;
 						if(self->client->time1000 >= 500)
@@ -1783,6 +1848,8 @@ void G_BotIntermissionThink( gclient_t *client ) //does/must not accept gentity_
  * Calculates aiming
  */
 qboolean botAimAtTarget( gentity_t *self, gentity_t *target ) {
+    int tooCloseDistance = 200; // about 2/3 of turret range //LEPE
+    int distance = 0;
 	vec3_t dirToTarget, angleToTarget, highPoint, targetUp, targetStraight, realBase;
 
 	// Calculate the point on top of model (head) (well, 15% lower).
@@ -1819,22 +1886,29 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target ) {
 	self->client->ps.delta_angles[ 1 ] = ANGLE2SHORT( angleToTarget[ 1 ] );
 	self->client->ps.delta_angles[ 2 ] = ANGLE2SHORT( angleToTarget[ 2 ] );
 
-
-
-	        if(angleToTarget[0] > -350 && angleToTarget[0] < -180) {
-			if( self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) {
-				// down
-				self->client->pers.cmd.upmove = -1;
-			}
-	        }
-	        else if(angleToTarget[0] < -6.0 && angleToTarget[0] > -180) {
-	                // up
-	                self->client->pers.cmd.upmove = 127;
-	        }
-	        else {
-	                // don't do anything
-	                self->client->pers.cmd.upmove = 0;
-	        }
+    //LEPE: added if... Humans keep jumping when they are too close of a buildable
+    if(target->s.eType == ET_BUILDABLE) {
+        distance = botGetDistanceBetweenPlayer(self, target);
+        if(distance > tooCloseDistance)
+            self->client->pers.cmd.upmove = 0; //do nothing (stand position)
+        else
+            self->client->pers.cmd.upmove = -1; //keep down
+    } else {
+        if(angleToTarget[0] > -350 && angleToTarget[0] < -180) {
+        if( self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) {
+            // down
+            self->client->pers.cmd.upmove = -1;
+        }
+        }
+        else if(angleToTarget[0] < -6.0 && angleToTarget[0] > -180) {
+                // up
+                self->client->pers.cmd.upmove = 127;
+        }
+        else {
+                // don't do anything
+                self->client->pers.cmd.upmove = 0;
+        }
+    }
 
 //	trap_SendServerCommand( -1, va( "print \"%f\n\"", angleToTarget[0]) );
 
@@ -2136,8 +2210,6 @@ qboolean botShootIfTargetInRange( gentity_t *self, gentity_t *target )
 	  //ROTAX
 			int nahoda = 0;
             int i = 0;
-			srand( trap_Milliseconds( ) );
-			//nahoda = (rand() % 20);
 			nahoda = (int)(( (double)rand() / ((double)(RAND_MAX)+(double)(1)) ) * 20);
 			self->client->pers.cmd.buttons = 0;
 			if (self->client->pers.classSelection == PCL_ALIEN_BUILDER0)
@@ -2218,8 +2290,8 @@ qboolean botShootIfTargetInRange( gentity_t *self, gentity_t *target )
 				}
 			}
             //LEPE: ant algorithm
-            //TODO: set target values
             for(i = 0; i < self->numCrumb; i++) {
+                if(level.paths[ self->crumb[i] ].essence < 50) level.paths[ self->crumb[i] ].essence = 50;
                 if(level.paths[ self->crumb[i] ].essence < 100) {
                     level.paths[ self->crumb[i] ].essence ++ ; //for now just increment in 1...
                     //G_Printf("Increasing: %i of total: %i (value: %i)\n",self->crumb[i], self->numCrumb, level.paths[ self->crumb[i] ].essence);
@@ -2240,6 +2312,5 @@ qboolean botShootIfTargetInRange( gentity_t *self, gentity_t *target )
  * Generates a number between 0-100
  */
 int G_Rand( ) {
-    srand( trap_Milliseconds() );
     return (int)rand() % 101;
 }

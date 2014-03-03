@@ -1775,9 +1775,10 @@ void Cmd_Class_f( gentity_t *ent )
       {
         other = &g_entities[ entityList[ i ] ];
 
-        if( ( other->client && other->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) ||
-            ( other->s.eType == ET_BUILDABLE && other->buildableTeam == TEAM_HUMANS &&
-              other->powered ) )
+        //LEPE: only trigger if near Human base, not near humans
+        //if( ( other->client && other->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) ||
+        if( other->s.eType == ET_BUILDABLE && other->buildableTeam == TEAM_HUMANS &&
+              other->powered ) 
         {
           G_TriggerMenu( clientNum, MN_A_TOOCLOSE );
           return;

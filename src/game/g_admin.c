@@ -112,7 +112,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
     },
     
     {"dnodes", G_drawnodes, qfalse, "drawnodes",
-      "show or hide nodes",
+      "turn nodes on / off",
       ""
     },
 
@@ -3445,46 +3445,9 @@ qboolean G_password( gentity_t *ent )
 
 qboolean G_drawnodes( gentity_t *ent )
 {
-	long i,i2;
-	qboolean draw;
-	if(level.drawpath == qfalse)
-	{
-		ADMP( "^2Drawing Paths\n" );
-		for(i = 0;i < level.numPaths;i++)
-		{
-            //G_Printf("%i : %i\n", i+1, level.paths[i].essence); //LEPE
-			draw = qtrue;
-			for(i2 = 0;i2 < 5;i2++)
-			{
-				if(level.paths[i].nextid[i2] < 0)
-				{
-					draw = qfalse;
-				}
-			}
-			if(draw == qtrue)
-			{
-				gentity_t *node;
-				node = spawnnode(ent,i);
-			}
-		}
-		level.drawpath = qtrue;
-		return qtrue;
-	}
-	else
-	{
-		for( i = 0; i < MAX_GENTITIES; i++ )
-		{
-			if(g_entities[i].client){continue;}
-			if(!strcmp("PathNode",g_entities[i].classname))
-			{
-				G_FreeEntity(&g_entities[i]);
-			}
-		}
-		ADMP( "^1Hiding Paths\n" );
-		level.drawpath = qfalse;
-		return qtrue;
-	}
-	//return qfalse; unreachable
+    level.drawpath = level.drawpath == qfalse ? qtrue : qfalse; 
+    level.drawent = ent;
+    return qtrue;
 }
 
 void nodethink(gentity_t *ent)
@@ -3511,43 +3474,4 @@ void nodethink(gentity_t *ent)
 	VectorCopy(pos,ent->r.currentOrigin );
 }
 
-gentity_t *spawnnode( gentity_t *self, long id )
-{
-  vec3_t temp;
-  vec3_t start;
-  gentity_t *bolt;
-  start[0] = level.paths[id].coord[0];
-  start[1] = level.paths[id].coord[1];
-  start[2] = level.paths[id].coord[2];
-  temp[0] = 0;temp[1] = 0;temp[2] = 0;
-  //VectorNormalize (temp);
-
-  bolt = G_Spawn();
-  bolt->classname = "PathNode";
-  bolt->nextthink = level.time + 2000;
-  bolt->think = nodethink;
-  bolt->s.eType = ET_MISSILE;
-  bolt->r.svFlags = SVF_USE_CURRENT_ORIGIN;
-  bolt->s.weapon = level.paths[id].essence > 40 ? WP_LUCIFER_CANNON : (level.paths[id].essence < 6 ? WP_PULSE_RIFLE : WP_BLASTER ); //LEPE
-  bolt->s.generic1 = WPM_PRIMARY; //weaponMode
-  bolt->r.ownerNum = self->r.ownerNum;
-  bolt->parent = self;
-  bolt->damage = 0;
-  bolt->splashDamage = 0;
-  bolt->splashRadius = 0;
-  bolt->methodOfDeath = MOD_GRENADE;
-  bolt->splashMethodOfDeath = MOD_GRENADE;
-  bolt->clipmask = 0;//MASK_SHOT; 
-  bolt->target_ent = NULL;
-  bolt->pathid = id;
-  bolt->s.pos.trType = TR_LINEAR;
-  bolt->s.pos.trTime = level.time - 50;   // move a bit on the very first frame
-  VectorCopy( start, bolt->s.pos.trBase );
-  VectorScale( temp, 0, bolt->s.pos.trDelta );
-  SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
-
-  VectorCopy( start, bolt->r.currentOrigin );
-
-  return bolt;
-}
 
