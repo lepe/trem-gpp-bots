@@ -1398,7 +1398,7 @@ typedef enum {
 #define MAX_SERVERSTATUSREQUESTS	16
 
 #define MAX_EMOTICON_NAME_LEN 16
-#define MAX_EMOTICONS 1300
+#define MAX_EMOTICONS 256
 
 typedef struct
 {

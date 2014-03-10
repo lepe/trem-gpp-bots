@@ -186,6 +186,7 @@ qboolean G_admin_revert( gentity_t *ent );
 qboolean G_admin_bot( gentity_t *ent );
 qboolean G_admin_botcmd( gentity_t *ent );
 qboolean G_drawnodes( gentity_t *ent );
+qboolean G_reloadnodes( gentity_t *ent ); //LEPE
 qboolean G_password( gentity_t *ent );
 
 void G_admin_print( gentity_t *ent, char *m );

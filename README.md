@@ -5,6 +5,19 @@ The current code was based on a P-Bot 2.x GPP port from Tremulous 1.1 P-Bot (htt
 
 CHANGE LOG
 
+v.15
+* Aliens improved (fixed stuck bug) and adjusted range values
+* Goons will not try to use barbs if they don't have enough
+* Bots will try to use wallwalk more (70%).
+* Aliens will evolve more randomly (even if they have evos, they may not use them)
+* Dretch and Basilisk will not always jump on attack
+* debug messages and commands have been added
+* g_bot_join 0/1 added to prevent bots from joining automatically
+* join message changed to: "Please join to deploy bots"
+* DrawNodes function changed to update only changed nodes (performance)
+* Essence update changed to every second (for debug purposes)
+* Cleaned code (removed many unused commented code)
+
 v.14
 * Ant Algorithm improved:
     - BAD essence was introduced as a "regret" action (shown as nades in dnodes)

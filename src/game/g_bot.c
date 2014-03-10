@@ -122,7 +122,7 @@ void G_BotAdd( char *name, team_t team, int skill, int ignore ) {
 	bot->patheditor = qfalse;
 	bot->r.svFlags |= SVF_BOT;
     //LEPE: used in ant algorithm
-    //G_Printf("Setting crumbs to 0\n");
+    if( g_debugAnts.integer ) G_Printf("Setting crumbs to 0\n");
     bot->numCrumb = 0;
 	// register user information
 	userinfo[0] = '\0';
@@ -176,13 +176,6 @@ void G_BotCmd( gentity_t *master, int clientNum, char *command, int skill ) {
   bot->botEnemy = NULL;
   bot->botFriendLastSeen = 0;
   bot->botEnemyLastSeen = 0;
-  
-  /*ROTAX
-  if (g_ambush.integer >= 1)
-  {
-    trap_Print( va("You can't change aliens behavior during ambush mode\n") );
-    return;
-  }*/
   
   if( !Q_stricmp( command, "regular" ) ) {
 	  
@@ -364,18 +357,36 @@ void G_FastThink( gentity_t *self )
 			}
 		}
 		self->client->pers.cmd.forwardmove = forwardMove;
+        if( BG_ClassHasAbility( self->client->ps.stats[ STAT_CLASS ], SCA_WALLCLIMBER ) ) { //LEPE: if possible
+            if(G_Rand() < 70) {
+                self->client->pers.cmd.upmove = -1;
+            } else {
+                self->client->pers.cmd.upmove = 0;
+            }
+        }
 		if(self->lastpathid >= 0)
 		{
 			switch(level.paths[self->lastpathid].action)
 			{
-				case BOT_WALLCLIMB: if( BG_ClassHasAbility( self->client->ps.stats[ STAT_CLASS ], SCA_WALLCLIMBER ) ) { //LEPE: before BOT_JUMP
+				case BOT_WALLCLIMB: if( BG_ClassHasAbility( self->client->ps.stats[ STAT_CLASS ], SCA_WALLCLIMBER ) ) { 
 							self->client->pers.cmd.upmove = -1;
 							}
 							break;
+				case BOT_POUNCE:if(self->client->pers.classSelection == PCL_ALIEN_LEVEL3 && 
+							self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG)
+							self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
+						else if(self->client->pers.classSelection == PCL_ALIEN_LEVEL3_UPG && 
+							self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG_UPG)
+							self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
+						break;
 				case BOT_JUMP:	if(level.time - self->jumptime > 3000)
 						{
-							if( self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS && 
-								self->client->ps.stats[ STAT_STAMINA ] < 0 )
+							if(( self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS && 
+								self->client->ps.stats[ STAT_STAMINA ] < 0) || 
+                                self->client->pers.classSelection == PCL_ALIEN_LEVEL1 || 
+                                self->client->pers.classSelection == PCL_ALIEN_LEVEL1_UPG || 
+                                self->client->pers.classSelection == PCL_ALIEN_LEVEL2 ||
+                                self->client->pers.classSelection == PCL_ALIEN_LEVEL2_UPG)
 							{break;}
 							self->client->pers.cmd.upmove = 20;
 							if(level.time - self->jumptime > 4000)
@@ -386,13 +397,6 @@ void G_FastThink( gentity_t *self )
 						{
 							self->client->pers.cmd.upmove = -1;
 						}
-						break;
-				case BOT_POUNCE:if(self->client->pers.classSelection == PCL_ALIEN_LEVEL3 && 
-							self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG)
-							self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
-						else if(self->client->pers.classSelection == PCL_ALIEN_LEVEL3_UPG && 
-							self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG_UPG)
-							self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
 						break;
 				default: break;
 			}
@@ -441,7 +445,7 @@ void setCrumb( gentity_t *self, int closestpath ) {
     qboolean regret = qfalse; //regret last decision: mark as negative essence
     for(i = 0; i < self->numCrumb; i++) {
         if(self->crumb[i] == closestpath) {
-            //G_Printf("Returning to: %i to node: %i\n",self->numCrumb,closestpath);
+            if( g_debugPaths.integer ) G_Printf("Returning to: %i to node: %i\n",self->numCrumb,closestpath);
             nc = i;
         } else if(nc > 0) {
             if(self->crumb[i] == self->lastJoint) {
@@ -449,13 +453,15 @@ void setCrumb( gentity_t *self, int closestpath ) {
             } 
         }
         if(regret == qtrue) {
+           if( g_debugPaths.integer ) G_Printf("Regreting: %i\n",self->crumb[i]);
            level.paths[self->crumb[i]].essence = 1; 
         }
     }
     if(nc > 0) {
         self->numCrumb = nc;
     }
-    //G_Printf("Setting crumb : %i to node: %i\n",self->numCrumb,closestpath);
+    if( g_debugPaths.integer || g_debugAnts.integer )
+        G_Printf("Setting crumb : %i to node: %i\n",self->numCrumb,closestpath);
     self->crumb[ self->numCrumb ] = closestpath;
     self->numCrumb++;
     return;
@@ -523,6 +529,8 @@ void findnextpath( gentity_t *self )
 	int possiblepaths[5];
     qboolean known = qfalse;
 
+    if( g_debugPaths.integer ) G_Printf("Last Node: %d\n",self->lastpathid);
+    if( g_debugPaths.integer ) G_Printf("Options: %i, %i, %i, %i, %i\n",pathessence[0],pathessence[1],pathessence[2],pathessence[3],pathessence[4]);
 	possiblepaths[0] = possiblepaths[1] = possiblepaths[2] = possiblepaths[3] = possiblepaths[4] = 0;
 	for(i = 0; i < 5; i++)
 	{
@@ -558,7 +566,9 @@ void findnextpath( gentity_t *self )
             //-------------
 			nextpath = 0;
             if(possiblenextpath > 1) {
+                if( g_debugPaths.integer ) G_Printf("Possible Paths: %d .",possiblenextpath);
                 for(i =0; i < possiblenextpath; i++) {
+                    if( g_debugPaths.integer ) G_Printf("[ %d :",possiblepaths[i]);
                     known = qfalse;
                     for(j=0; j < self->numCrumb; j++) {
                         if(self->crumb[j] == possiblepaths[i]) {
@@ -568,26 +578,33 @@ void findnextpath( gentity_t *self )
                     } 
                     pathessence[i] = level.paths[possiblepaths[i]].essence;
                     essence = pathessence[i] > 50 ? GOOD_ESSENCE : (pathessence[i] < 50 ? BAD_ESSENCE : NO_ESSENCE);
+                    if( g_debugPaths.integer ) G_Printf("%d",pathessence[i]);
                     if(known == qfalse && essence == GOOD_ESSENCE) {
+                        if( g_debugPaths.integer ) G_Printf(" x 50");
                         pathrank[i] = 50;                    
                     } else if(known == qfalse && essence == NO_ESSENCE) {
+                        if( g_debugPaths.integer ) G_Printf(" x 30");
                         pathrank[i] = 30;                    
                     } else if(known == qtrue && (essence == GOOD_ESSENCE || essence == NO_ESSENCE)) {
+                        if( g_debugPaths.integer ) G_Printf(" x 15");
                         pathrank[i] = 15;                    
                     } else if(known == qfalse) { //bad essence implied
+                        if( g_debugPaths.integer ) G_Printf(" x 5");
                         pathrank[i] = 5;                    
                     } else { //known && bad essence implied
+                        if( g_debugPaths.integer ) G_Printf(" x 1");
                         pathrank[i] = 1;                    
                     }
                     totalessence += pathessence[i] * pathrank[i];
+                    if( g_debugPaths.integer ) G_Printf("] TOTAL: %d\n",totalessence);
                 }
                 self->lastJoint = self->targetPath; //when was the last time we had to choose a path (used to create negative essence)
 
-                //G_Printf("Options: %i, %i, %i, %i, %i\n",pathessence[0],pathessence[1],pathessence[2],pathessence[3],pathessence[4]);
                 randnum = G_Rand();
                 for(i =0; i < possiblenextpath; i++) {
                     accumessence += ((pathessence[i] * pathrank[i]) * 100) / totalessence;
                     if(randnum <= accumessence) {
+                        if( g_debugPaths.integer ) G_Printf("SELECTED : %d\n",possiblepaths[i]);
                         nextpath = i;
                         break;
                     }
@@ -757,7 +774,7 @@ void Bot_Buy( gentity_t *self )
 			boughtweap = qtrue;
 			buybatt = qtrue;
 			energyweap = qtrue;
-            if(level.drawpath == qtrue) G_Printf("Bought LUCIFER_CANNON\n");
+            if(g_debugBotBuy.integer) G_Printf("Bought LUCIFER_CANNON\n");
 		}
 	}
     prob = g_humanStage.integer == 2 ? 40 : 50;
@@ -771,7 +788,7 @@ void Bot_Buy( gentity_t *self )
 			boughtweap = qtrue;
 			buybatt = qtrue;
 			energyweap = qtrue;
-            if(level.drawpath == qtrue) G_Printf("Bought PULSE\n");
+            if(g_debugBotBuy.integer) G_Printf("Bought PULSE\n");
 		}
 	}
     prob = g_humanStage.integer == 2 ? 50 : (g_humanStage.integer == 1 ? 40 : 50);
@@ -783,7 +800,7 @@ void Bot_Buy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
-            if(level.drawpath == qtrue) G_Printf("Bought CHAINGUN\n");
+            if(g_debugBotBuy.integer) G_Printf("Bought CHAINGUN\n");
 		}
 	}
     prob = g_humanStage.integer == 2 ? 30 : 60;
@@ -795,7 +812,7 @@ void Bot_Buy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
-            if(level.drawpath == qtrue) G_Printf("Bought FLAMER\n");
+            if(g_debugBotBuy.integer) G_Printf("Bought FLAMER\n");
 		}
 	}
     prob = g_humanStage.integer == 2 ? 20 : (g_humanStage.integer == 1 ? 50 : 80);
@@ -809,7 +826,7 @@ void Bot_Buy( gentity_t *self )
 			boughtweap = qtrue;
 			buybatt = qtrue;
 			energyweap = qtrue;
-            if(level.drawpath == qtrue) G_Printf("Bought MASS_DRIVER\n");
+            if(g_debugBotBuy.integer) G_Printf("Bought MASS_DRIVER\n");
 		}
 	}
     prob = g_humanStage.integer == 2 ? 40 : (g_humanStage.integer == 1 ? 50 : 80);
@@ -823,7 +840,7 @@ void Bot_Buy( gentity_t *self )
 			boughtweap = qtrue;
 			buybatt = qtrue;
 			energyweap = qtrue;
-            if(level.drawpath == qtrue) G_Printf("Bought LAS_GUN\n");
+            if(g_debugBotBuy.integer) G_Printf("Bought LAS_GUN\n");
 		}
 	}
     prob = g_humanStage.integer == 2 ? 10 : (g_humanStage.integer == 1 ? 20 : 80);
@@ -835,7 +852,7 @@ void Bot_Buy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
-            if(level.drawpath == qtrue) G_Printf("Bought SHOTGUN\n");
+            if(g_debugBotBuy.integer) G_Printf("Bought SHOTGUN\n");
 		}
 	}
     prob = g_humanStage.integer == 2 ? 40 : (g_humanStage.integer == 1 ? 40 : 40);
@@ -847,7 +864,7 @@ void Bot_Buy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
-            if(level.drawpath == qtrue) G_Printf("Bought PAIN_SAW\n");
+            if(g_debugBotBuy.integer) G_Printf("Bought PAIN_SAW\n");
 		}
 	}
     //100% prob if reached this point
@@ -859,7 +876,7 @@ void Bot_Buy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
-            if(level.drawpath == qtrue) G_Printf("MACHINEGUN for FREE!\n");
+            if(g_debugBotBuy.integer) G_Printf("MACHINEGUN for FREE!\n");
 		}
 	}
 	//Buy Nades
@@ -868,7 +885,7 @@ void Bot_Buy( gentity_t *self )
 	if(G_Rand() < prob &! BG_InventoryContainsUpgrade( upgrade, self->client->ps.stats ) && g_humanStage.integer > 0 && BG_Upgrade( upgrade )->price <= (short)self->client->ps.persistant[ PERS_CREDIT ]) {
 		BG_AddUpgradeToInventory( upgrade, self->client->ps.stats );
 		G_AddCreditToClient( self->client, -(short)BG_Upgrade( upgrade )->price, qfalse );
-		if(level.drawpath == qtrue) G_Printf("NADE Bought\n");
+		if(g_debugBotBuy.integer) G_Printf("NADE Bought\n");
 	}
 	if(boughtweap == qtrue)
 	{
@@ -883,7 +900,7 @@ void Bot_Buy( gentity_t *self )
 	{
 		weapon = WP_BLASTER;
 		G_ForceWeaponChange( self, weapon );
-		if(level.drawpath == qtrue) G_Printf("BLASTER?\n");
+		if(g_debugBotBuy.integer) G_Printf("BLASTER?\n");
 	}
 	upgrade = UP_BATTPACK;
     prob = 50;
@@ -895,7 +912,7 @@ void Bot_Buy( gentity_t *self )
 	{
 		BG_AddUpgradeToInventory( upgrade, self->client->ps.stats );
 		G_AddCreditToClient( self->client, -(short)BG_Upgrade( upgrade )->price, qfalse );
-		if(level.drawpath == qtrue) G_Printf("Bought BATTPACK\n");
+		if(g_debugBotBuy.integer) G_Printf("Bought BATTPACK\n");
 	}
 	else
 	{buybatt = qfalse;}
@@ -922,64 +939,13 @@ void Bot_Evolve( gentity_t *self )
 	class_t class = PCL_NONE;
 	int levels;
 	int clientNum;
+    int rand;
 	qboolean lowclass = qfalse;
 	if(self->client->ps.stats[ STAT_TEAM ] != TEAM_ALIENS){return;}
 	clientNum = self->client - level.clients;
 	self->evolvetime = level.time;
-// 	if(g_ambush.integer > 0)
-// 	{
-// 		classfound = qtrue;
-// 		if(self->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0)
-// 		{
-// 			int randclass = 0;
-// 			int randmax = 0;
-// 			srand( trap_Milliseconds( ) );
-// 			randmax = g_ambush_stage.integer;
-// 			if(randmax > 9){randmax = 9;}
-// 			/*switch(g_ambush_stage.integer)
-// 			{ 
-// 				case 1:case 2:case 3:return;break;
-// 				case 4:case 5:case 6:randmax = 1;break;
-// 				case 7:case 8:case 9:randmax = 2;break;
-// 				case 10:case 11:case 12:randmax = 3;break;
-// 				case 13:case 14:case 15:randmax = 4;break;
-// 				case 16:case 17:case 18:randmax = 5;break;
-// 				case 19:case 20:case 21:randmax = 6;break;
-// 				case 22:case 23:case 24:randmax = 7;break;
-// 				case 25:case 26:case 27:randmax = 8;break;
-// 				case 28:case 29:case 30:randmax = 9;break;
-// 				case 31:case 32:case 33:case 34:randmax = 9;break;
-// 				default: randmax = 9; break;
-// 			}*/
-// 			randclass = (int)(( (double)rand() / ((double)(RAND_MAX)+(double)(1)) ) * randmax);
-// 			switch(randclass)
-// 			{
-// 				case 0:class = PCL_ALIEN_BUILDER0_UPG;break;
-// 				case 1:class = PCL_ALIEN_LEVEL0;break;
-// 				case 2:class = PCL_ALIEN_LEVEL1;break;
-// 				case 3:class = PCL_ALIEN_LEVEL1_UPG;break;
-// 				case 4:class = PCL_ALIEN_LEVEL2;break;
-// 				case 5:class = PCL_ALIEN_LEVEL2_UPG;break;
-// 				case 6:class = PCL_ALIEN_LEVEL3;break;
-// 				case 7:class = PCL_ALIEN_LEVEL3_UPG;break;
-// 				case 8:class = PCL_ALIEN_LEVEL4;break;
-// 				default:class = PCL_ALIEN_LEVEL4;break;
-// 			}
-// 			classfound = qtrue;
-// 		}
-// 		else{classfound = qfalse;}
-// 		if(classfound == qtrue)
-// 		{
-// 			if(!G_RoomForClassChange( self, class, origin ))
-// 			{return;}
-// 			lowclass = qtrue;
-// 		}
-// 		else if(classfound == qfalse && g_bot_evolve.integer <= 0)
-// 		{
-// 			return;
-// 		}
-// 	}
-	if(classfound == qfalse)
+    rand = G_Rand();
+	if(rand < 80 && classfound == qfalse)
 	{
 		class = PCL_ALIEN_LEVEL4;
  		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
@@ -1008,7 +974,8 @@ void Bot_Evolve( gentity_t *self )
 	  classfound=qtrue;
 	  
 	}
-	if(classfound == qfalse)
+    rand = G_Rand();
+	if(rand < 80 && classfound == qfalse)
 	{
 		class = PCL_ALIEN_LEVEL3_UPG;
 		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
@@ -1037,7 +1004,8 @@ void Bot_Evolve( gentity_t *self )
 	if(classfound != qfalse)
 	  classfound=qtrue;
 	}
-	if(classfound == qfalse)
+    rand = G_Rand();
+	if(rand < 80 && classfound == qfalse)
 	{
 		class = PCL_ALIEN_LEVEL3;
  		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
@@ -1066,7 +1034,8 @@ void Bot_Evolve( gentity_t *self )
 	if(classfound != qfalse)
 	  classfound=qtrue;
 	}
-	if(classfound == qfalse)
+    rand = G_Rand();
+	if(rand < 80 && classfound == qfalse)
 	{
 		class = PCL_ALIEN_LEVEL2_UPG;
  		
@@ -1082,7 +1051,8 @@ void Bot_Evolve( gentity_t *self )
 	if(classfound != qfalse)
 	  classfound=qtrue;
 	}
-	if(classfound == qfalse)
+    rand = G_Rand();
+	if(rand < 80 && classfound == qfalse)
 	{
 		class = PCL_ALIEN_LEVEL2;
  		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
@@ -1111,7 +1081,8 @@ void Bot_Evolve( gentity_t *self )
 	if(classfound != qfalse)
 	  classfound=qtrue;
 	}
-	if(classfound == qfalse)
+    rand = G_Rand();
+	if(rand < 80 && classfound == qfalse)
 	{
 		class = PCL_ALIEN_LEVEL1_UPG;
  		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
@@ -1129,7 +1100,8 @@ void Bot_Evolve( gentity_t *self )
  			classfound = qtrue;
  		}
 	}
-	if(classfound == qfalse)
+    rand = G_Rand();
+	if(rand < 80 && classfound == qfalse)
 	{
 		class = PCL_ALIEN_LEVEL1;
  		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
@@ -1357,7 +1329,7 @@ void G_BotThink( gentity_t *self )
 				{
 					self->searchtime = level.time;
 					self->checktime = level.time;
-					tempEntityIndex = botFindClosestEnemy(self, qfalse);
+					tempEntityIndex = botFindClosestEnemy(self);
 					if(tempEntityIndex >= 0)
 						self->botEnemy = &g_entities[tempEntityIndex];
 				}
@@ -1410,28 +1382,9 @@ void G_BotThink( gentity_t *self )
 					else
 					{
 						self->client->pers.cmd.forwardmove = forwardMove;
-// 						if (g_ambush.integer > 0)
-// 						{
-// 							int uhyb = 0;
-//   							//if (g_ambush_dodge_random.integer <= 0)
-// 							//	g_ambush_dodge_random.integer = 1;
-//   				  
-//   							if (g_ambush_dodge.integer > 0)
-// 							{
-// 								srand( trap_Milliseconds( ) );
-// 								uhyb = (rand() % g_ambush_dodge.integer);
-//     								if(self->client->time1000 >= 500)
-//     									self->client->pers.cmd.rightmove = uhyb;
-// 								else
-// 									self->client->pers.cmd.rightmove = -uhyb;
-//   							}
-// 						}
-// 						else
-// 						{
   							self->client->pers.cmd.rightmove = -100;
   							if(self->client->time1000 >= 500)
   								self->client->pers.cmd.rightmove = 100;
-// 						}
 					}
 				}
 				else
@@ -1476,7 +1429,7 @@ void G_BotThink( gentity_t *self )
 			
 			if(!self->botEnemy) {
 				// try to find closest enemy
-				tempEntityIndex = botFindClosestEnemy(self, qfalse);
+				tempEntityIndex = botFindClosestEnemy(self);
 				if(tempEntityIndex >= 0)
 					self->botEnemy = &g_entities[tempEntityIndex];
             }
@@ -1583,7 +1536,7 @@ void G_BotThink( gentity_t *self )
 			
 			if(!self->botEnemy) {
 				// try to find closest enemy
-				tempEntityIndex = botFindClosestEnemy(self, qfalse);
+				tempEntityIndex = botFindClosestEnemy(self);
 				if(tempEntityIndex >= 0)
 					self->botEnemy = &g_entities[tempEntityIndex];
 			}
@@ -1686,43 +1639,6 @@ void G_BotThink( gentity_t *self )
 			
 			break;
 			
-		//case BOT_TEAM_KILLER: break; //We don't need this. 
-			/*
-			if(self->botEnemy) {
-				if(!botTargetInRange(self,self->botEnemy)) {
-					if(self->botEnemyLastSeen > clicksToStopChase) {
-						self->botEnemy = NULL;
-						self->botEnemyLastSeen = 0;
-					} else {
-						self->botEnemyLastSeen++;
-					}
-				} else {
-					self->botEnemyLastSeen = 0;
-				}
-			}
-			
-			if(!self->botEnemy) {
-				tempEntityIndex = botFindClosestEnemy(self, qtrue);
-				if(tempEntityIndex >= 0)
-					self->botEnemy = &g_entities[tempEntityIndex];
-			}
-			
-			if(!self->botEnemy) {
-			} else {
-				distance = botGetDistanceBetweenPlayer(self, self->botEnemy);
-				if( BG_ClassHasAbility( self->client->ps.stats[ STAT_CLASS ], SCA_WALLCLIMBER ) ) {
-					self->client->pers.cmd.upmove = -1;
-				}
-				
-				botShootIfTargetInRange(self,self->botEnemy);
-				self->client->pers.cmd.forwardmove = forwardMove;
-				self->client->pers.cmd.rightmove = -100;
-				if(self->client->time1000 >= 500)
-					self->client->pers.cmd.rightmove = 100;
-			}
-			
-			break;
-			*/
 		default:
 			// dunno.
 			break;
@@ -1754,86 +1670,11 @@ void G_BotSpectatorThink( gentity_t *self )
 		}
 		else if( teamnum == TEAM_ALIENS)
 		{
-// 			//ROTAX
-// 			if (g_ambush.integer == 1)
-// 			{   
-// 				if (ROTACAK_ambush_rebuild_time_temp < level.time && ((level.time - level.startTime) > (g_ambush_sec_to_start.integer * 1000)) )
-// 				{
-// 					srand( trap_Milliseconds( ) );
-// 					self->client->pers.classSelection = PCL_ALIEN_BUILDER0;
-// 					self->client->ps.stats[ STAT_CLASS ] = PCL_ALIEN_BUILDER0;
-// 					G_PushSpawnQueue( &level.alienSpawnQueue, clientNum );
-// 				}
-// 			}
-// 			else
-// 			{
 				self->client->pers.classSelection = PCL_ALIEN_LEVEL0;
 				self->client->ps.stats[ STAT_CLASS ] = PCL_ALIEN_LEVEL0;
 				G_PushSpawnQueue( &level.alienSpawnQueue, clientNum );
-// 			}
-// 		}
 	}
 }
-
-// qboolean botAimAtTarget( gentity_t *self, gentity_t *target ) {
-// 	int Ax,Ay,Az,Bx,By,Bz = 0;
-// 	vec3_t dirToTarget, angleToTarget;
-// 	vec3_t top = { 0, 0, 0};
-// 	vec3_t  forward, right, up;
-// 	vec3_t  muzzle,delta;
-// 	float deltangle,deltangle2,diffangle,diffangle2;
-// 	AngleVectors( self->client->ps.viewangles, forward, right, up );
-// 	CalcMuzzlePoint( self, forward, right, up, muzzle );
-// 	if(self->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL3 || 
-// 		self->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL3_UPG)
-// 	{
-// 		Ax = target->s.pos.trBase[0];
-// 		Ay = target->s.pos.trBase[1];
-// 		Az = target->s.pos.trBase[2];
-// 		Bx = self->s.pos.trBase[0];
-// 		By = self->s.pos.trBase[1];
-// 		Bz = self->s.pos.trBase[2];
-// 		if(self->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL3)
-// 		{top[2] = (int)(sqrt((Ax - Bx)*(Ax - Bx) + (Ay - By)*(Ay - By) + (Az - Bz)*(Az - Bz)) / 3);}
-// 		else
-// 		{top[2] = (int)(sqrt((Ax - Bx)*(Ax - Bx) + (Ay - By)*(Ay - By) + (Az - Bz)*(Az - Bz)) / 5);}
-// 	}
-// 	VectorAdd( target->s.pos.trBase, top, top);
-// 	VectorSubtract( top, muzzle, dirToTarget );
-// 	VectorNormalize( dirToTarget );
-// 	vectoangles( dirToTarget, angleToTarget );
-// 	deltangle = SHORT2ANGLE(self->client->ps.delta_angles[0]);
-// 	deltangle2 = SHORT2ANGLE(self->client->ps.delta_angles[1]);
-// 	diffangle = AngleSubtract(angleToTarget[0],deltangle);
-// 	diffangle2 = AngleSubtract(angleToTarget[1],deltangle2);
-// 	if(diffangle > self->botSkillLevel)
-// 	{
-// 		delta[0] = deltangle + self->botSkillLevel;
-// 	}
-// 	else if(diffangle < -self->botSkillLevel)
-// 	{
-// 		delta[0] = deltangle - self->botSkillLevel;
-// 	}
-// 	else
-// 	{
-// 		delta[0] = angleToTarget[0];
-// 	}
-// 	if(diffangle2 > self->botSkillLevel)
-// 	{
-// 		delta[1] = deltangle2 + self->botSkillLevel;
-// 	}
-// 	else if(diffangle2 < -self->botSkillLevel)
-// 	{
-// 		delta[1] = deltangle2 - self->botSkillLevel;
-// 	}
-// 	else
-// 	{
-// 		delta[1] = angleToTarget[1];
-// 	}
-//  	self->client->ps.delta_angles[0] = ANGLE2SHORT(delta[0]);
-// 	self->client->ps.delta_angles[1] = ANGLE2SHORT(delta[1]);
-// 	return qtrue;
-// }
 
 /*
  * Called when we are in intermission.
@@ -1876,7 +1717,7 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target ) {
 
 	if( target->s.eType == ET_BUILDABLE || target->s.eType == PCL_ALIEN_LEVEL4 ) {	//LEPE: Nades on buildings or tyrants
 	    if(BG_InventoryContainsUpgrade(UP_GRENADE,self->client->ps.stats)) {
-            G_Printf("NADE ACTIVATED!\n");
+            if(g_debugBotBuy.integer) G_Printf("NADE ACTIVATED!\n");
             BG_ActivateUpgrade(UP_GRENADE,self->client->ps.stats);
 	    }
 	}
@@ -1925,13 +1766,6 @@ qboolean botTargetInRange( gentity_t *self, gentity_t *target ) {
 
 	if( !self || !target )
 		return qfalse;
-
-//   //ROTAX - niceni budov
-// 	if( !self->client || (!target->client && g_ambush_att_buildables.integer == 0) )
-// 		return qfalse;
-// 
-// 	if( target->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
-// 		return qfalse;
 
 	if( target->health <= 0 )
 		return qfalse;
@@ -2001,109 +1835,20 @@ qboolean botTargetInRange( gentity_t *self, gentity_t *target ) {
 
 	trap_Trace( &trace, muzzle, NULL, NULL, target->s.pos.trBase, self->s.number, MASK_SHOT );
 	traceEnt = &g_entities[ trace.entityNum ];
-	//if( trace.fraction < 1.0 )
-	//{return qfalse;}
-	// check that we hit a human and not an object
-	//if( !traceEnt->client )
-	//	return qfalse;
-	
-	//check our target is in LOS
-	if(!(traceEnt == target))
-		return qfalse;
+    //if( trace.fraction < 1.0 )
+    //{return qfalse;}
+    // check that we hit a human and not an object
+    //if( !traceEnt->client )
+    // return qfalse;
+
+    //check our target is in LOS
+    if(!(traceEnt == target))
+            return qfalse;
 
 	return qtrue;
 }
 
-// int botFindClosestEnemy( gentity_t *self, qboolean includeTeam ) {
-// 	// return enemy entity index, or -1
-// 	//int vectorRange = MGTURRET_RANGE * 3;
-// 	int i;
-// 	//int total_entities;
-// 	//int entityList[ MAX_GENTITIES ];
-// 	//vec3_t    range;
-// 	//vec3_t    mins, maxs;
-// 	gentity_t *target;
-// 
-// 	//if (g_ambush.integer == 1)//ROTAX
-// 	//  vectorRange = 1.0f * g_ambush_range.integer;
-// 	
-// 	//VectorSet( range, vectorRange, vectorRange, vectorRange );
-// 	//VectorAdd( self->client->ps.origin, range, maxs );
-// 	//VectorSubtract( self->client->ps.origin, range, mins );
-// 	
-// 	//total_entities = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
-// 	
-// 	// check list for enemies
-// 	for( i = 0; i < MAX_GENTITIES/*total_entities*/; i++ ) {
-// 		target = &g_entities[ i ];//entityList[ i ] ];
-// // 		if(target->health <= 0 || botGetDistanceBetweenPlayer( self, target ) > g_ambush_range.integer || !botTargetInRange( self, target ))
-// // 		{continue;}
-// // 		//ROTAX - niceni budov
-// // 		if (g_ambush_att_buildables.integer == 0)
-// // 		{
-// // 			if (target->client && self != target && target->client->ps.stats[ STAT_TEAM ] != self->client->ps.stats[ STAT_TEAM ])
-// // 			{
-// //   				//if( botTargetInRange( self, target ) ) {
-// //   					return i;
-// //   				//}
-// // 			}
-// // 		}
-// // 		else if (g_ambush_att_buildables.integer == 1)
-// // 		{
-//       if ((target->client && self != target && target->client->ps.stats[ STAT_TEAM ] != self->client->ps.stats[ STAT_TEAM ])
-//       || (!target->client && self != target && self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS && self->client->ps.stats[ STAT_CLASS ] != PCL_ALIEN_LEVEL0 &&
-//       (target->s.modelindex == BA_H_SPAWN
-//       || target->s.modelindex == BA_H_MGTURRET
-//       || target->s.modelindex == BA_H_TESLAGEN
-//       || target->s.modelindex == BA_H_ARMOURY
-//       || target->s.modelindex == BA_H_DCC
-//       || target->s.modelindex == BA_H_MEDISTAT
-//       || target->s.modelindex == BA_H_REACTOR
-//       || target->s.modelindex == BA_H_REPEATER)) ||
-// 	(!target->client && self != target && self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS && (
-// 	target->s.modelindex == BA_A_SPAWN ||
-// 	target->s.modelindex == BA_A_BARRICADE ||
-// 	target->s.modelindex == BA_A_BOOSTER ||
-// 	target->s.modelindex == BA_A_ACIDTUBE ||
-// 	target->s.modelindex == BA_A_HIVE ||
-// 	target->s.modelindex == BA_A_TRAPPER ||
-// 	target->s.modelindex == BA_A_OVERMIND ||
-// 	(!target->client && self != target && self->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL0 && (target->s.modelindex == BA_H_MGTURRET || target->s.modelindex == BA_H_TESLAGEN)))))
-//       {
-//   			// aliens ignore if it's in LOS because they have radar
-//   			//if(self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS) {
-//   			//	return entityList[ i ];
-//   			//} else {
-//   				//if( botTargetInRange( self, target ) ) {
-//   					return i;
-//   				//}
-//   			//}
-// //       }
-// 	}
-// 	}
-// 	/*
-// 	if(includeTeam) {
-// 		// check list for enemies in team
-// 		for( i = 0; i < total_entities; i++ ) {
-// 			target = &g_entities[ entityList[ i ] ];
-// 			
-// 			if( target->client && self !=target && target->client->ps.stats[ STAT_TEAM ] == self->client->ps.stats[ STAT_TEAM ] ) {
-// 				// aliens ignore if it's in LOS because they have radar
-// 				//if(self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS) {
-// 				//	return entityList[ i ];
-// 				//} else {
-// 					//if( botTargetInRange( self, target ) ) {
-// 						return entityList[ i ];
-// 					//}
-// 				//}
-// 			}
-// 		}
-// 	}
-// 	*/
-// 	return -1;
-// }
-
-int botFindClosestEnemy( gentity_t *self, qboolean includeTeam ) {
+int botFindClosestEnemy( gentity_t *self ) {
 	// return enemy entity index, or -1
 	int vectorRange = MGTURRET_RANGE * 3;
 	int i;
@@ -2119,79 +1864,29 @@ int botFindClosestEnemy( gentity_t *self, qboolean includeTeam ) {
 
 	total_entities = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
 
-	// check list for enemies
-// 	for( i = 0; i < total_entities; i++ ) {
-// 		target = &g_entities[ entityList[ i ] ];
-// 
-// 		if( (target->s.eType == ET_BUILDABLE || target->client) && self != target ) {
-// 			if( target->s.eType == ET_BUILDABLE ) {
-// 				if( target->client->ps.stats[ STAT_TEAM ]  != self->client->ps.stats[ STAT_TEAM ] ) {
-// 				  trap_Print("Shooting reactor\n");
-//                                         // aliens ignore if it's in LOS because they have radar
-//                                         if(self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS) {
-//                                                 return entityList[ i ];
-//                                         } else {
-//                                                 if( botTargetInRange( self, target ) ) {
-//                                                         return entityList[ i ];
-// 						}
-//                                         }
-// 				}
-// 			}
-// 			else {
-// 				if( target->client->ps.stats[ STAT_TEAM ] != self->client->ps.stats[ STAT_TEAM ] ) {
-// 					// aliens ignore if it's in LOS because they have radar
-// 					if(self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS) {
-// 						return entityList[ i ];
-// 					} else {
-// 						if( botTargetInRange( self, target ) ) {
-// 							return entityList[ i ];
-// 						}
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
 	for( i = 0; i < total_entities; i++ ) {
 		target = &g_entities[ entityList[ i ] ];
 
 		if( target->client && self != target && target->client->ps.stats[ STAT_TEAM ] != self->client->ps.stats[ STAT_TEAM ] ) {
 			// aliens ignore if it's in LOS because they have radar
-			if(self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS) {
-				return entityList[ i ];
-			} else {
+			//if(self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS) {
+			//	return entityList[ i ];
+			//} else {
 				if( botTargetInRange( self, target ) ) {
 					return entityList[ i ];
 				}
-			}
+			//}
 		}
 		
 		if( target->s.eType == ET_BUILDABLE && self != target && target->buildableTeam != self->client->ps.stats[ STAT_TEAM ] ) {
 			// aliens ignore if it's in LOS because they have radar
-			if(self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS) {
-				return entityList[ i ];
-			} else {
+			//if(self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS) {
+			//	return entityList[ i ];
+			//} else {
 				if( botTargetInRange( self, target ) ) {
 					return entityList[ i ];
 				}
-			}
-		}
-	}
-
-	if(includeTeam) {
-		// check list for enemies in team
-		for( i = 0; i < total_entities; i++ ) {
-			target = &g_entities[ entityList[ i ] ];
-
-			if( target->client && self !=target && target->client->ps.stats[ STAT_TEAM ] == self->client->ps.stats[ STAT_TEAM ] ) {
-				// aliens ignore if it's in LOS because they have radar
-				if(self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS) {
-					return entityList[ i ];
-				} else {
-					if( botTargetInRange( self, target ) ) {
-						return entityList[ i ];
-					}
-				}
-			}
+			//}
 		}
 	}
 
@@ -2239,7 +1934,7 @@ qboolean botShootIfTargetInRange( gentity_t *self, gentity_t *target )
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL3)//dragon
 			{
-				if(Distance( self->s.pos.trBase, target->s.pos.trBase ) > 150 && 
+				if(Distance( self->s.pos.trBase, target->s.pos.trBase ) > 50 && 
 					self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG)
 					self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
 				else
@@ -2247,12 +1942,12 @@ qboolean botShootIfTargetInRange( gentity_t *self, gentity_t *target )
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL3_UPG)//adv dragon
 			{
-				if(/*self->client->ps.ammo[WP_ALEVEL3_UPG] > 0 &&*/ 
+				if(self->client->ps.ammo > 0 && 
 					Distance( self->s.pos.trBase, target->s.pos.trBase ) > 150 )
 					self->client->pers.cmd.buttons |= BUTTON_USE_HOLDABLE;
 				else
 				{	
-					if(Distance( self->s.pos.trBase, target->s.pos.trBase ) > 150 && 
+					if(Distance( self->s.pos.trBase, target->s.pos.trBase ) > 50 && 
 						self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG_UPG)
 						self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
 					else
@@ -2294,7 +1989,7 @@ qboolean botShootIfTargetInRange( gentity_t *self, gentity_t *target )
                 if(level.paths[ self->crumb[i] ].essence < 50) level.paths[ self->crumb[i] ].essence = 50;
                 if(level.paths[ self->crumb[i] ].essence < 100) {
                     level.paths[ self->crumb[i] ].essence ++ ; //for now just increment in 1...
-                    //G_Printf("Increasing: %i of total: %i (value: %i)\n",self->crumb[i], self->numCrumb, level.paths[ self->crumb[i] ].essence);
+                    if(g_debugAnts.integer) G_Printf("Increasing: %i of total: %i (value: %i)\n",self->crumb[i], self->numCrumb, level.paths[ self->crumb[i] ].essence);
                 }
             }
 

@@ -763,7 +763,6 @@ typedef struct
   int               alienBots;
   int               humanBots;
   int               essenceFadeTimer; //used to control how essence is faded in ant algorithm
-
 } level_locals_t;
 
 #define CMD_CHEAT         0x0001
@@ -811,7 +810,7 @@ void G_BotSpectatorThink( gentity_t *self );
 void G_BotIntermissionThink( gclient_t *client );
 // are these suppose to be out here?! Why not?
 qboolean botAimAtTarget( gentity_t *self, gentity_t *target );
-int botFindClosestEnemy( gentity_t *self, qboolean includeTeam );
+int botFindClosestEnemy( gentity_t *self );
 qboolean botTargetInRange( gentity_t *self, gentity_t *target );
 int botGetDistanceBetweenPlayer( gentity_t *self, gentity_t *player );
 qboolean botShootIfTargetInRange( gentity_t *self, gentity_t *target );
@@ -1311,6 +1310,15 @@ extern  vmCvar_t  g_bot_chaingun;
 extern  vmCvar_t  g_bot_prifle;
 extern  vmCvar_t  g_bot_flamer;
 extern  vmCvar_t  g_bot_lcannon;
+extern  vmCvar_t  g_bot_join;  //LEPE: disable bots join
+
+//LEPE
+extern vmCvar_t  g_debugBots; //debug G_Bots
+extern vmCvar_t  g_debugPaths; //debug path decision
+extern vmCvar_t  g_debugNodes; 
+extern vmCvar_t  g_debugEssence; //debug current path essence values
+extern vmCvar_t  g_debugAnts; //debug crumbs
+extern vmCvar_t  g_debugBotBuy; //debug what bots buy
 
 
 void      trap_Print( const char *fmt );

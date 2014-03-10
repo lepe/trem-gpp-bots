@@ -168,7 +168,15 @@ vmCvar_t  g_bot_chaingun;
 vmCvar_t  g_bot_prifle;
 vmCvar_t  g_bot_flamer;
 vmCvar_t  g_bot_lcannon;
+vmCvar_t  g_bot_join;  //LEPE
 
+//LEPE (add also in g_local.h)
+vmCvar_t  g_debugBots; 
+vmCvar_t  g_debugPaths;
+vmCvar_t  g_debugNodes; 
+vmCvar_t  g_debugEssence; 
+vmCvar_t  g_debugAnts; 
+vmCvar_t  g_debugBotBuy;
 
 
 // copy cvars that can be set in worldspawn so they can be restored later
@@ -236,6 +244,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_bot_prifle, "g_bot_prifle", "1", CVAR_ARCHIVE, 0, qfalse },
   { &g_bot_flamer, "g_bot_flamer", "1", CVAR_ARCHIVE, 0, qfalse },
   { &g_bot_lcannon, "g_bot_lcannon", "1", CVAR_ARCHIVE, 0, qfalse },
+  { &g_bot_join, "g_bot_join", "1", 0, 0, qfalse },
   { &g_pathpassword, "g_pathpassword", "", CVAR_ARCHIVE, 0, qfalse },
   
   { &g_needpass, "g_needpass", "0", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse },
@@ -249,6 +258,13 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_debugMove, "g_debugMove", "0", 0, 0, qfalse },
   { &g_debugDamage, "g_debugDamage", "0", 0, 0, qfalse },
   { &g_motd, "g_motd", "", 0, 0, qfalse },
+  //LEPE
+  { &g_debugBots, "g_debugBots", "0", 0, 0, qfalse },
+  { &g_debugPaths, "g_debugPaths", "0", 0, 0, qfalse },
+  { &g_debugNodes, "g_debugNodes", "0", 0, 0, qfalse },
+  { &g_debugEssence, "g_debugEssence", "0", 0, 0, qfalse },
+  { &g_debugBotBuy, "g_debugBotBuy", "0", 0, 0, qfalse },
+  { &g_debugAnts, "g_debugAnts", "0", 0, 0, qfalse },
 
   { &g_allowVote, "g_allowVote", "1", CVAR_ARCHIVE, 0, qfalse },
   { &g_voteLimit, "g_voteLimit", "5", CVAR_ARCHIVE, 0, qfalse },
@@ -377,7 +393,7 @@ Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, i
     case GAME_CLIENT_BEGIN:
       ClientBegin( arg0 );
       G_Bots( &g_entities[ arg0 ] ); //LEPE
-      trap_SendServerCommand(arg0, "cp \"Please join ANY TEAM to start!\"");
+      trap_SendServerCommand(arg0, "cp \"Please join to deploy bots!\"");
       return 0;
 
     case GAME_CLIENT_COMMAND:
@@ -394,7 +410,6 @@ Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, i
 
   return -1;
 }
-
 
 void QDECL G_Printf( const char *fmt, ... )
 {
@@ -656,7 +671,7 @@ void G_PathLoad( void )
 		}
 	path++;
 	}
-	G_Printf( va("Loaded %d paths\n", level.numPaths) );
+	if(g_debugNodes.integer) G_Printf( va("Loaded %d paths\n", level.numPaths) );
 }
 /*
   Drawing nodes
@@ -666,11 +681,17 @@ gentity_t *spawnnode( gentity_t *self, long id )
   vec3_t temp;
   vec3_t start;
   gentity_t *bolt;
+  int weapon;
   start[0] = level.paths[id].coord[0];
   start[1] = level.paths[id].coord[1];
   start[2] = level.paths[id].coord[2];
   temp[0] = 0;temp[1] = 0;temp[2] = 0;
   //VectorNormalize (temp);
+  //LEPE
+        if (level.paths[id].essence > 80) weapon = WP_LUCIFER_CANNON;
+   else if (level.paths[id].essence > 60) weapon = WP_BLASTER;
+   else if (level.paths[id].essence < 40) weapon = WP_GRENADE;
+   else weapon = WP_PULSE_RIFLE;
 
   bolt = G_Spawn();
   bolt->classname = "PathNode";
@@ -678,7 +699,7 @@ gentity_t *spawnnode( gentity_t *self, long id )
   bolt->think = nodethink;
   bolt->s.eType = ET_MISSILE;
   bolt->r.svFlags = SVF_USE_CURRENT_ORIGIN;
-  bolt->s.weapon = level.paths[id].essence > 80 ? WP_LUCIFER_CANNON : (level.paths[id].essence < 60 ? ( level.paths[id].essence > 40 ? WP_PULSE_RIFLE : WP_GRENADE) : WP_BLASTER ); //LEPE
+  bolt->s.weapon = weapon;
   bolt->s.generic1 = WPM_PRIMARY; //weaponMode
   bolt->r.ownerNum = self->r.ownerNum;
   bolt->parent = self;
@@ -697,63 +718,84 @@ gentity_t *spawnnode( gentity_t *self, long id )
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
 
   VectorCopy( start, bolt->r.currentOrigin );
-
   return bolt;
 }
 /*
 ============
 G_DrawNodes (LEPE: moved from g_admin.c)
-Turn it on/off with "dnodes"
+Draw Nodes for first time
 ============
 */
-void G_DrawNodes(void) 
+void G_DrawNodes( gentity_t *ent ) 
 {
 	long i,i2;
-    gentity_t *ent;
 	qboolean draw;
-	if(level.drawpath == qtrue)
-	{
-        //We need to remove the current ones first before adding them
-		for( i = 0; i < MAX_GENTITIES; i++ )
-		{
-			if(g_entities[i].client){continue;}
-			if(!strcmp("PathNode",g_entities[i].classname))
-			{
-				G_FreeEntity(&g_entities[i]);
-			}
-		}
-		//ADMP( "^2Drawing Paths\n" );
-		for(i = 0;i < level.numPaths;i++)
-		{
-			draw = qtrue;
-			for(i2 = 0;i2 < 5;i2++)
-			{
-				if(level.paths[i].nextid[i2] < 0)
-				{
-					draw = qfalse;
-				}
-			}
-			if(draw == qtrue)
-			{
-				gentity_t *node;
-				node = spawnnode(level.drawent,i);
-			}
-		}
-	}
-	else if(level.drawent != NULL)
-	{
-		for( i = 0; i < MAX_GENTITIES; i++ )
-		{
-			if(g_entities[i].client){continue;}
-			if(!strcmp("PathNode",g_entities[i].classname))
-			{
-				G_FreeEntity(&g_entities[i]);
-			}
-		}
-        level.drawent = NULL;
-		//ADMP( "^1Hiding Paths\n" );
-	}
+    for(i = 0;i < level.numPaths;i++)
+    {
+        draw = qtrue;
+        for(i2 = 0;i2 < 5;i2++)
+        {
+            if(level.paths[i].nextid[i2] < 0)
+            {
+                draw = qfalse;
+            }
+        }
+        if(draw == qtrue)
+        {
+            spawnnode(ent,i);
+        }
+    }
 }
+/*
+============
+G_RedrawNodes 
+Refresh node status according to essence
+============
+*/
+void G_RedrawNodes( ) 
+{
+	long i;
+    int pid; //path_id
+    gentity_t *ent;
+    //We need to remove the current ones first before adding them
+    for( i = 0; i < MAX_GENTITIES; i++ )
+    {
+        if(g_entities[i].client){continue;}
+        if(!strcmp("PathNode",g_entities[i].classname))
+        {
+            pid = g_entities[i].pathid; 
+            if(level.paths[pid].essence != 50) {
+                if(ent == NULL) ent = g_entities[i].parent; //recover parent entity before removing node
+                if(g_entities[i].nextthink - 2000 < level.time - 1000) { //do not create it again if was created less than a sec before
+                    //G_Printf("Deleting entity: %i, to Update node %d with essence: %d\n", i, pid, level.paths[pid].essence);
+                    G_FreeEntity(&g_entities[i]);
+                    spawnnode(ent, pid);
+                }
+            }
+        }
+    }
+}
+
+
+/*
+============
+G_EraseNodes (LEPE: split from G_DrawNodes)
+remove nodes from rendering
+============
+*/
+void G_EraseNodes(void) 
+{
+	long i,i2;
+    for( i = 0; i < MAX_GENTITIES; i++ )
+    {
+        if(g_entities[i].client){continue;}
+        if(!strcmp("PathNode",g_entities[i].classname))
+        {
+            G_FreeEntity(&g_entities[i]);
+        }
+    }
+}
+
 /*
 ============
 G_InitGame
@@ -2560,7 +2602,7 @@ void G_RunFrame( int levelTime )
   int        i;
   int  max = 0;
   int  min = 50;
-  int  essence_mod = 3;
+  int  essence_mod = 1;
   gentity_t  *ent;
   int        msec;
   static int ptime3000 = 0;
@@ -2603,25 +2645,26 @@ void G_RunFrame( int levelTime )
   }
 
   //LEPE: control the essence of paths
-  if( level.essenceFadeTimer > 3000 ) {
+  if( level.essenceFadeTimer > 1000 ) {
         level.essenceFadeTimer = 0;
         for( i = 0; i < level.numPaths; i++ ) {
             max = level.paths[i].essence > max ? level.paths[i].essence : max; 
             min = level.paths[i].essence < min ? level.paths[i].essence : min; 
             if(level.paths[i].essence > (50 + essence_mod)) {
-                //G_Printf("Reducing Essence of path %i to %i", i, level.paths[i].essence);
+                if(g_debugEssence.integer) G_Printf("Reducing Essence of path %i to %i\n", i, level.paths[i].essence);
                 level.paths[i].essence = level.paths[i].essence - essence_mod; //TODO: convert to sv_essence_rate or something like that
-                //G_Printf(" +E\n");
             } else if(level.paths[i].essence < 50) { //for negative essence
                 level.paths[i].essence = level.paths[i].essence + essence_mod; 
             } else {
                 level.paths[i].essence = 50;
             }
         }
-        if(level.drawpath == qtrue) {
+        if(g_debugEssence.integer) {
             G_Printf("Max essence: %i\n", max); 
             G_Printf("Min essence: %i\n", min);
-            G_DrawNodes();
+        }
+        if(g_debugNodes.integer) {
+            G_RedrawNodes( );
         }
   }
   level.essenceFadeTimer += (levelTime - level.time);
@@ -2756,16 +2799,18 @@ void G_RunFrame( int levelTime )
 **/
 void G_Bots( gentity_t *ent ) 
 {
-    //G_Printf("G_Bots called\n");
-    if(! (ent->r.svFlags & SVF_BOT)) { 
-        if(level.numAlienClients - level.alienBots > 0) {
-            trap_SendConsoleCommand( EXEC_APPEND, va("exec bots/A%d.cfg\n", level.numAlienClients) ); 
-        } 
-        if(level.numHumanClients - level.humanBots > 0) {
-            trap_SendConsoleCommand( EXEC_APPEND, va("exec bots/H%d.cfg\n", level.numHumanClients) ); 
-        }
-        if(level.numAlienClients == 0 && level.numHumanClients == 0) {
-            trap_SendConsoleCommand( EXEC_APPEND, "exec bots/start.cfg\n" ); 
+    if(g_bot_join.integer) {
+        if(g_debugBots.integer) G_Printf("G_Bots called\n");
+        if(! (ent->r.svFlags & SVF_BOT)) { 
+            if(level.numAlienClients - level.alienBots > 0) {
+                trap_SendConsoleCommand( EXEC_APPEND, va("exec bots/A%d.cfg\n", level.numAlienClients) ); 
+            } 
+            if(level.numHumanClients - level.humanBots > 0) {
+                trap_SendConsoleCommand( EXEC_APPEND, va("exec bots/H%d.cfg\n", level.numHumanClients) ); 
+            }
+            if(level.numAlienClients == 0 && level.numHumanClients == 0) {
+                trap_SendConsoleCommand( EXEC_APPEND, "exec bots/start.cfg\n" ); 
+            }
         }
     }
 }

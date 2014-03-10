@@ -228,6 +228,12 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "unmute a muted player",
       "[^3name|slot#^7]"
     }
+/*
+    {"rnodes", G_reloadnodes, qfalse, "drawnodes",
+      "Reload nodes from file",
+      ""
+    }
+*/
   };
 
 static size_t adminNumCmds = sizeof( g_admin_cmds ) / sizeof( g_admin_cmds[ 0 ] );
@@ -3443,10 +3449,24 @@ qboolean G_password( gentity_t *ent )
   return qtrue;
 }
 
+qboolean G_reloadnodes( gentity_t *ent )
+{
+    ADMP( "^3Reloading Paths\n" );
+    G_PathLoad();
+    return qtrue;
+}
+
 qboolean G_drawnodes( gentity_t *ent )
 {
-    level.drawpath = level.drawpath == qfalse ? qtrue : qfalse; 
-    level.drawent = ent;
+    if(level.drawpath == qtrue) {
+        ADMP( "^1Hiding Paths\n" );
+        G_EraseNodes( ent );
+        level.drawpath = qfalse;
+    } else {
+        ADMP( "^2Drawing Paths\n" );
+        G_DrawNodes();
+        level.drawpath = qtrue;
+    }
     return qtrue;
 }
 
