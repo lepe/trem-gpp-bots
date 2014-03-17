@@ -83,7 +83,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
     
     {"botcmd", G_admin_botcmd, qfalse, "botcmd",
       "Change bot behavior.",
-      "[^3name^7] [^5regular/idle/attack/standground/defensive/followprotect/followattack/followidle/teamkill/give^7]"
+      "[^3name^7] [^5regular/idle/standground/followattack/followidle | skill | give | kill ^7]"
     },
 
     {"builder", G_admin_builder, qtrue, "builder",
@@ -156,9 +156,9 @@ g_admin_cmd_t g_admin_cmds[ ] =
       ""
     },
     
-    {"passcode", G_password, qfalse, "passcode",
-      "Password used for various functions",
-      "(^5password^7)"
+    {"rnodes", G_reloadnodes, qfalse, "redrawnodes",
+      "Reload nodes from file",
+      ""
     },
 
     {"passvote", G_admin_endvote, qfalse, "passvote",
@@ -228,12 +228,6 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "unmute a muted player",
       "[^3name|slot#^7]"
     }
-/*
-    {"rnodes", G_reloadnodes, qfalse, "drawnodes",
-      "Reload nodes from file",
-      ""
-    }
-*/
   };
 
 static size_t adminNumCmds = sizeof( g_admin_cmds ) / sizeof( g_admin_cmds[ 0 ] );
@@ -3397,7 +3391,7 @@ qboolean G_admin_botcmd( gentity_t *ent ) {
         char name[ MAX_NAME_LENGTH ];
         char name_s[ MAX_NAME_LENGTH ];
         char name2_s[ MAX_NAME_LENGTH ];
-        char skill[ 100 ];
+        char value[ 100 ];
         char command[ 32 ];
         int i, j;
         qboolean success = qfalse;
@@ -3406,14 +3400,14 @@ qboolean G_admin_botcmd( gentity_t *ent ) {
         //[botname] [command]
         minargc = 3;
         if( trap_Argc() < minargc )     {
-                ADMP( "^3!botcmd: ^7usage: !botcmd [botname] [command]\n" );
+                ADMP( "^3!botcmd: ^7usage: !botcmd [botname] [command] [value]\n" );
                 return qfalse;
         }
 
         trap_Argv( 1, name, sizeof( name ) );
         trap_Argv( 2, command, sizeof( command ) );
-        trap_Argv( 3, skill, sizeof( skill ) );
-        trap_SendServerCommand(ent - g_entities, va("print \"%s %s %s\n\"", name, command, skill ) );
+        trap_Argv( 3, value, sizeof( value ) );
+        trap_SendServerCommand(ent - g_entities, va("print \"%s %s %s\n\"", name, command, value ) );
         G_SanitiseString( name, name_s, sizeof(name_s) );
 
         success = qfalse;
@@ -3423,7 +3417,7 @@ qboolean G_admin_botcmd( gentity_t *ent ) {
                         for( j = 0; j < MAX_NAMELOG_NAMES && namelog->name[ j ][ 0 ]; j++ ) {
                                 G_SanitiseString(namelog->name[ j ], name2_s, sizeof(name2_s) );
                                 if( strstr( name2_s, name_s ) ) {
-                                        G_BotCmd(ent, namelog->slot,command, atoi(skill) );
+                                        G_BotCmd(ent, namelog->slot,command, atoi(value) );
                                         success = qtrue;
                                 }
                         }
@@ -3432,21 +3426,6 @@ qboolean G_admin_botcmd( gentity_t *ent ) {
 
         return success;
 
-}
-
-qboolean G_password( gentity_t *ent )
-{
-  char password[ MAX_STRING_CHARS ];
-  if( !g_pathpassword.string[0] ){ADMP( "^3password: Not set (g_pathpassword)\n" );return qfalse;}
-  if( trap_Argc() < 2 )
-  {
-    ADMP( "^3password: ^7usage: password [password]\n" );
-    return qfalse;
-  }
-  trap_Argv( 1, password, sizeof( password ) );
-  if( !strcmp(password, g_pathpassword.string) )
-	ent->patheditor = qtrue;
-  return qtrue;
 }
 
 qboolean G_reloadnodes( gentity_t *ent )

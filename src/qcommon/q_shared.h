@@ -979,14 +979,14 @@ typedef enum {
 
 // a trace is returned when a box is swept through the world
 typedef struct {
-	qboolean	allsolid;	// if true, plane is not valid
-	qboolean	startsolid;	// if true, the initial point was in a solid area
-	float		fraction;	// time completed, 1.0 = didn't hit anything
-	vec3_t		endpos;		// final position
-	cplane_t	plane;		// surface normal at impact, transformed to world space
-	int			surfaceFlags;	// surface hit
-	int			contents;	// contents on other side of surface hit
-	int			entityNum;	// entity the contacted sirface is a part of
+	qboolean	allsolid;	// if true, plane is not valid ( true if the object you were testing was inside a solid the entire trace )
+	qboolean	startsolid;	// if true, the initial point was in a solid area ( true if the object you were testing started inside another object )
+	float		fraction;	// time completed, 1.0 = didn't hit anything ( the entity number of the object that was collided against - this will be ENTITYNUM_WORLD for something that's not linked to an entity, e.g. a plain brush.fraction: will be in the range 0.0 - 1.0, and indicates how far along the trace a collision took place (if any). obviously if fraction == 1.0, then the trace reached the end point without any collision. )
+	vec3_t		endpos;		// final position (the point of collision, if any)
+	cplane_t	plane;		// surface normal at impact, transformed to world space ( information about the plane which the collision took place against - this holds information such as the plane's equation.)
+	int			surfaceFlags;	// surface hit ( the surface flags of the object collided against - I think this is for testing air-water/lava transitions? )
+	int			contents;	// contents on other side of surface hit (  the colliding object's contents flags, e.g. MASK_PLAYERSOLID, MASK_SHOT, etc. )
+	int			entityNum;	// entity the contacted surface is a part of
 	float		lateralFraction; // fraction of collision tangetially to the trace direction
 } trace_t;
 

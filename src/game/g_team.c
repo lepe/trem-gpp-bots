@@ -216,7 +216,6 @@ G_ChangeTeam
 void G_ChangeTeam( gentity_t *ent, team_t newTeam )
 {
   team_t  oldTeam = ent->client->pers.teamSelection;
-
   if( oldTeam == newTeam )
     return;
 

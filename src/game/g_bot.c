@@ -164,7 +164,7 @@ void G_BotDel( int clientNum ) {
 	ClientDisconnect(clientNum);
 }
 
-void G_BotCmd( gentity_t *master, int clientNum, char *command, int skill ) {
+void G_BotCmd( gentity_t *master, int clientNum, char *command, int value ) {
   gentity_t *bot;
   
   bot = &g_entities[clientNum];
@@ -225,10 +225,17 @@ void G_BotCmd( gentity_t *master, int clientNum, char *command, int skill ) {
     bot->botCommand = BOT_TEAM_KILLER;
     
   } else if( !Q_stricmp( command, "skill" ) ) {
-    bot->botSkillLevel = skill;
-    //trap_SendServerCommand(-1, "print \"team kill mode\n\"");
+
+    bot->botSkillLevel = value;
+
   } else if( !Q_stricmp( command, "give" ) ) { //LEPE: give money/evos to bot
-    G_AddCreditToClient( bot->client, (short)skill, qfalse );
+
+    G_AddCreditToClient( bot->client, (short)value, qfalse );
+
+  } else if( !Q_stricmp( command, "kill" ) ) { //LEPE: kill bot
+
+    bot->client->ps.stats[ STAT_HEALTH ] = bot->health = 0;
+    player_die( bot, bot, bot, 10000, MOD_SUICIDE );
     
   } else {
 	
@@ -256,7 +263,7 @@ int distanceToTargetNode( gentity_t *self )
 qboolean botAimAtPath( gentity_t *self )
 {
 	vec3_t dirToTarget, angleToTarget;
-	vec3_t top = { 0, 0, 0};
+	vec3_t top = { 0, 0, 0 };
 // 	int vh = 0;
 // 	BG_FindViewheightForClass(  self->client->ps.stats[ STAT_CLASS ], &vh, NULL );
 	top[2]=BG_ClassConfig( self->client->ps.stats[ STAT_CLASS ] )->viewheight;
@@ -319,10 +326,6 @@ void G_FastThink( gentity_t *self )
 	if(self->botEnemy)
 	{
 		botShootIfTargetInRange(self,self->botEnemy);
-		/*if(botTargetInRange( self, self->botEnemy ) == qfalse)
-		{
-			self->botEnemy = NULL;
-		}*/
 		self->enemytime = level.time;
 	}
 	if(self->botFriend)
@@ -341,11 +344,15 @@ void G_FastThink( gentity_t *self )
 		if((self->isblocked == qtrue || 
 			VectorLength( self->client->ps.velocity ) < 50.0f) && level.time - self->enemytime > 1000)
 		{
+            if( BG_ClassHasAbility( self->client->ps.stats[ STAT_CLASS ], SCA_WALLCLIMBER ) ) { //LEPE: if possible
+                self->client->pers.cmd.upmove = -1;
+            }
 			self->client->pers.cmd.buttons |= BUTTON_GESTURE;
-			self->client->pers.cmd.rightmove = -100;
+			self->client->pers.cmd.rightmove = G_Rand() < 50 ? -100 : 200;
+		    self->client->pers.cmd.forwardmove = G_Rand() < 50 ? 127 : -500;
   			if(self->client->time1000 >= 500)
   			{
-				self->client->pers.cmd.rightmove = 100;
+				self->client->pers.cmd.rightmove = G_Rand() < 50 ? 100 : -200;
 			}
 			if(level.time - self->jumptime > 3000 &&
 				(( self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS && self->client->ps.stats[ STAT_STAMINA ] > 0 ) ||
@@ -355,15 +362,36 @@ void G_FastThink( gentity_t *self )
 				if(level.time - self->jumptime > 4000)
 				self->jumptime = level.time;
 			}
-		}
-		self->client->pers.cmd.forwardmove = forwardMove;
-        if( BG_ClassHasAbility( self->client->ps.stats[ STAT_CLASS ], SCA_WALLCLIMBER ) ) { //LEPE: if possible
-            if(G_Rand() < 70) {
-                self->client->pers.cmd.upmove = -1;
-            } else {
-                self->client->pers.cmd.upmove = 0;
+		} else { //If not blocked
+            if( BG_ClassHasAbility( self->client->ps.stats[ STAT_CLASS ], SCA_WALLCLIMBER ) ) { //LEPE: if possible
+                if(G_Rand() < 70) {
+                    self->client->pers.cmd.upmove = -1;
+                } else {
+                    self->client->pers.cmd.upmove = 0;
+                }
+            } else if(G_Rand() < 90 &&
+                    (self->client->pers.classSelection == PCL_ALIEN_LEVEL2 || 
+                    self->client->pers.classSelection == PCL_ALIEN_LEVEL2_UPG) &&
+                    level.time - self->jumptime > 1000) {
+                        self->client->pers.cmd.upmove = 20;
+                        if(level.time - self->jumptime > G_Rand() * 50) //between (0)1000 - 5000
+                            self->jumptime = level.time;
+            } else if((self->client->pers.classSelection == PCL_ALIEN_LEVEL3 && 
+                      self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG) || 
+                     (self->client->pers.classSelection == PCL_ALIEN_LEVEL3_UPG && 
+                      self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG_UPG) &&
+                     level.time - self->jumptime > 3000) {
+		                self->client->pers.cmd.upmove = 127;
+                        if(level.time - self->jumptime > 5000) { 
+                            self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
+                            self->jumptime = level.time;
+                        }
+            } else if(self->client->pers.classSelection == PCL_ALIEN_LEVEL4) {
+                     self->client->pers.cmd.buttons |= BUTTON_ATTACK2; 
             }
         }
+		self->client->pers.cmd.forwardmove = forwardMove;
+
 		if(self->lastpathid >= 0)
 		{
 			switch(level.paths[self->lastpathid].action)
@@ -411,7 +439,7 @@ void G_FastThink( gentity_t *self )
 			self->state = FINDNEWPATH;
 			self->timeFoundPath = level.time;
 		}
-		if(distanceToTargetNode(self) < 70)
+		if(distanceToTargetNode(self) < 150) //LEPE: was 70
 		{
 			self->state = FINDNEXTPATH;
 			self->timeFoundPath = level.time;
@@ -487,15 +515,12 @@ void findnewpath( gentity_t *self )
 		By = self->s.pos.trBase[1];
 		Bz = self->s.pos.trBase[2];
 		distance = sqrt((Ax - Bx)*(Ax - Bx) + (Ay - By)*(Ay - By) + (Az - Bz)*(Az - Bz));
-		if(distance < 5000)
-		{
-			if(closestpathdistance > distance)
-			{
-				closestpath = i;
-				closestpathdistance = distance;
-				pathfound = qtrue;
-			}
-		}
+        if(distance < closestpathdistance)
+        {
+            closestpath = i;
+            closestpathdistance = distance;
+            pathfound = qtrue;
+        }
 	}
 	if(pathfound == qtrue)
 	{
@@ -945,7 +970,7 @@ void Bot_Evolve( gentity_t *self )
 	clientNum = self->client - level.clients;
 	self->evolvetime = level.time;
     rand = G_Rand();
-	if(rand < 80 && classfound == qfalse)
+	if(rand < 50 && classfound == qfalse && g_bot_tyrant.integer > 0)
 	{
 		class = PCL_ALIEN_LEVEL4;
  		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
@@ -975,7 +1000,7 @@ void Bot_Evolve( gentity_t *self )
 	  
 	}
     rand = G_Rand();
-	if(rand < 80 && classfound == qfalse)
+	if(rand < 50 && classfound == qfalse && g_bot_advgoon.integer > 0)
 	{
 		class = PCL_ALIEN_LEVEL3_UPG;
 		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
@@ -1005,7 +1030,84 @@ void Bot_Evolve( gentity_t *self )
 	  classfound=qtrue;
 	}
     rand = G_Rand();
-	if(rand < 80 && classfound == qfalse)
+	if(rand < 50 && classfound == qfalse && g_bot_advmara.integer > 0)
+	{
+		class = PCL_ALIEN_LEVEL2_UPG;
+ 		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
+ 						class,
+ 						self->client->pers.credit,
+                                      g_alienStage.integer, 0 );
+ 		if(BG_ClassIsAllowed( class ) && 
+ 			 
+ 			G_Overmind( ) &&
+ 			G_RoomForClassChange( self, class, origin ) && 
+ 			!( self->client->ps.stats[ STAT_STATE ] & SS_WALLCLIMBING ) && 
+ 			levels >= 0)
+ 		{
+ 			classfound = qtrue;
+ 		}
+				if( !BG_ClassIsAllowed( class ) )
+      {
+        classfound=qfalse;
+      }
+
+      if( !BG_ClassAllowedInStage( class, g_alienStage.integer ) )
+      {
+        classfound=qfalse;
+      }
+	if(classfound != qfalse)
+	  classfound=qtrue;
+	}
+    rand = G_Rand();
+	if(rand < 50 && classfound == qfalse && g_bot_mara.integer > 0)
+	{
+		class = PCL_ALIEN_LEVEL2;
+ 		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
+ 						class,
+ 						self->client->pers.credit,
+                                      g_alienStage.integer, 0 );
+ 		if(BG_ClassIsAllowed( class ) && 
+ 			 
+ 			G_Overmind( ) &&
+ 			G_RoomForClassChange( self, class, origin ) && 
+ 			!( self->client->ps.stats[ STAT_STATE ] & SS_WALLCLIMBING ) && 
+ 			levels >= 0)
+ 		{
+ 			classfound = qtrue;
+ 		}
+				if( !BG_ClassIsAllowed( class ) )
+      {
+        classfound=qfalse;
+      }
+
+      if( !BG_ClassAllowedInStage( class, g_alienStage.integer ) )
+      {
+        classfound=qfalse;
+      }
+	if(classfound != qfalse)
+	  classfound=qtrue;
+	}
+    rand = G_Rand();
+	if(rand < 50 && classfound == qfalse && g_bot_advbasi.integer > 0)
+	{
+		class = PCL_ALIEN_LEVEL1_UPG;
+ 		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
+ 						class,
+ 						self->client->pers.credit,
+                                      g_alienStage.integer, 0 );
+ 		if(BG_ClassIsAllowed( class ) && 
+ 			 
+ 			G_Overmind( ) &&
+ 			G_RoomForClassChange( self, class, origin ) && 
+ 			!( self->client->ps.stats[ STAT_STATE ] & SS_WALLCLIMBING ) && 
+ 			 
+ 			levels >= 0)
+ 		{
+ 			classfound = qtrue;
+ 		}
+	}
+    rand = G_Rand();
+	if(rand < 50 && classfound == qfalse && g_bot_goon.integer > 0)
 	{
 		class = PCL_ALIEN_LEVEL3;
  		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
@@ -1035,73 +1137,7 @@ void Bot_Evolve( gentity_t *self )
 	  classfound=qtrue;
 	}
     rand = G_Rand();
-	if(rand < 80 && classfound == qfalse)
-	{
-		class = PCL_ALIEN_LEVEL2_UPG;
- 		
-				if( !BG_ClassIsAllowed( class ) )
-      {
-        classfound=qfalse;
-      }
-
-      if( !BG_ClassAllowedInStage( class, g_alienStage.integer ) )
-      {
-        classfound=qfalse;
-      }
-	if(classfound != qfalse)
-	  classfound=qtrue;
-	}
-    rand = G_Rand();
-	if(rand < 80 && classfound == qfalse)
-	{
-		class = PCL_ALIEN_LEVEL2;
- 		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
- 						class,
- 						self->client->pers.credit,
-                                      g_alienStage.integer, 0 );
- 		if(BG_ClassIsAllowed( class ) && 
- 			 
- 			G_Overmind( ) &&
- 			G_RoomForClassChange( self, class, origin ) && 
- 			!( self->client->ps.stats[ STAT_STATE ] & SS_WALLCLIMBING ) && 
- 			 
- 			levels >= 0)
- 		{
- 			classfound = qtrue;
- 		}
-				if( !BG_ClassIsAllowed( class ) )
-      {
-        classfound=qfalse;
-      }
-
-      if( !BG_ClassAllowedInStage( class, g_alienStage.integer ) )
-      {
-        classfound=qfalse;
-      }
-	if(classfound != qfalse)
-	  classfound=qtrue;
-	}
-    rand = G_Rand();
-	if(rand < 80 && classfound == qfalse)
-	{
-		class = PCL_ALIEN_LEVEL1_UPG;
- 		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
- 						class,
- 						self->client->pers.credit,
-                                      g_alienStage.integer, 0 );
- 		if(BG_ClassIsAllowed( class ) && 
- 			 
- 			G_Overmind( ) &&
- 			G_RoomForClassChange( self, class, origin ) && 
- 			!( self->client->ps.stats[ STAT_STATE ] & SS_WALLCLIMBING ) && 
- 			 
- 			levels >= 0)
- 		{
- 			classfound = qtrue;
- 		}
-	}
-    rand = G_Rand();
-	if(rand < 80 && classfound == qfalse)
+	if(rand < 50 && classfound == qfalse && g_bot_basi.integer > 0)
 	{
 		class = PCL_ALIEN_LEVEL1;
  		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
@@ -1176,7 +1212,7 @@ void G_BotThink( gentity_t *self )
 		return;
 	}
 	self->isblocked = qfalse;
-	if(self->state == TARGETPATH && !self->botEnemy && !self->botFriend && level.time - self->enemytime > 2500)
+	if(self->state == TARGETPATH && !self->botEnemy && !self->botFriend && level.time - self->enemytime > 1000)
 	{
 		//AngleVectors( self->client->ps.viewangles, forward, right, up );
 		//CalcMuzzlePoint( self, forward, right, up, muzzle );
@@ -1323,7 +1359,8 @@ void G_BotThink( gentity_t *self )
 				}
 			}
 			
-			//if(!self->botEnemy) { LEPE: even if you already have an enemy, attack the one is nearest to you.
+			if(G_Rand() < 50 && (self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS || 
+                botGetDistanceBetweenPlayer(self, self->botEnemy) > tooCloseDistance)) { //LEPE: change target 50% of times. If is alien and is too close to target, don't change.s
 				// try to find closest enemy
 				if(level.time - self->searchtime >  self->botSkillLevel)
 				{
@@ -1333,6 +1370,7 @@ void G_BotThink( gentity_t *self )
 					if(tempEntityIndex >= 0)
 						self->botEnemy = &g_entities[tempEntityIndex];
 				}
+            }
 		    	
 			if(!self->botEnemy || G_Rand() < 50) { //LEPE: Give 50% of chances to continue to next path (ignore target for a sec)
 				pathfinding(self); //Roam the map!!!
@@ -1446,7 +1484,7 @@ void G_BotThink( gentity_t *self )
 					self->client->pers.cmd.upmove = -1;
 				}
 				
-				//botShootIfTargetInRange(self,self->botEnemy); //# LEPE
+				botShootIfTargetInRange(self,self->botEnemy); 
 
 				//ROTAX
 				if(self->botEnemy->client || self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS)
@@ -1649,31 +1687,27 @@ void G_BotSpectatorThink( gentity_t *self )
 {
 	team_t teamnum;
 	int clientNum;
-	if( /*g_bot.integer <= 0 || */self->client->ps.pm_flags & PMF_QUEUED /*|| self->client->ps.stats[ STAT_CLASS ] != PCL_NONE*/)
+	if( self->client->ps.pm_flags & PMF_QUEUED )
 	{
 		//we're queued to spawn, all good
-		
 		return;
 	}
-// 	if( self->client->sess.sessionTeam == TEAM_NONE )
-// 	{
-		
-		teamnum = self->client->pers.teamSelection;
-		clientNum = self->client->ps.clientNum;
-		if( teamnum == TEAM_HUMANS )
-		{
-			self->client->pers.classSelection = PCL_HUMAN;
-			self->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
-			self->client->pers.humanItemSelection = WP_MACHINEGUN;
-			//self->client->pers.humanItemSelection = WP_HBUILD; //LEPE (for future reference when builders become a reality)
-			G_PushSpawnQueue( &level.humanSpawnQueue, clientNum );
-		}
-		else if( teamnum == TEAM_ALIENS)
-		{
-				self->client->pers.classSelection = PCL_ALIEN_LEVEL0;
-				self->client->ps.stats[ STAT_CLASS ] = PCL_ALIEN_LEVEL0;
-				G_PushSpawnQueue( &level.alienSpawnQueue, clientNum );
-	}
+    teamnum = self->client->pers.teamSelection;
+    clientNum = self->client->ps.clientNum;
+    if( teamnum == TEAM_HUMANS )
+    {
+        self->client->pers.classSelection = PCL_HUMAN;
+        self->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
+        self->client->pers.humanItemSelection = WP_MACHINEGUN;
+        //self->client->pers.humanItemSelection = WP_HBUILD; //LEPE (for future reference when builders become a reality)
+        G_PushSpawnQueue( &level.humanSpawnQueue, clientNum );
+    }
+    else if( teamnum == TEAM_ALIENS)
+    {
+            self->client->pers.classSelection = PCL_ALIEN_LEVEL0;
+            self->client->ps.stats[ STAT_CLASS ] = PCL_ALIEN_LEVEL0;
+            G_PushSpawnQueue( &level.alienSpawnQueue, clientNum );
+    }
 }
 
 /*
@@ -1736,10 +1770,10 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target ) {
             self->client->pers.cmd.upmove = -1; //keep down
     } else {
         if(angleToTarget[0] > -350 && angleToTarget[0] < -180) {
-        if( self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) {
-            // down
-            self->client->pers.cmd.upmove = -1;
-        }
+            if( self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) {
+                // down
+                self->client->pers.cmd.upmove = -1;
+            }
         }
         else if(angleToTarget[0] < -6.0 && angleToTarget[0] > -180) {
                 // up
@@ -1900,12 +1934,12 @@ int botGetDistanceBetweenPlayer( gentity_t *self, gentity_t *player ) {
 
 qboolean botShootIfTargetInRange( gentity_t *self, gentity_t *target )
 {
-	if(botTargetInRange(self,target))
+	if(botTargetInRange(self,target) && G_Visible(self, target, CONTENTS_SOLID)) //LEPE: test if its visible
 	{
 	  //ROTAX
-			int nahoda = 0;
+			int rand = 0;
             int i = 0;
-			nahoda = (int)(( (double)rand() / ((double)(RAND_MAX)+(double)(1)) ) * 20);
+			rand = G_Rand();
 			self->client->pers.cmd.buttons = 0;
 			if (self->client->pers.classSelection == PCL_ALIEN_BUILDER0)
 			{
@@ -1913,14 +1947,22 @@ qboolean botShootIfTargetInRange( gentity_t *self, gentity_t *target )
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_BUILDER0_UPG)//adv granger
 			{
-				if (nahoda > 10)
+				if (rand > 10)
  					self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
 				else
 					self->client->pers.cmd.buttons |= BUTTON_USE_HOLDABLE;
 			}
+			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL0)//dretch
+            {
+                //LEPE: ignore structures that can't destroy
+                if(target->spawned && target->s.eType == ET_BUILDABLE) {
+                    self->botEnemy = NULL;
+                    return qfalse;
+                }
+            }
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL1_UPG)//adv basilisk
 			{
-				if (nahoda > 15)
+				if (rand > 15)
 					self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
 				else
 					self->client->pers.cmd.buttons |= BUTTON_ATTACK;
@@ -1934,7 +1976,7 @@ qboolean botShootIfTargetInRange( gentity_t *self, gentity_t *target )
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL3)//dragon
 			{
-				if(Distance( self->s.pos.trBase, target->s.pos.trBase ) > 50 && 
+				if(Distance( self->s.pos.trBase, target->s.pos.trBase ) > LEVEL3_CLAW_RANGE - 10 &&  //LEPE: using the constant
 					self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG)
 					self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
 				else
@@ -1943,16 +1985,14 @@ qboolean botShootIfTargetInRange( gentity_t *self, gentity_t *target )
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL3_UPG)//adv dragon
 			{
 				if(self->client->ps.ammo > 0 && 
-					Distance( self->s.pos.trBase, target->s.pos.trBase ) > 150 )
-					self->client->pers.cmd.buttons |= BUTTON_USE_HOLDABLE;
-				else
-				{	
-					if(Distance( self->s.pos.trBase, target->s.pos.trBase ) > 50 && 
+					Distance( self->s.pos.trBase, target->s.pos.trBase ) > 150)
+					    self->client->pers.cmd.buttons |= BUTTON_USE_HOLDABLE; //it can shoot and attack at the same time
+
+					if(Distance( self->s.pos.trBase, target->s.pos.trBase ) > LEVEL3_CLAW_UPG_RANGE - 10 &&  //LEPE: using constant.
 						self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG_UPG)
 						self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
 					else
 						self->client->pers.cmd.buttons |= BUTTON_ATTACK;
-				}
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL4)//tyrant
 			{
@@ -1994,9 +2034,9 @@ qboolean botShootIfTargetInRange( gentity_t *self, gentity_t *target )
             }
 
 			return qtrue;
-			//if (nahoda == 15 || nahoda == 16)
+			//if (rand == 15 || rand == 16)
         		//	self->client->pers.cmd.buttons |= BUTTON_GESTURE;
-			//if (nahoda > 11 && nahoda < 15)
+			//if (rand > 11 && rand < 15)
         		//	self->client->pers.cmd.upmove = 20;
 	}
 	self->botEnemy = NULL;

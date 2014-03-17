@@ -3138,18 +3138,6 @@ void Cmd_Node_f( gentity_t *ent )
 			"print \"g_pathediting is off.\n\"");
 		return;
 	}
-	if(!g_pathpassword.string[0])
-	{
-		trap_SendServerCommand( ent-g_entities,
-			"print \"Password not set (g_pathpassword).\n\"");
-		//return; //LEPE
-	}
-	if(!ent->patheditor)
-	{
-		trap_SendServerCommand( ent-g_entities,
-			"print \"Wrong password (!password).\n\"");
-		//return; //LEPE
-	}
 	trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
 	for(i = 0; i < level.numPaths; i++ )
 	{

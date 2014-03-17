@@ -802,7 +802,7 @@ void G_BotAdd( char *name, team_t team, int skill, int ignore );
 void G_BotDel( int clientNum );
 void G_DeleteBots( void );
 void G_BotReload( gentity_t *ent, int clientNum );
-void G_BotCmd( gentity_t *master, int clientNum, char *command, int skill );
+void G_BotCmd( gentity_t *master, int clientNum, char *command, int value );
 void G_BotThink( gentity_t *self );
 void G_FrameAim( gentity_t *self );
 void G_FastThink( gentity_t *self );
@@ -1287,7 +1287,6 @@ extern  vmCvar_t  g_censorship;
 
 // ROTAX
 extern  vmCvar_t  g_pathediting;
-extern  vmCvar_t  g_pathpassword;
 extern  vmCvar_t  g_human_range;
 extern  vmCvar_t  g_human_strafe;
 extern  vmCvar_t  g_level0_range;
@@ -1310,9 +1309,15 @@ extern  vmCvar_t  g_bot_chaingun;
 extern  vmCvar_t  g_bot_prifle;
 extern  vmCvar_t  g_bot_flamer;
 extern  vmCvar_t  g_bot_lcannon;
-extern  vmCvar_t  g_bot_join;  //LEPE: disable bots join
-
-//LEPE
+//LEPE:
+extern  vmCvar_t  g_bot_lisk;
+extern  vmCvar_t  g_bot_advlisk;
+extern  vmCvar_t  g_bot_mara;
+extern  vmCvar_t  g_bot_advmara;
+extern  vmCvar_t  g_bot_goon;
+extern  vmCvar_t  g_bot_advgoon;
+extern  vmCvar_t  g_bot_tyrant;
+extern  vmCvar_t  g_bot_join;  //disable bots join
 extern vmCvar_t  g_debugBots; //debug G_Bots
 extern vmCvar_t  g_debugPaths; //debug path decision
 extern vmCvar_t  g_debugNodes; 
@@ -1351,6 +1356,17 @@ void      trap_GetUserinfo( int num, char *buffer, int bufferSize );
 void      trap_SetUserinfo( int num, const char *buffer );
 void      trap_GetServerinfo( char *buffer, int bufferSize );
 void      trap_SetBrushModel( gentity_t *ent, const char *name );
+/**
+ * trap_Trace() 
+ *
+ * result: the trace_t - this is how the function returns the results of the trace.
+ * start: where you want to start tracing from.
+ * mins and maxs: like the mins/maxs of a player's bounding box. In your case, you want them to be the same as your item's bounding box.
+ * end: where you want the trace to finish.
+ * skipentity: the entity number you want to avoid collision detection against.
+ * collisionflags: tells the function what sort of collision boxes you want to collide against.
+ *
+ */
 void      trap_Trace( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
                       const vec3_t end, int passEntityNum, int contentmask );
 int       trap_PointContents( const vec3_t point, int passEntityNum );

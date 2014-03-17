@@ -145,7 +145,6 @@ vmCvar_t  g_tag;
 
 // ROTAX
 vmCvar_t  g_pathediting;
-vmCvar_t  g_pathpassword;
 vmCvar_t  g_human_range;
 vmCvar_t  g_human_strafe;
 vmCvar_t  g_level0_range;
@@ -168,9 +167,15 @@ vmCvar_t  g_bot_chaingun;
 vmCvar_t  g_bot_prifle;
 vmCvar_t  g_bot_flamer;
 vmCvar_t  g_bot_lcannon;
-vmCvar_t  g_bot_join;  //LEPE
-
-//LEPE (add also in g_local.h)
+//LEPE:(add also in g_local.h)
+vmCvar_t  g_bot_join;
+vmCvar_t  g_bot_basi;
+vmCvar_t  g_bot_advbasi;
+vmCvar_t  g_bot_mara;
+vmCvar_t  g_bot_advmara;
+vmCvar_t  g_bot_goon;
+vmCvar_t  g_bot_advgoon;
+vmCvar_t  g_bot_tyrant;
 vmCvar_t  g_debugBots; 
 vmCvar_t  g_debugPaths;
 vmCvar_t  g_debugNodes; 
@@ -221,8 +226,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_logFileSync, "g_logFileSync", "0", CVAR_ARCHIVE, 0, qfalse  },
 
   { &g_password, "g_password", "", CVAR_USERINFO, 0, qfalse  },
-  { &g_pathediting, "g_pathediting", "0", CVAR_ARCHIVE, 0, qfalse },
-  { &g_bot, "g_bot", "1", CVAR_ARCHIVE, 0, qfalse },
+  { &g_pathediting, "g_pathediting", "0", 0, 0, qfalse },
+  { &g_bot, "g_bot", "1", 0, 0, qfalse },
   { &g_bot_spawnprotection, "g_bot_spawnprotection", "2000", CVAR_ARCHIVE, 0, qfalse },
   { &g_human_range, "g_human_range", "3000", CVAR_ARCHIVE, 0, qfalse },
   { &g_human_strafe, "g_human_strafe", "0", CVAR_ARCHIVE, 0, qfalse },
@@ -234,23 +239,27 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_level3_range, "g_level3_range", "500", CVAR_ARCHIVE, 0, qfalse },
   { &g_level3UPG_range, "g_level3UPG_range", "600", CVAR_ARCHIVE, 0, qfalse },
   { &g_level4_range, "g_level4_range", "300", CVAR_ARCHIVE, 0, qfalse },
-  { &g_bot_evolve, "g_bot_evolve", "1", CVAR_ARCHIVE, 0, qfalse },
-  { &g_bot_mgun, "g_bot_mgun", "1", CVAR_ARCHIVE, 0, qfalse },
-  { &g_bot_shotgun, "g_bot_shotgun", "1", CVAR_ARCHIVE, 0, qfalse },
-  { &g_bot_psaw, "g_bot_psaw", "1", CVAR_ARCHIVE, 0, qfalse },
-  { &g_bot_lasgun, "g_bot_lasgun", "1", CVAR_ARCHIVE, 0, qfalse },
-  { &g_bot_mdriver, "g_bot_mdriver", "1", CVAR_ARCHIVE, 0, qfalse },
-  { &g_bot_chaingun, "g_bot_chaingun", "1", CVAR_ARCHIVE, 0, qfalse },
-  { &g_bot_prifle, "g_bot_prifle", "1", CVAR_ARCHIVE, 0, qfalse },
-  { &g_bot_flamer, "g_bot_flamer", "1", CVAR_ARCHIVE, 0, qfalse },
-  { &g_bot_lcannon, "g_bot_lcannon", "1", CVAR_ARCHIVE, 0, qfalse },
+  { &g_bot_evolve, "g_bot_evolve", "1", 0, 0, qfalse },
+  { &g_bot_mgun, "g_bot_mgun", "1", 0, 0, qfalse },
+  { &g_bot_shotgun, "g_bot_shotgun", "1", 0, 0, qfalse },
+  { &g_bot_psaw, "g_bot_psaw", "1", 0, 0, qfalse },
+  { &g_bot_lasgun, "g_bot_lasgun", "1", 0, 0, qfalse },
+  { &g_bot_mdriver, "g_bot_mdriver", "1", 0, 0, qfalse },
+  { &g_bot_chaingun, "g_bot_chaingun", "1", 0, 0, qfalse },
+  { &g_bot_prifle, "g_bot_prifle", "1", 0, 0, qfalse },
+  { &g_bot_flamer, "g_bot_flamer", "1", 0, 0, qfalse },
+  { &g_bot_lcannon, "g_bot_lcannon", "1", 0, 0, qfalse },
+  { &g_bot_basi, "g_bot_basi", "1", 0, 0, qfalse },
+  { &g_bot_advbasi, "g_bot_advbasi", "1", 0, 0, qfalse },
+  { &g_bot_mara, "g_bot_mara", "1", 0, 0, qfalse },
+  { &g_bot_advmara, "g_bot_advmara", "1", 0, 0, qfalse },
+  { &g_bot_goon, "g_bot_goon", "1", 0, 0, qfalse },
+  { &g_bot_advgoon, "g_bot_advgoon", "1", 0, 0, qfalse },
+  { &g_bot_tyrant, "g_bot_tyrant", "1", 0, 0, qfalse },
   { &g_bot_join, "g_bot_join", "1", 0, 0, qfalse },
-  { &g_pathpassword, "g_pathpassword", "", CVAR_ARCHIVE, 0, qfalse },
   
   { &g_needpass, "g_needpass", "0", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse },
-
   { &g_dedicated, "dedicated", "0", 0, 0, qfalse  },
-
   { &g_speed, "g_speed", "320", 0, 0, qtrue  },
   { &g_gravity, "g_gravity", "800", 0, 0, qtrue, cv_gravity },
   { &g_knockback, "g_knockback", "1000", 0, 0, qtrue  },
@@ -386,13 +395,11 @@ Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, i
       return 0;
 
     case GAME_CLIENT_DISCONNECT:
-      G_Bots( &g_entities[ arg0 ] ); //LEPE
       ClientDisconnect( arg0 );
       return 0;
 
     case GAME_CLIENT_BEGIN:
       ClientBegin( arg0 );
-      G_Bots( &g_entities[ arg0 ] ); //LEPE
       trap_SendServerCommand(arg0, "cp \"Please join to deploy bots!\"");
       return 0;
 
@@ -2800,17 +2807,22 @@ void G_RunFrame( int levelTime )
 void G_Bots( gentity_t *ent ) 
 {
     if(g_bot_join.integer) {
-        if(g_debugBots.integer) G_Printf("G_Bots called\n");
+        if(g_debugBots.integer) {
+            G_Printf("A Players: %d\nH Players: %d\n",level.numAlienClients,level.numHumanClients);
+        }
         if(! (ent->r.svFlags & SVF_BOT)) { 
-            if(level.numAlienClients - level.alienBots > 0) {
-                trap_SendConsoleCommand( EXEC_APPEND, va("exec bots/A%d.cfg\n", level.numAlienClients) ); 
-            } 
-            if(level.numHumanClients - level.humanBots > 0) {
-                trap_SendConsoleCommand( EXEC_APPEND, va("exec bots/H%d.cfg\n", level.numHumanClients) ); 
-            }
             if(level.numAlienClients == 0 && level.numHumanClients == 0) {
                 trap_SendConsoleCommand( EXEC_APPEND, "exec bots/start.cfg\n" ); 
             }
+            if(level.numAlienClients - level.alienBots >= 0) {
+                trap_SendConsoleCommand( EXEC_APPEND, va("exec bots/A%d.cfg\n", level.numAlienClients - level.alienBots) ); 
+            } 
+            if(level.numHumanClients - level.humanBots >= 0) {
+                trap_SendConsoleCommand( EXEC_APPEND, va("exec bots/H%d.cfg\n", level.numHumanClients - level.humanBots) ); 
+            }
+        }
+        if(g_debugBots.integer) {
+            G_Printf("A Bots: %d\nH Bots: %d\n",level.alienBots,level.humanBots);
         }
     }
 }
