@@ -5,6 +5,21 @@ The current code was based on a P-Bot 2.x GPP port from Tremulous 1.1 P-Bot (htt
 
 CHANGE LOG
 
+v.16
+* goons pounce and rants rush to move faster, maras jump more.
+* aliens were not able to evolve to adv. marauder (since original code).
+* aliens evolve percentages and order changed. Expect more adv. basilisks and adv. marauders in game
+* adv. goons can snipe and attack at the same time
+* goon attack ranges adjusted according to CLAW_RANGE defined constants
+* dretches will not to attack structures it can't destroy unless they are not completed
+* bots deployment fixed (bots were not removed when last player disconnected)
+* added botcmd BOT kill to instantly kill bot (useful when bots are stuck or performing tests)
+* added aliens class controlling commands, like: g_bot_lisk 0,  g_bot_advmara 0 , g_bot_goon 0,  etc.
+* prevent aliens to loose target in case they are too close of it. In general (humans and aliens) reduce the chances of changing target.
+* bots now move more randomly when they are blocked
+* blocked timeout reduced to 1 second
+* rnodes command added to reload nodes on edition (command not working yet)
+
 v.15
 * Aliens improved (fixed stuck bug) and adjusted range values
 * Goons will not try to use barbs if they don't have enough
