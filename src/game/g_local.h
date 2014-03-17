@@ -1310,8 +1310,8 @@ extern  vmCvar_t  g_bot_prifle;
 extern  vmCvar_t  g_bot_flamer;
 extern  vmCvar_t  g_bot_lcannon;
 //LEPE:
-extern  vmCvar_t  g_bot_lisk;
-extern  vmCvar_t  g_bot_advlisk;
+extern  vmCvar_t  g_bot_basi;
+extern  vmCvar_t  g_bot_advbasi;
 extern  vmCvar_t  g_bot_mara;
 extern  vmCvar_t  g_bot_advmara;
 extern  vmCvar_t  g_bot_goon;
