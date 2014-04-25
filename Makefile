@@ -17,22 +17,28 @@ ifeq ($(COMPILE_PLATFORM),darwin)
   COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/x86/)
 endif
 
+#build binaries suited for stand-alone games
 ifndef BUILD_STANDALONE
   BUILD_STANDALONE =0
 endif
+#build the 'tremulous' client binary
 ifndef BUILD_CLIENT
   BUILD_CLIENT     =0
 endif
+#build the 'tremulous-smp' client binary
 ifndef BUILD_CLIENT_SMP
   BUILD_CLIENT_SMP =0
 endif
+#build the 'tremded' server binary
 #Turn this to empty the first time and everytime /src/server/* is modified
 ifndef BUILD_SERVER
   BUILD_SERVER     =0
 endif
+#build the game shared libraries
 ifndef BUILD_GAME_SO
-  BUILD_GAME_SO    =0
+  BUILD_GAME_SO    =1
 endif
+#build the game qvms
 ifndef BUILD_GAME_QVM
   BUILD_GAME_QVM   =1
 endif
@@ -106,18 +112,22 @@ ifndef GENERATE_DEPENDENCIES
 GENERATE_DEPENDENCIES=1
 endif
 
+#use OpenAL where available
 ifndef USE_OPENAL
 USE_OPENAL=1
 endif
 
+#link with OpenAL at runtime
 ifndef USE_OPENAL_DLOPEN
 USE_OPENAL_DLOPEN=1
 endif
 
+#use libcurl for http/ftp download support
 ifndef USE_CURL
 USE_CURL=1
 endif
 
+#link with libcurl at runtime
 ifndef USE_CURL_DLOPEN
   ifeq ($(PLATFORM),mingw32)
     USE_CURL_DLOPEN=0
@@ -126,6 +136,7 @@ ifndef USE_CURL_DLOPEN
   endif
 endif
 
+#enable Ogg Vorbis support
 ifndef USE_CODEC_VORBIS
 USE_CODEC_VORBIS=0
 endif
@@ -150,6 +161,7 @@ ifndef USE_INTERNAL_JPEG
 USE_INTERNAL_JPEG=1
 endif
 
+#use headers local to trem instead of system ones
 ifndef USE_LOCAL_HEADERS
 USE_LOCAL_HEADERS=1
 endif
@@ -257,7 +269,7 @@ ifneq (,$(findstring "$(PLATFORM)", "linux" "gnu_kfreebsd" "kfreebsd-gnu"))
   endif
 
   BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit -Wstrict-prototypes \
-    -pipe -DUSE_ICON
+                -pipe -DUSE_ICON 
   CLIENT_CFLAGS = $(SDL_CFLAGS)
   SERVER_CFLAGS =
 
@@ -283,16 +295,17 @@ ifneq (,$(findstring "$(PLATFORM)", "linux" "gnu_kfreebsd" "kfreebsd-gnu"))
   OPTIMIZE = $(OPTIMIZEVM) -ffast-math
 
   ifeq ($(ARCH),x86_64)
-    OPTIMIZEVM = -O3 -fomit-frame-pointer -funroll-loops \
-      -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
-      -fstrength-reduce
+    OPTIMIZEVM = -O3 -fomit-frame-pointer -funroll-loops
+#      -falign-loops=2 -falign-jumps=2 -falign-functions=2 \
+#      -fstrength-reduce
     OPTIMIZE = $(OPTIMIZEVM) -ffast-math
     HAVE_VM_COMPILED = true
   else
   ifeq ($(ARCH),x86)
     OPTIMIZEVM = -O3 -march=i586 -fomit-frame-pointer \
-      -funroll-loops -falign-loops=2 -falign-jumps=2 \
-      -falign-functions=2 -fstrength-reduce
+      -funroll-loops
+#      -falign-loops=2 -falign-jumps=2 \
+#      -falign-functions=2 -fstrength-reduce
     OPTIMIZE = $(OPTIMIZEVM) -ffast-math
     HAVE_VM_COMPILED=true
   else
@@ -489,9 +502,9 @@ ifeq ($(PLATFORM),mingw32)
     CLIENT_CFLAGS += -DUSE_CODEC_VORBIS
   endif
 
-  OPTIMIZEVM = -O3 -march=i586 -fno-omit-frame-pointer \
-    -falign-loops=2 -funroll-loops -falign-jumps=2 -falign-functions=2 \
-    -fstrength-reduce
+  OPTIMIZEVM = -O3 -march=i586 -fno-omit-frame-pointer 
+#    -falign-loops=2 -funroll-loops -falign-jumps=2 -falign-functions=2 \
+#    -fstrength-reduce
   OPTIMIZE = $(OPTIMIZEVM) -ffast-math
 
   HAVE_VM_COMPILED = true
@@ -1693,6 +1706,12 @@ GOBJ_ = \
   $(B)/base/game/g_maprotation.o \
   $(B)/base/game/g_weapon.o \
   $(B)/base/game/g_admin.o \
+  $(B)/base/game/g_bot_control.o \
+  $(B)/base/game/g_bot_util.o \
+  $(B)/base/game/g_bot_common.o \
+  $(B)/base/game/g_bot_nav.o \
+  $(B)/base/game/g_bot_alien.o \
+  $(B)/base/game/g_bot_human.o \
   $(B)/base/game/g_bot.o \
   $(B)/base/game/g_namelog.o \
   \

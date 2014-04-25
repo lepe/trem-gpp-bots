@@ -85,6 +85,12 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "Change bot behavior.",
       "[^3name^7] [^5regular/idle/standground/followattack/followidle | skill | give | kill ^7]"
     },
+	
+	//LEPE
+	{"botdbg", G_admin_botdbg, qfalse, "botdbg",
+		"Debug bot information",
+		"[^5think | state | navstate | path | profile | general | main | admin | active | alien | human | control | util | common | say | nav ] ^7[ normal | verbose | quiet | off ]"
+	},
 
     {"builder", G_admin_builder, qtrue, "builder",
       "show who built a structure",
@@ -155,7 +161,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "go to the next map in the cycle",
       ""
     },
-    
+    //LEPE
     {"rnodes", G_reloadnodes, qfalse, "redrawnodes",
       "Reload nodes from file",
       ""
@@ -3313,14 +3319,8 @@ qboolean G_admin_bot( gentity_t *ent ) {
         char skill[2];
         int skill_int;
         qboolean success = qfalse;
-        int i, j;
+        int j;
         namelog_t *namelog;
-
-        //char s2[ MAX_NAME_LENGTH ];
-        //char n2[ MAX_NAME_LENGTH ];
-        //int logmatch = -1, logmatches = 0;
-        //int i, j;
-        //qboolean exactmatch = qfalse;
 
         minargc = 3;
         if( trap_Argc() < minargc )     {
@@ -3391,9 +3391,10 @@ qboolean G_admin_botcmd( gentity_t *ent ) {
         char name[ MAX_NAME_LENGTH ];
         char name_s[ MAX_NAME_LENGTH ];
         char name2_s[ MAX_NAME_LENGTH ];
-        char value[ 100 ];
+        char value[ 5 ];
+        char value2[ 5 ];
         char command[ 32 ];
-        int i, j;
+        int j;
         qboolean success = qfalse;
         namelog_t *namelog;
 
@@ -3407,7 +3408,8 @@ qboolean G_admin_botcmd( gentity_t *ent ) {
         trap_Argv( 1, name, sizeof( name ) );
         trap_Argv( 2, command, sizeof( command ) );
         trap_Argv( 3, value, sizeof( value ) );
-        trap_SendServerCommand(ent - g_entities, va("print \"%s %s %s\n\"", name, command, value ) );
+        trap_Argv( 4, value2, sizeof( value2 ) );
+        trap_SendServerCommand(ent - g_entities, va("print \"%s %s %s %s\n\"", name, command, value, value2 ) );
         G_SanitiseString( name, name_s, sizeof(name_s) );
 
         success = qfalse;
@@ -3417,7 +3419,7 @@ qboolean G_admin_botcmd( gentity_t *ent ) {
                         for( j = 0; j < MAX_NAMELOG_NAMES && namelog->name[ j ][ 0 ]; j++ ) {
                                 G_SanitiseString(namelog->name[ j ], name2_s, sizeof(name2_s) );
                                 if( strstr( name2_s, name_s ) ) {
-                                        G_BotCmd(ent, namelog->slot,command, atoi(value) );
+                                        G_BotCmd(namelog->slot, command, atoi(value), atoi(value2) );
                                         success = qtrue;
                                 }
                         }
@@ -3426,6 +3428,65 @@ qboolean G_admin_botcmd( gentity_t *ent ) {
 
         return success;
 
+}
+
+qboolean G_admin_botdbg(  gentity_t *ent )
+{
+	int minargc;
+	int flag;
+	char type[ MAX_NAME_LENGTH ];
+	char type_s[ MAX_NAME_LENGTH ];
+	char verb[ MAX_NAME_LENGTH ];
+	char verb_s[ MAX_NAME_LENGTH ];
+	qboolean turnoff = qfalse;
+	qboolean success = qfalse;
+
+	minargc = 1;
+	if( trap_Argc() < minargc )     {
+			ADMP( "^7usage: !botdbg type [verbosity=normal]\n" );
+			return qfalse;
+	}
+	ADMP( "^3Enabling Debug" );
+	success = qtrue;
+	trap_Argv( 1, type, sizeof( type) );
+	trap_Argv( 2, verb , sizeof( verb ) );
+	trap_SendServerCommand(ent - g_entities, va("print \"%s %s\n\"", type, verb ) );
+	G_SanitiseString( type, type_s, sizeof(type_s) );
+	G_SanitiseString( verb, verb_s, sizeof(verb_s) );
+	turnoff = !Q_stricmp( verb_s, "off" );
+	
+		   if( !Q_stricmp( type_s, "think" ) ) { 	flag = BOT_DEBUG_THINK;
+	} else if( !Q_stricmp( type_s, "state" ) ) { 	flag = BOT_DEBUG_STATE;
+	} else if( !Q_stricmp( type_s, "navstate" ) ) { flag = BOT_DEBUG_NAVSTATE;
+	} else if( !Q_stricmp( type_s, "path" ) ) { 	flag = BOT_DEBUG_PATH;
+	} else if( !Q_stricmp( type_s, "profile" ) ) { 	flag = BOT_DEBUG_PROFILE;
+	} else if( !Q_stricmp( type_s, "general" ) ) { 	flag = BOT_DEBUG_GENERAL;
+	} else if( !Q_stricmp( type_s, "main" ) ) { 	flag = BOT_DEBUG_MAIN;
+	} else if( !Q_stricmp( type_s, "admin" ) ) { 	flag = BOT_DEBUG_ADMIN;
+	} else if( !Q_stricmp( type_s, "active" ) ) { 	flag = BOT_DEBUG_ACTIVE;
+	} else if( !Q_stricmp( type_s, "alien" ) ) { 	flag = BOT_DEBUG_ALIEN;
+	} else if( !Q_stricmp( type_s, "human" ) ) { 	flag = BOT_DEBUG_HUMAN;
+	} else if( !Q_stricmp( type_s, "control" ) ) { 	flag = BOT_DEBUG_CONTROL;
+	} else if( !Q_stricmp( type_s, "util" ) ) { 	flag = BOT_DEBUG_UTIL;
+	} else if( !Q_stricmp( type_s, "common" ) ) { 	flag = BOT_DEBUG_COMMON;
+	} else if( !Q_stricmp( type_s, "say" ) ) { 		flag = BOT_DEBUG_SAY;
+	} else if( !Q_stricmp( type_s, "nav" ) ) {  	flag = BOT_DEBUG_NAV;
+	} else {
+		ADMP( "^7Unknown debug type\n");
+		success = qfalse;
+	}
+	if(turnoff) {
+		g_bot_debug_type.integer &= ~flag;
+	} else {
+		g_bot_debug_type.integer |= flag;
+		
+			   if( !Q_stricmp( verb_s, "verbose" ) ) {	g_bot_debug_verbosity.integer = BOT_VERB_DETAIL;
+		} else if( !Q_stricmp( verb_s, "quiet" ) ) {	g_bot_debug_verbosity.integer = BOT_VERB_IMPORTANT;
+		} else { //normal
+			g_bot_debug_verbosity.integer = BOT_VERB_NORMAL;
+		}
+	}
+	return success;
 }
 
 qboolean G_reloadnodes( gentity_t *ent )
@@ -3439,11 +3500,11 @@ qboolean G_drawnodes( gentity_t *ent )
 {
     if(level.drawpath == qtrue) {
         ADMP( "^1Hiding Paths\n" );
-        G_EraseNodes( ent );
+        G_EraseNodes();
         level.drawpath = qfalse;
     } else {
         ADMP( "^2Drawing Paths\n" );
-        G_DrawNodes();
+        G_DrawNodes( ent );
         level.drawpath = qtrue;
     }
     return qtrue;

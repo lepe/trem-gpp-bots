@@ -1,0 +1,62 @@
+{
+  "[BotsCamp]"
+  {
+    "Welcome to ^2acidtu.be ^7| ^2Bots^1Camp ^7[GPP-BOT] mod for Tremulous GPP. \n"
+    "If you need help, feel free to ask around, and there are the category "
+    "tabs on the left you can click on, feel free to explore them.\n"
+    "We are always looking for people that can help us improve this mod through "
+    "great ideas, comments, code patches and more. Please follow these links "
+    "to join us! \n"
+    "^2Forum: ^7forum.acidtu.be (It's a link)\n"
+    "^3GitHub: ^7github.com/lepe/trem-gpp-bots/\n"
+    "Credits are in the mod's .pk3 in a file named credits.txt.\n"
+  }
+  "Adding Bots"
+  {
+    "If there are no bots around, please join any team and the bots will "
+    "be added automatically.\n"
+    "Commands to add bots: (you need to be registrated)\n"
+  }
+  "Single Player missions"
+  {
+    "We have prepared several single player missions..."
+  }
+  "Coop missions"
+  {
+    "If more than one player is connected, you can start a co-op mission with the command:"
+  }
+  "Customizing your own bot"
+  {
+    "To customize your bot, open...."
+  }
+  "Bot's competition"
+  {
+    "Bots will be tested now and then against each other. Players may watch "
+    "those games but won't be able to join until they are finished.\n"
+    "In that way, bots will ranked. Current ranks can be seen here: (link)\n"
+    ""
+  }
+  "Why Asia?"
+  {
+    "''To let Overpowered Asian Level and Australia eliminate the deficient European-ridden GPP.''"
+    " - [kor]^2F^7risqy^8.^4V^5i^1r^6u^3S^7\n"
+    "''Because I live in Japan'' - ^2Global^1Warming^7\n"
+    "''I'm Australian.'' - ^1Igneel^7the^1Dragon^7 (not [dragoon] but dragon)\n"
+    "''01110011 01110100 01100110 01110101'' - ^1[BOT]AlienZ^7\n"
+    "''At least it isn't that un******h*d [poop] project'' - /dev/humancontroller^7\n"
+    "''Tremulous is still alive?'' - ^2Kharnov^7\n"
+    "''theos is awesome'' - <oxytocin>\n"
+    "''^2cirus bru^7'' - PaN61\n"
+    "''Tremulous GPP is now Edge-Mania. Good to be free of it.'' - <Tumbo>"
+  }
+  "Why BotsCamp?"
+  {
+    "This is a fun server to play when very few people are on and your waiting for "
+    "more to join. Also there are some fun challenging layouts that already exist "
+    "that are good for both single player and coop.\n"
+    "That is one of the objectives of BotsCamp, the other objectives are to have a "
+    "training server for beginners as well as to help fine tune the skills of more "
+    "experienced players, and to allow for single player and coop tremulous games.\n"
+    "\n                               *<{dGr8LookinSparky\n"
+  }
+}

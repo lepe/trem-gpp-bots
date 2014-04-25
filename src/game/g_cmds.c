@@ -894,7 +894,7 @@ static qboolean G_SayTo( gentity_t *ent, gentity_t *other, saymode_t mode, const
   }
 
   trap_SendServerCommand( other-g_entities, va( "chat %d %d \"%s\"",
-    ent ? ent-g_entities : -1,
+    (int)ent ? (int)(ent - g_entities) : -1,
     mode,
     message ) );
 
@@ -1129,12 +1129,12 @@ void Cmd_VSay_f( gentity_t *ent )
     case VOICE_CHAN_LOCAL:
       trap_SendServerCommand( -1, va(
         "voice %d %d %d %d \"%s\"\n",
-        ent-g_entities, vchan, cmdNum, trackNum, text ) );
+        (int)(ent - g_entities), vchan, cmdNum, trackNum, text ) );
       break;
     case VOICE_CHAN_TEAM:
       G_TeamCommand( ent->client->pers.teamSelection, va(
         "voice %d %d %d %d \"%s\"\n",
-        ent-g_entities, vchan, cmdNum, trackNum, text ) );
+        (int)(ent - g_entities), vchan, cmdNum, trackNum, text ) );
       break;
     default:
       break;
@@ -1599,7 +1599,7 @@ void Cmd_SetViewpos_f( gentity_t *ent )
 
 #define AS_OVER_RT3         ((ALIENSENSE_RANGE*0.5f)/M_ROOT3)
 
-static qboolean G_RoomForClassChange( gentity_t *ent, class_t class,
+qboolean G_RoomForClassChange( gentity_t *ent, class_t class,
                                       vec3_t newOrigin )
 {
   vec3_t    fromMins, fromMaxs;
@@ -3124,7 +3124,7 @@ void Cmd_Node_f( gentity_t *ent )
 	char fileName[ MAX_OSPATH ];
 	int i,i2,distance,Ax,Ay,Az,Bx,By,Bz = 0;
 	int timeout2 = 0;
-	int nearbynodeid[ MAX_PATHS ];
+	int nearbynodeid[ 5 ]; //no more than 5 near nodes to show
 	int numnearby = 0;
 	qboolean delpath = qfalse;
 	qboolean pathfound = qfalse;
@@ -3138,8 +3138,9 @@ void Cmd_Node_f( gentity_t *ent )
 			"print \"g_pathediting is off.\n\"");
 		return;
 	}
+	G_Printf("pathid value is: %d\n",ent->pathid);
 	trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
-	for(i = 0; i < level.numPaths; i++ )
+	for(i = 0; i < level.numPaths && numnearby < 5; i++ )
 	{
 		Ax = level.paths[i].coord[0];
 		Ay = level.paths[i].coord[1];
@@ -3223,6 +3224,7 @@ void Cmd_Node_f( gentity_t *ent )
 				return;
 			}
 			trap_Argv( 2, action, sizeof( action ) );
+			/* DEPRECATED
 			if(!Q_stricmp( action, "jump" ))
 			{level.paths[nearbynodeid[0]].action = BOT_JUMP;}
 			else if(!Q_stricmp( action, "wallclimb" ))
@@ -3234,8 +3236,11 @@ void Cmd_Node_f( gentity_t *ent )
 			else if(!Q_stricmp( action, "none" ))
 			{level.paths[nearbynodeid[0]].action = 0;}
 			else
-			{trap_SendServerCommand( ent-g_entities,
-				"print \"Unknown action (jump,wallclimb,\n\"");return;}
+			{
+			 */
+			level.paths[nearbynodeid[0]].action = 0;
+			//trap_SendServerCommand( ent-g_entities,
+			//"print \"Unknown action (jump,wallclimb,\n\"");return;}
 			trap_SendServerCommand( ent-g_entities,
 				"print \"Node action set.\n\"");
 			return;	
@@ -3246,12 +3251,6 @@ void Cmd_Node_f( gentity_t *ent )
 			{
 				trap_SendServerCommand( ent-g_entities,
 					"print \"Too close to another node.\n\"");
-				return;
-			}
-			if(level.numPaths >= MAX_PATHS)
-			{
-				trap_SendServerCommand( ent-g_entities,
-					"print \"Reached Max amount of nodes.\n\"" );
 				return;
 			}
 			for(i = 0; i < level.numPaths; i++ )
@@ -3269,11 +3268,11 @@ void Cmd_Node_f( gentity_t *ent )
 				level.paths[i].coord[0] = ent->s.pos.trBase[0];
 				level.paths[i].coord[1] = ent->s.pos.trBase[1];
 				level.paths[i].coord[2] = ent->s.pos.trBase[2];
-				level.paths[i].nextid[0] = 1000 + MAX_PATHS;
-				level.paths[i].nextid[1] = 1000 + MAX_PATHS;
-				level.paths[i].nextid[2] = 1000 + MAX_PATHS;
-				level.paths[i].nextid[3] = 1000 + MAX_PATHS;
-				level.paths[i].nextid[4] = 1000 + MAX_PATHS;
+				level.paths[i].nextid[0] = -1;
+				level.paths[i].nextid[1] = -1;
+				level.paths[i].nextid[2] = -1;
+				level.paths[i].nextid[3] = -1;
+				level.paths[i].nextid[4] = -1;
 				level.paths[i].random = 0;
 				level.paths[i].timeout = 10000;
 				level.paths[i].action = 0;
@@ -3289,11 +3288,11 @@ void Cmd_Node_f( gentity_t *ent )
 				level.paths[level.numPaths].coord[0] = ent->s.pos.trBase[0];
 				level.paths[level.numPaths].coord[1] = ent->s.pos.trBase[1];
 				level.paths[level.numPaths].coord[2] = ent->s.pos.trBase[2];
-				level.paths[level.numPaths].nextid[0] = 1000 + MAX_PATHS;
-				level.paths[level.numPaths].nextid[1] = 1000 + MAX_PATHS;
-				level.paths[level.numPaths].nextid[2] = 1000 + MAX_PATHS;
-				level.paths[level.numPaths].nextid[3] = 1000 + MAX_PATHS;
-				level.paths[level.numPaths].nextid[4] = 1000 + MAX_PATHS;
+				level.paths[level.numPaths].nextid[0] = -1;
+				level.paths[level.numPaths].nextid[1] = -1;
+				level.paths[level.numPaths].nextid[2] = -1;
+				level.paths[level.numPaths].nextid[3] = -1;
+				level.paths[level.numPaths].nextid[4] = -1;
 				level.paths[level.numPaths].random = 0;
 				level.paths[level.numPaths].timeout = 10000;
 				level.paths[level.numPaths].action = 0;
@@ -3373,6 +3372,7 @@ void Cmd_Node_f( gentity_t *ent )
 				}
 				countz = 0;
 				countz2 = 0;
+				/* No MAX_PATH limit (left here in case there are problems)
 				for(i = 0;i < 5;i++)
 				{
 					if(level.paths[nearbynodeid[0]].nextid[i] >= MAX_PATHS)
@@ -3383,6 +3383,7 @@ void Cmd_Node_f( gentity_t *ent )
 					if(level.paths[ent->pathid].nextid[i] >= MAX_PATHS)
 					{countz2 = i; i = 5; break;}
 				}
+				 */
 				if(linked == qtrue)
 				{
 					trap_SendServerCommand( ent-g_entities,
@@ -3424,11 +3425,11 @@ void Cmd_Node_f( gentity_t *ent )
 					"print \"No nearby nodes.\n\"");
 				return;
 			}
-			level.paths[nearbynodeid[0]].nextid[0] = 1000 + MAX_PATHS;
-			level.paths[nearbynodeid[0]].nextid[1] = 1000 + MAX_PATHS;
-			level.paths[nearbynodeid[0]].nextid[2] = 1000 + MAX_PATHS;
-			level.paths[nearbynodeid[0]].nextid[3] = 1000 + MAX_PATHS;
-			level.paths[nearbynodeid[0]].nextid[4] = 1000 + MAX_PATHS;
+			level.paths[nearbynodeid[0]].nextid[0] = -1;
+			level.paths[nearbynodeid[0]].nextid[1] = -1;
+			level.paths[nearbynodeid[0]].nextid[2] = -1;
+			level.paths[nearbynodeid[0]].nextid[3] = -1;
+			level.paths[nearbynodeid[0]].nextid[4] = -1;
 			level.paths[nearbynodeid[0]].random = 0;
 			level.paths[nearbynodeid[0]].timeout = 0;
 			level.paths[nearbynodeid[0]].action = 0;
@@ -3489,7 +3490,7 @@ void Cmd_Node_f( gentity_t *ent )
 				{
 					if(level.paths[i].nextid[i2] == nearbynodeid[0])
 					{
-						level.paths[i].nextid[i2] = 1000 + MAX_PATHS;
+						level.paths[i].nextid[i2] = -1;
 					}
 				}
 			}
@@ -3531,11 +3532,11 @@ void Cmd_Node_f( gentity_t *ent )
 				{
 					if(level.paths[nearbynodeid[0]].nextid[i] == ent->discpathid)
 					{
-						level.paths[nearbynodeid[0]].nextid[i] = 1000 + MAX_PATHS;
+						level.paths[nearbynodeid[0]].nextid[i] = -1;
 					}
 					if(level.paths[ent->discpathid].nextid[i] == nearbynodeid[0])
 					{
-						level.paths[ent->discpathid].nextid[i] = 1000 + MAX_PATHS;
+						level.paths[ent->discpathid].nextid[i] = -1;
 					}
 				}
 				trap_SendServerCommand( ent-g_entities,

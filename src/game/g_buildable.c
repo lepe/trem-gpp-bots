@@ -931,7 +931,7 @@ Think function for Alien Overmind
 */
 void AOvermind_Think( gentity_t *self )
 {
-  vec3_t range = { OVERMIND_ATTACK_RANGE, OVERMIND_ATTACK_RANGE, OVERMIND_ATTACK_RANGE };
+  //vec3_t range = { OVERMIND_ATTACK_RANGE, OVERMIND_ATTACK_RANGE, OVERMIND_ATTACK_RANGE };
   int    i;
 
   if( self->spawned && ( self->health > 0 ) )
@@ -3030,7 +3030,7 @@ void G_FreeMarkedBuildables( gentity_t *deconner, char *readable, int rsize,
     removalCounts[ bNum ]++;
 
     if( nums )
-      Q_strcat( nums, nsize, va( " %d", ent - g_entities ) );
+      Q_strcat( nums, nsize, va( " %d", (int)(ent - g_entities) ) );
 
     G_FreeEntity( ent );
   }

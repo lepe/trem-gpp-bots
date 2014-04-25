@@ -31,6 +31,7 @@ typedef struct gentity_s gentity_t;
 typedef struct gclient_s gclient_t;
 
 #include "g_admin.h"
+#include "g_bot.h" 
 
 //==================================================================
 
@@ -41,10 +42,7 @@ typedef struct gclient_s gclient_t;
 #define REWARD_SPRITE_TIME  2000
 
 #define INTERMISSION_DELAY_TIME 1000
-#define SP_INTERMISSION_DELAY_TIME 5000
-
-#define MAX_PATHS	300 //try not to make it over 1000 or there will be problems.
-
+#define SP_INTERMISSION_DELAY_TIME 500
 // gentity->flags
 #define FL_GODMODE        0x00000010
 #define FL_NOTARGET       0x00000020
@@ -55,10 +53,9 @@ typedef struct gclient_s gclient_t;
 #define FL_NO_HUMANS      0x00004000  // spawn point just for bots
 #define FL_FORCE_GESTURE  0x00008000  // spawn point just for bots
 
-#define BOT_JUMP		1
-#define BOT_WALLCLIMB	2
-#define BOT_KNEEL		3
-#define BOT_POUNCE		4
+#ifndef RAND_MAX
+#define RAND_MAX 32768
+#endif
 
 // movers are things like doors, plats, buttons, etc
 typedef enum
@@ -79,44 +76,9 @@ typedef enum
   MODEL_2TO1
 } moverState_t;
 
-#define SP_PODIUM_MODEL   "models/mapobjects/podium/podium4.md3"
-
-//ROTAX
-typedef enum
-{
-  BOT_REGULAR = 1,
-  BOT_IDLE,
-  BOT_ATTACK,
-  BOT_STAND_GROUND,
-  BOT_DEFENSIVE,
-  BOT_FOLLOW_FRIEND_PROTECT,
-  BOT_FOLLOW_FRIEND_ATTACK,
-  BOT_FOLLOW_FRIEND_IDLE,
-  BOT_TEAM_KILLER
-} botCommand_t;
-
-typedef struct
-{
-	vec3_t	coord;
-	int	nextid[5];
-	int	random;
-	int	timeout;
-	int	action;
-    int essence; //LEPE: used for ant colony algorithm
-} path;
-
-
-
-typedef enum
-{
-	TARGETPATH,
-	FINDNEXTPATH,
-	FINDNEWPATH,
-	LOST
-} botstate;
-
-
 //============================================================================
+
+//--------------------- ENTITIES ------------------
 
 struct gentity_s
 {
@@ -227,43 +189,10 @@ struct gentity_s
   int               waterlevel;
 
   int               noise_index;
-
-  //ROTAX
-  //for targeting following
-  botCommand_t		botCommand;
-  gentity_t		*botEnemy;
-  gentity_t		*botFriend;
-  int			enemytime;
-  int			botFriendLastSeen;  
-  int			botEnemyLastSeen;
-  int			botSkillLevel;
-  team_t		botTeam;
-  qboolean		nextNode;
-  qboolean		pathChosen;
-  int			targetPath;
-  int			targetNode;
-  int			timeFoundPath;
-  botstate		state;
-  int			buytime;
-  int			evolvetime;
-  qboolean		isblocked;
-  int			pathid;
-  int			movepathid;
-  int			discpathid;
-  int			lastpathid;
-  qboolean		patheditor;
-  //LEPE
-  int		    crumb[MAX_PATHS]; //path node history
-  int           numCrumb; //counter of max path length
-  int           lastJoint; //keep id of last junction
   
   // timing variables
   float             wait;
   float             random;
-  int			jumptime;
-  int			searchtime;
-  int			checktime;
- 
 
   team_t            stageTeam;
   stage_t           stageStage;
@@ -319,6 +248,14 @@ struct gentity_s
 
   int               buildPointZone;                 // index for zone
   int               usesBuildPointZone;             // does it use a zone?
+
+  //--- Paths (required here) used by editor
+  int				pathid;  	//node id to display paths
+  int				movepathid;
+  int				discpathid;
+  qboolean			patheditor; //who is editing
+  //--- Bots
+  bot_t				*bot;
 };
 
 typedef enum
@@ -487,7 +424,6 @@ struct gclient_s
   int                 time100;          // timer for 100ms interval events
   int                 time1000;         // timer for one second interval events
   int                 time10000;        // timer for ten second interval events
-  int		      bottime;
   
   char                *areabits;
 
@@ -745,10 +681,6 @@ typedef struct
   int               numTeamImbalanceWarnings;
 
   voice_t           *voices;
-  path		paths[MAX_PATHS];
-  int		numPaths;
-  qboolean	drawpath;
-  gentity_t *drawent; //LEPE: added so we can keep nodes refreshing
 
   emoticon_t        emoticons[ MAX_EMOTICONS ];
   int               emoticonCount;
@@ -759,11 +691,18 @@ typedef struct
   int               buildId;
   int               numBuildLogs;
 
-  //LEPE
+  //Path related ---
+  path				*paths;
+  int				numPaths;
+  qboolean			drawpath;
+  gentity_t 		*drawent; //LEPE: added so we can keep nodes refreshing
+  //Bots related ----
   int               alienBots;
   int               humanBots;
   int               essenceFadeTimer; //used to control how essence is faded in ant algorithm
-} level_locals_t;
+  int				groupLogicTimer;
+  //----
+} level_locals_t; //global settings
 
 #define CMD_CHEAT         0x0001
 #define CMD_CHEAT_TEAM    0x0002 // is a cheat when used on a team
@@ -793,28 +732,6 @@ qboolean  G_SpawnVector( const char *key, const char *defaultString, float *out 
 void      G_SpawnEntitiesFromString( void );
 char      *G_NewString( const char *string );
 
-//ROTAX
-// g_bot.c
-//
-int G_Rand( void ); //LEPE
-void G_Bots( gentity_t *ent ); 
-void G_BotAdd( char *name, team_t team, int skill, int ignore );
-void G_BotDel( int clientNum );
-void G_DeleteBots( void );
-void G_BotReload( gentity_t *ent, int clientNum );
-void G_BotCmd( gentity_t *master, int clientNum, char *command, int value );
-void G_BotThink( gentity_t *self );
-void G_FrameAim( gentity_t *self );
-void G_FastThink( gentity_t *self );
-void G_BotSpectatorThink( gentity_t *self );
-void G_BotIntermissionThink( gclient_t *client );
-// are these suppose to be out here?! Why not?
-qboolean botAimAtTarget( gentity_t *self, gentity_t *target );
-int botFindClosestEnemy( gentity_t *self );
-qboolean botTargetInRange( gentity_t *self, gentity_t *target );
-int botGetDistanceBetweenPlayer( gentity_t *self, gentity_t *player );
-qboolean botShootIfTargetInRange( gentity_t *self, gentity_t *target );
-
 //
 // g_cmds.c
 //
@@ -843,6 +760,7 @@ int       G_FloodLimited( gentity_t *ent );
 void      G_ListCommands( gentity_t *ent );
 void      G_LoadCensors( void );
 void      G_CensorString( char *out, const char *in, int len, gentity_t *ent );
+qboolean  G_RoomForClassChange( gentity_t *ent, class_t class, vec3_t newOrigin );
 
 //
 // g_physics.c
@@ -1097,6 +1015,11 @@ void FireWeapon3( gentity_t *ent );
 //
 // g_main.c
 //
+void G_PathLoad( void );
+void G_EraseNodes(void);
+void G_RedrawNodes( void );
+void G_DrawNodes( gentity_t *ent );
+void G_DeployBots( gentity_t *ent );  //LEPE
 void ScoreboardMessage( gentity_t *client );
 void MoveClientToIntermission( gentity_t *client );
 void G_MapConfigs( const char *mapname );
@@ -1113,6 +1036,8 @@ void G_ExecuteVote( team_t team );
 void G_CheckVote( team_t team );
 void LogExit( const char *string );
 int  G_TimeTilSuddenDeath( void );
+//LEPE
+void QDECL G_BotDebug(botDebugVerbosity verbosity, int type, const char *fmt, ... );
 
 //
 // g_client.c
@@ -1302,7 +1227,7 @@ extern  vmCvar_t  g_bot_spawnprotection;
 extern  vmCvar_t  g_bot_evolve;
 extern  vmCvar_t  g_bot_mgun;
 extern  vmCvar_t  g_bot_shotgun;
-extern  vmCvar_t  g_bot_psaw;
+extern  vmCvar_t  g_bot_painsaw;
 extern  vmCvar_t  g_bot_lasgun;
 extern  vmCvar_t  g_bot_mdriver;
 extern  vmCvar_t  g_bot_chaingun;
@@ -1317,14 +1242,13 @@ extern  vmCvar_t  g_bot_advmara;
 extern  vmCvar_t  g_bot_goon;
 extern  vmCvar_t  g_bot_advgoon;
 extern  vmCvar_t  g_bot_tyrant;
-extern  vmCvar_t  g_bot_join;  //disable bots join
-extern vmCvar_t  g_debugBots; //debug G_Bots
-extern vmCvar_t  g_debugPaths; //debug path decision
-extern vmCvar_t  g_debugNodes; 
-extern vmCvar_t  g_debugEssence; //debug current path essence values
-extern vmCvar_t  g_debugAnts; //debug crumbs
-extern vmCvar_t  g_debugBotBuy; //debug what bots buy
 
+extern  vmCvar_t  g_bot_manual;  //set bots in manual mode
+extern  vmCvar_t  g_bot_manual_nav;  //set bots navigation in manual mode
+extern  vmCvar_t  g_bot_join;  //disable bots join
+
+extern  vmCvar_t  g_bot_debug_verbosity;
+extern  vmCvar_t  g_bot_debug_type;
 
 void      trap_Print( const char *fmt );
 void      trap_Error( const char *fmt );

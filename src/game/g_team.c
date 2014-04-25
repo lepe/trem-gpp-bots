@@ -254,7 +254,7 @@ void G_ChangeTeam( gentity_t *ent, team_t newTeam )
   G_namelog_update_score( ent->client );
   TeamplayInfoMessage( ent );
 
-  G_Bots( ent ); //LEPE
+  G_DeployBots( ent ); //LEPE
 }
 
 /*

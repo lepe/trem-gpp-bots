@@ -160,7 +160,7 @@ vmCvar_t  g_bot_spawnprotection;
 vmCvar_t  g_bot_evolve;
 vmCvar_t  g_bot_mgun;
 vmCvar_t  g_bot_shotgun;
-vmCvar_t  g_bot_psaw;
+vmCvar_t  g_bot_painsaw;
 vmCvar_t  g_bot_lasgun;
 vmCvar_t  g_bot_mdriver;
 vmCvar_t  g_bot_chaingun;
@@ -176,13 +176,11 @@ vmCvar_t  g_bot_advmara;
 vmCvar_t  g_bot_goon;
 vmCvar_t  g_bot_advgoon;
 vmCvar_t  g_bot_tyrant;
-vmCvar_t  g_debugBots; 
-vmCvar_t  g_debugPaths;
-vmCvar_t  g_debugNodes; 
-vmCvar_t  g_debugEssence; 
-vmCvar_t  g_debugAnts; 
-vmCvar_t  g_debugBotBuy;
 
+vmCvar_t  g_bot_manual;
+vmCvar_t  g_bot_manual_nav;
+vmCvar_t  g_bot_debug_verbosity;
+vmCvar_t  g_bot_debug_type;
 
 // copy cvars that can be set in worldspawn so they can be restored later
 static char cv_gravity[ MAX_CVAR_VALUE_STRING ];
@@ -200,7 +198,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_restarted, "g_restarted", "0", CVAR_ROM, 0, qfalse  },
   { &g_lockTeamsAtStart, "g_lockTeamsAtStart", "0", CVAR_ROM, 0, qfalse  },
   { NULL, "sv_mapname", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
-  { NULL, "P", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
+  { NULL, "P", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse },
 
   // latched vars
 
@@ -242,7 +240,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_bot_evolve, "g_bot_evolve", "1", 0, 0, qfalse },
   { &g_bot_mgun, "g_bot_mgun", "1", 0, 0, qfalse },
   { &g_bot_shotgun, "g_bot_shotgun", "1", 0, 0, qfalse },
-  { &g_bot_psaw, "g_bot_psaw", "1", 0, 0, qfalse },
+  { &g_bot_painsaw, "g_bot_painsaw", "1", 0, 0, qfalse },
   { &g_bot_lasgun, "g_bot_lasgun", "1", 0, 0, qfalse },
   { &g_bot_mdriver, "g_bot_mdriver", "1", 0, 0, qfalse },
   { &g_bot_chaingun, "g_bot_chaingun", "1", 0, 0, qfalse },
@@ -257,6 +255,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_bot_advgoon, "g_bot_advgoon", "1", 0, 0, qfalse },
   { &g_bot_tyrant, "g_bot_tyrant", "1", 0, 0, qfalse },
   { &g_bot_join, "g_bot_join", "1", 0, 0, qfalse },
+  { &g_bot_manual, "g_bot_manual", "0", 0, 0, qfalse },
+  { &g_bot_manual_nav, "g_bot_manual_nav", "0", 0, 0, qfalse },
   
   { &g_needpass, "g_needpass", "0", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse },
   { &g_dedicated, "dedicated", "0", 0, 0, qfalse  },
@@ -267,13 +267,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_debugMove, "g_debugMove", "0", 0, 0, qfalse },
   { &g_debugDamage, "g_debugDamage", "0", 0, 0, qfalse },
   { &g_motd, "g_motd", "", 0, 0, qfalse },
-  //LEPE
-  { &g_debugBots, "g_debugBots", "0", 0, 0, qfalse },
-  { &g_debugPaths, "g_debugPaths", "0", 0, 0, qfalse },
-  { &g_debugNodes, "g_debugNodes", "0", 0, 0, qfalse },
-  { &g_debugEssence, "g_debugEssence", "0", 0, 0, qfalse },
-  { &g_debugBotBuy, "g_debugBotBuy", "0", 0, 0, qfalse },
-  { &g_debugAnts, "g_debugAnts", "0", 0, 0, qfalse },
+  { &g_bot_debug_type, "", "0", 0, 0, qfalse },
+  { &g_bot_debug_verbosity, "", "0", 0, 0, qfalse },
 
   { &g_allowVote, "g_allowVote", "1", CVAR_ARCHIVE, 0, qfalse },
   { &g_voteLimit, "g_voteLimit", "5", CVAR_ARCHIVE, 0, qfalse },
@@ -417,7 +412,11 @@ Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, i
 
   return -1;
 }
-
+/**
+ * Prints on admin console
+ * @param fmt
+ * @param ...
+ */
 void QDECL G_Printf( const char *fmt, ... )
 {
   va_list argptr;
@@ -429,7 +428,11 @@ void QDECL G_Printf( const char *fmt, ... )
 
   trap_Print( text );
 }
-
+/**
+ * Print it as error
+ * @param fmt
+ * @param ...
+ */
 void QDECL G_Error( const char *fmt, ... )
 {
   va_list argptr;
@@ -440,6 +443,32 @@ void QDECL G_Error( const char *fmt, ... )
   va_end( argptr );
 
   trap_Error( text );
+}
+/**
+ * Debug messages for bots
+ * @param type [int] : (Bitwise AND) botDebugType
+ * @param fmt
+ * @param ...
+ * 
+ * BotDebugType works like tags to flag this debug message.
+ * It can contain one or more types
+ * 
+ */
+void QDECL G_BotDebug(botDebugVerbosity verbosity, int type, const char *fmt, ... )
+{
+	if(g_bot_debug_type.integer & type) {
+		if(g_bot_debug_verbosity.integer >= verbosity) {
+			va_list argptr;
+			char    text[ 1024 ];
+
+			va_start( argptr, fmt );
+			Q_vsnprintf( text, sizeof( text ), fmt, argptr );
+			va_end( argptr );
+
+			//TODO: call G_LogPrintf or G_admin_print(trap_SendServerCommand)...
+			trap_Print( text );
+		}
+	}
 }
 
 /*
@@ -617,25 +646,12 @@ void G_PathLoad( void )
 	fileHandle_t f;
 	int len;
 	char *path;
+	char *pathorigin;
 	char line[ MAX_STRING_CHARS ];
 	char map[ MAX_QPATH ];
+	int numPaths = 0;
 	level.numPaths = 0;
 	trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
-	for(i = 0; i < MAX_PATHS;i++)
-	{
-		level.paths[i].coord[0] = 0;
-		level.paths[i].coord[1] = 0;
-		level.paths[i].coord[2] = 0;
-		level.paths[i].nextid[0] = -1;
-		level.paths[i].nextid[1] = -1;
-		level.paths[i].nextid[2] = -1;
-		level.paths[i].nextid[3] = -1;
-		level.paths[i].nextid[4] = -1;
-		level.paths[i].random = -1;
-		level.paths[i].timeout = 10000;
-		level.paths[i].action = 0;
-		level.paths[i].essence= 50; //LEPE: default value for ant algorithm (below 50 is negative)
-	}
 	len = trap_FS_FOpenFile( va( "paths/%s/path.dat", map ), &f, FS_READ );
 	if( len < 0 )
 	{
@@ -643,9 +659,14 @@ void G_PathLoad( void )
 		return;
 	}
 	path = BG_Alloc( len + 1 );
+	pathorigin = path;
 	trap_FS_Read( path, len, f );
 	*( path + len ) = '\0';
 	trap_FS_FCloseFile( f );
+	/*
+	 * We perform 2 rounds. The first one will tell us how large our array will become.
+	 * The second one is to fill the array.
+	 */
 	i = 0;
 	while( *path )
 	{
@@ -659,7 +680,20 @@ void G_PathLoad( void )
 		if( *path == '\n' )
 		{
 			i = 0; 
-			if( level.numPaths >= MAX_PATHS ){G_Printf( "Reached path limit\n" );return;}
+			numPaths ++;
+		}
+	path++;
+	}
+	path = pathorigin; //reset pointer
+	level.paths = BG_Alloc( numPaths * sizeof(path) );
+	i = 0;
+	while( *path )
+	{
+		line[ i++ ] = *path;
+		line[ i ] = '\0';
+		if( *path == '\n' )
+		{
+			i = 0; 
 			sscanf( line, "%d %f %f %f %d %d %d %d %d %d %d %d\n", 
 						&level.numPaths,
 						&level.paths[level.numPaths].coord[0], 
@@ -672,13 +706,17 @@ void G_PathLoad( void )
 						&level.paths[level.numPaths].nextid[4],
 						&level.paths[level.numPaths].random,
 						&level.paths[level.numPaths].timeout,
-						&level.paths[level.numPaths].action ); 
-			if(level.paths[level.numPaths].timeout <= 0){level.paths[level.numPaths].timeout = 10000;}
+						&level.paths[level.numPaths].action 
+					); 
+			if(level.paths[level.numPaths].timeout <= 0){
+				level.paths[level.numPaths].timeout = 10000;
+			}
+			level.paths[level.numPaths].essence= 50; //LEPE: default value for ant algorithm (below 50 is negative)
 			level.numPaths ++;
 		}
 	path++;
 	}
-	if(g_debugNodes.integer) G_Printf( va("Loaded %d paths\n", level.numPaths) );
+	G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH, "Loaded %d paths\n", level.numPaths);
 }
 /*
   Drawing nodes
@@ -687,7 +725,7 @@ gentity_t *spawnnode( gentity_t *self, long id )
 {
   vec3_t temp;
   vec3_t start;
-  gentity_t *bolt;
+  gentity_t *ent;
   int weapon;
   start[0] = level.paths[id].coord[0];
   start[1] = level.paths[id].coord[1];
@@ -700,32 +738,32 @@ gentity_t *spawnnode( gentity_t *self, long id )
    else if (level.paths[id].essence < 40) weapon = WP_GRENADE;
    else weapon = WP_PULSE_RIFLE;
 
-  bolt = G_Spawn();
-  bolt->classname = "PathNode";
-  bolt->nextthink = level.time + 2000;
-  bolt->think = nodethink;
-  bolt->s.eType = ET_MISSILE;
-  bolt->r.svFlags = SVF_USE_CURRENT_ORIGIN;
-  bolt->s.weapon = weapon;
-  bolt->s.generic1 = WPM_PRIMARY; //weaponMode
-  bolt->r.ownerNum = self->r.ownerNum;
-  bolt->parent = self;
-  bolt->damage = 0;
-  bolt->splashDamage = 0;
-  bolt->splashRadius = 0;
-  bolt->methodOfDeath = MOD_GRENADE;
-  bolt->splashMethodOfDeath = MOD_GRENADE;
-  bolt->clipmask = 0;//MASK_SHOT; 
-  bolt->target_ent = NULL;
-  bolt->pathid = id;
-  bolt->s.pos.trType = TR_LINEAR;
-  bolt->s.pos.trTime = level.time - 50;   // move a bit on the very first frame
-  VectorCopy( start, bolt->s.pos.trBase );
-  VectorScale( temp, 0, bolt->s.pos.trDelta );
-  SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
+  ent = G_Spawn();
+  ent->classname = "PathNode";
+  ent->nextthink = level.time + 2000;
+  ent->think = nodethink;
+  ent->s.eType = ET_MISSILE;
+  ent->r.svFlags = SVF_USE_CURRENT_ORIGIN;
+  ent->s.weapon = weapon;
+  ent->s.generic1 = WPM_PRIMARY; //weaponMode
+  ent->r.ownerNum = self->r.ownerNum;
+  ent->parent = self;
+  ent->damage = 0;
+  ent->splashDamage = 0;
+  ent->splashRadius = 0;
+  ent->methodOfDeath = MOD_GRENADE;
+  ent->splashMethodOfDeath = MOD_GRENADE;
+  ent->clipmask = 0;//MASK_SHOT; 
+  ent->target_ent = NULL;
+  ent->pathid = id;
+  ent->s.pos.trType = TR_LINEAR;
+  ent->s.pos.trTime = level.time - 50;   // move a bit on the very first frame
+  VectorCopy( start, ent->s.pos.trBase );
+  VectorScale( temp, 0, ent->s.pos.trDelta );
+  SnapVector( ent->s.pos.trDelta );      // save net bandwidth
 
-  VectorCopy( start, bolt->r.currentOrigin );
-  return bolt;
+  VectorCopy( start, ent->r.currentOrigin );
+  return ent;
 }
 /*
 ============
@@ -759,7 +797,7 @@ G_RedrawNodes
 Refresh node status according to essence
 ============
 */
-void G_RedrawNodes( ) 
+void G_RedrawNodes( void ) 
 {
 	long i;
     int pid; //path_id
@@ -774,7 +812,7 @@ void G_RedrawNodes( )
             if(level.paths[pid].essence != 50) {
                 if(ent == NULL) ent = g_entities[i].parent; //recover parent entity before removing node
                 if(g_entities[i].nextthink - 2000 < level.time - 1000) { //do not create it again if was created less than a sec before
-                    //G_Printf("Deleting entity: %i, to Update node %d with essence: %d\n", i, pid, level.paths[pid].essence);
+                    G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Deleting entity: %i, to Update node %d with essence: %d\n", i, pid, level.paths[pid].essence);
                     G_FreeEntity(&g_entities[i]);
                     spawnnode(ent, pid);
                 }
@@ -792,7 +830,7 @@ remove nodes from rendering
 */
 void G_EraseNodes(void) 
 {
-	long i,i2;
+	long i;
     for( i = 0; i < MAX_GENTITIES; i++ )
     {
         if(g_entities[i].client){continue;}
@@ -818,8 +856,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   G_RegisterCvars( );
 
   G_Printf( "------- Game Initialization -------\n" );
-  G_Printf( "gamename: %s\n", GAME_VERSION );
-  G_Printf( "gamedate: %s\n", __DATE__ );
+  //G_Printf( "gamename: %s\n", GAME_VERSION );
+  //G_Printf( "gamedate: %s\n", __DATE__ );
 
   BG_InitMemory( );
 
@@ -989,7 +1027,7 @@ void G_ShutdownGame( int restart )
 {
   // in case of a map_restart
   G_ClearVotes( );
-  G_DeleteBots( );
+  G_BotDelAll( );
   G_RestoreCvars( );
 
   G_Printf( "==== ShutdownGame ====\n" );
@@ -1930,6 +1968,9 @@ void ExitLevel( void )
   level.changemap = NULL;
   level.intermissiontime = 0;
 
+  // remove paths
+  BG_Free( level.paths );
+
   // reset all the scores so we don't enter the intermission again
   for( i = 0; i < g_maxclients.integer; i++ )
   {
@@ -1965,7 +2006,7 @@ void G_AdminMessage( gentity_t *ent, const char *msg )
   char    string[ 1024 ];
   int     i;
 
-  Com_sprintf( string, sizeof( string ), "chat %d %d \"%s\"",
+  Com_sprintf( string, sizeof( string ), "chat %lu %d \"%s\"",
     ent ? ent - g_entities : -1,
     G_admin_permission( ent, ADMF_ADMINCHAT ) ? SAY_ADMINS : SAY_ADMINS_PUBLIC,
     msg );
@@ -2658,7 +2699,7 @@ void G_RunFrame( int levelTime )
             max = level.paths[i].essence > max ? level.paths[i].essence : max; 
             min = level.paths[i].essence < min ? level.paths[i].essence : min; 
             if(level.paths[i].essence > (50 + essence_mod)) {
-                if(g_debugEssence.integer) G_Printf("Reducing Essence of path %i to %i\n", i, level.paths[i].essence);
+                G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Reducing Essence of path %i to %i\n", i, level.paths[i].essence);
                 level.paths[i].essence = level.paths[i].essence - essence_mod; //TODO: convert to sv_essence_rate or something like that
             } else if(level.paths[i].essence < 50) { //for negative essence
                 level.paths[i].essence = level.paths[i].essence + essence_mod; 
@@ -2666,16 +2707,17 @@ void G_RunFrame( int levelTime )
                 level.paths[i].essence = 50;
             }
         }
-        if(g_debugEssence.integer) {
-            G_Printf("Max essence: %i\n", max); 
-            G_Printf("Min essence: %i\n", min);
-        }
-        if(g_debugNodes.integer) {
-            G_RedrawNodes( );
-        }
+        G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Max essence: %i\n", max); 
+        G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Min essence: %i\n", min);
+        G_RedrawNodes( );
   }
   level.essenceFadeTimer += (levelTime - level.time);
-
+  //LEPE: Perform GROUP logic
+  if( level.groupLogicTimer > 5000) { //TODO: set g_bot_group_think
+  	G_BotGroupThink( );
+  }
+  level.groupLogicTimer += (levelTime - level.time);
+  
   level.framenum++;
   level.previousTime = level.time;
   level.time = levelTime;
@@ -2802,14 +2844,15 @@ void G_RunFrame( int levelTime )
   level.frameMsec = trap_Milliseconds();
 }
 /**
- * Start bots //LEPE
+ * Call for scripts (.cfg) to add or remove bots according to the number of connected players
+ * for example: if a player joins aliens, it will call: bots/A1.cfg . If that player leaves, it
+ * will call bots/A0.cfg
+ * @param ent [gentity_t] player who enter or leaves the game.
 **/
-void G_Bots( gentity_t *ent ) 
+void G_DeployBots( gentity_t *ent ) 
 {
     if(g_bot_join.integer) {
-        if(g_debugBots.integer) {
-            G_Printf("A Players: %d\nH Players: %d\n",level.numAlienClients,level.numHumanClients);
-        }
+         G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN,"A Players: %d\nH Players: %d\n",level.numAlienClients,level.numHumanClients);
         if(! (ent->r.svFlags & SVF_BOT)) { 
             if(level.numAlienClients == 0 && level.numHumanClients == 0) {
                 trap_SendConsoleCommand( EXEC_APPEND, "exec bots/start.cfg\n" ); 
@@ -2821,8 +2864,6 @@ void G_Bots( gentity_t *ent )
                 trap_SendConsoleCommand( EXEC_APPEND, va("exec bots/H%d.cfg\n", level.numHumanClients - level.humanBots) ); 
             }
         }
-        if(g_debugBots.integer) {
-            G_Printf("A Bots: %d\nH Bots: %d\n",level.alienBots,level.humanBots);
-        }
+        G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN,"A Bots: %d\nH Bots: %d\n",level.alienBots,level.humanBots);
     }
 }

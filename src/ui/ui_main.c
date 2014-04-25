@@ -875,10 +875,6 @@ static void UI_BuildServerDisplayList( qboolean force )
   if( !( force || uiInfo.uiDC.realTime > uiInfo.serverStatus.nextDisplayRefresh ) )
     return;
 
-  // if we shouldn't reset
-  if( force == 2 )
-    force = 0;
-
   // do motd updates here too
   trap_Cvar_VariableStringBuffer( "cl_motdString", uiInfo.serverStatus.motd, sizeof( uiInfo.serverStatus.motd ) );
 

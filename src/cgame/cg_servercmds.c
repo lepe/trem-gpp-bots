@@ -1069,7 +1069,7 @@ static void CG_ParseVoice( void )
     return;
 
   vChan = atoi( CG_Argv( 2 ) );
-  if( vChan < 0 || vChan >= VOICE_CHAN_NUM_CHANS )
+  if( vChan >= VOICE_CHAN_NUM_CHANS )
     return;
 
   if( cg_teamChatsOnly.integer && vChan != VOICE_CHAN_TEAM )

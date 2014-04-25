@@ -188,6 +188,7 @@ qboolean G_admin_botcmd( gentity_t *ent );
 qboolean G_drawnodes( gentity_t *ent );
 qboolean G_reloadnodes( gentity_t *ent ); //LEPE
 qboolean G_password( gentity_t *ent );
+qboolean G_admin_botdbg(  gentity_t *ent ); //LEPE
 
 void G_admin_print( gentity_t *ent, char *m );
 void G_admin_buffer_print( gentity_t *ent, char *m );
