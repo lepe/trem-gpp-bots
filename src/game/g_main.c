@@ -179,6 +179,7 @@ vmCvar_t  g_bot_tyrant;
 
 vmCvar_t  g_bot_manual;
 vmCvar_t  g_bot_manual_nav;
+//Debug for console:
 vmCvar_t  g_bot_debug_verbosity;
 vmCvar_t  g_bot_debug_type;
 
@@ -456,17 +457,38 @@ void QDECL G_Error( const char *fmt, ... )
  */
 void QDECL G_BotDebug(botDebugVerbosity verbosity, int type, const char *fmt, ... )
 {
-	if(g_bot_debug_type.integer & type) {
-		if(g_bot_debug_verbosity.integer >= verbosity) {
-			va_list argptr;
-			char    text[ 1024 ];
+	int i;
+	qboolean isadmin = qfalse;
+	gentity_t *ent;
+	//Process the message:
+	va_list argptr;
+	char    text[ 1024 ];
 
-			va_start( argptr, fmt );
-			Q_vsnprintf( text, sizeof( text ), fmt, argptr );
-			va_end( argptr );
-
-			//TODO: call G_LogPrintf or G_admin_print(trap_SendServerCommand)...
-			trap_Print( text );
+	va_start( argptr, fmt );
+	Q_vsnprintf( text, sizeof( text ), fmt, argptr );
+	va_end( argptr );
+	//Let it know to requested admins:
+	for( i = 0; i < level.maxclients; i++ )
+	{
+		if( level.clients[ i ].pers.connected != CON_DISCONNECTED )
+		{
+		  	if( level.clients[ i ].pers.admin ) {
+				if(level.clients[ i ].pers.botDebugTypeFlg & type) {
+					if(level.clients[ i ].pers.botDebugVerbosityVal >= verbosity) {
+						isadmin = qtrue;
+    					ent = &g_entities[ i ];
+						G_admin_print( ent , text );
+					}
+				}
+			}
+		}
+	}
+	//It it was done by console:
+	if(!isadmin) {
+		if(g_bot_debug_type.integer & type) {
+			if(g_bot_debug_verbosity.integer >= verbosity) {
+				G_Printf(text);
+			}
 		}
 	}
 }
@@ -721,7 +743,7 @@ void G_PathLoad( void )
 /*
   Drawing nodes
 */
-gentity_t *spawnnode( gentity_t *self, long id )
+gentity_t *spawnnode(long id )
 {
   vec3_t temp;
   vec3_t start;
@@ -739,15 +761,15 @@ gentity_t *spawnnode( gentity_t *self, long id )
    else weapon = WP_PULSE_RIFLE;
 
   ent = G_Spawn();
-  ent->classname = "PathNode";
+  ent->flags |= FL_PATH_NODE;
   ent->nextthink = level.time + 2000;
   ent->think = nodethink;
   ent->s.eType = ET_MISSILE;
   ent->r.svFlags = SVF_USE_CURRENT_ORIGIN;
   ent->s.weapon = weapon;
   ent->s.generic1 = WPM_PRIMARY; //weaponMode
-  ent->r.ownerNum = self->r.ownerNum;
-  ent->parent = self;
+  ent->r.ownerNum = 0;
+  ent->parent = NULL;
   ent->damage = 0;
   ent->splashDamage = 0;
   ent->splashRadius = 0;
@@ -771,7 +793,7 @@ G_DrawNodes (LEPE: moved from g_admin.c)
 Draw Nodes for first time
 ============
 */
-void G_DrawNodes( gentity_t *ent ) 
+void G_DrawNodes( void ) 
 {
 	long i,i2;
 	qboolean draw;
@@ -787,7 +809,7 @@ void G_DrawNodes( gentity_t *ent )
         }
         if(draw == qtrue)
         {
-            spawnnode(ent,i);
+            spawnnode(i);
         }
     }
 }
@@ -806,15 +828,15 @@ void G_RedrawNodes( void )
     for( i = 0; i < MAX_GENTITIES; i++ )
     {
         if(g_entities[i].client){continue;}
-        if(!strcmp("PathNode",g_entities[i].classname))
+        if(g_entities[i].flags & FL_PATH_NODE)
         {
             pid = g_entities[i].pathid; 
             if(level.paths[pid].essence != 50) {
-                if(ent == NULL) ent = g_entities[i].parent; //recover parent entity before removing node
+                //if(ent == NULL) ent = g_entities[i].parent; //recover parent entity before removing node
                 if(g_entities[i].nextthink - 2000 < level.time - 1000) { //do not create it again if was created less than a sec before
                     G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Deleting entity: %i, to Update node %d with essence: %d\n", i, pid, level.paths[pid].essence);
                     G_FreeEntity(&g_entities[i]);
-                    spawnnode(ent, pid);
+                    spawnnode(pid);
                 }
             }
         }
@@ -834,7 +856,7 @@ void G_EraseNodes(void)
     for( i = 0; i < MAX_GENTITIES; i++ )
     {
         if(g_entities[i].client){continue;}
-        if(!strcmp("PathNode",g_entities[i].classname))
+        if(g_entities[i].flags & FL_PATH_NODE)
         {
             G_FreeEntity(&g_entities[i]);
         }

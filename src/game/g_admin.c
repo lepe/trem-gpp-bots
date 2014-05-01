@@ -3413,8 +3413,7 @@ qboolean G_admin_botcmd( gentity_t *ent ) {
         G_SanitiseString( name, name_s, sizeof(name_s) );
 
         success = qfalse;
-        //for( i = 0; i < MAX_NAMELOG_NAMES && namelog[ i ];i++ ) {
-          for( namelog = level.namelogs; namelog; namelog = namelog->next )
+          for( namelog = level.namelogs; namelog; namelog = namelog->next ) {
                 if( namelog->slot >= 0 ) {
                         for( j = 0; j < MAX_NAMELOG_NAMES && namelog->name[ j ][ 0 ]; j++ ) {
                                 G_SanitiseString(namelog->name[ j ], name2_s, sizeof(name2_s) );
@@ -3424,13 +3423,12 @@ qboolean G_admin_botcmd( gentity_t *ent ) {
                                 }
                         }
                 }
-        
-
+		  }
         return success;
 
 }
 
-qboolean G_admin_botdbg(  gentity_t *ent )
+qboolean G_admin_botdbg( gentity_t *ent )
 {
 	int minargc;
 	int flag;
@@ -3439,22 +3437,19 @@ qboolean G_admin_botdbg(  gentity_t *ent )
 	char verb[ MAX_NAME_LENGTH ];
 	char verb_s[ MAX_NAME_LENGTH ];
 	qboolean turnoff = qfalse;
-	qboolean success = qfalse;
 
 	minargc = 1;
 	if( trap_Argc() < minargc )     {
 			ADMP( "^7usage: !botdbg type [verbosity=normal]\n" );
 			return qfalse;
 	}
-	ADMP( "^3Enabling Debug" );
-	success = qtrue;
 	trap_Argv( 1, type, sizeof( type) );
 	trap_Argv( 2, verb , sizeof( verb ) );
 	trap_SendServerCommand(ent - g_entities, va("print \"%s %s\n\"", type, verb ) );
 	G_SanitiseString( type, type_s, sizeof(type_s) );
 	G_SanitiseString( verb, verb_s, sizeof(verb_s) );
-	turnoff = !Q_stricmp( verb_s, "off" );
 	
+	turnoff  = !Q_stricmp( verb_s, "off" );
 		   if( !Q_stricmp( type_s, "think" ) ) { 	flag = BOT_DEBUG_THINK;
 	} else if( !Q_stricmp( type_s, "state" ) ) { 	flag = BOT_DEBUG_STATE;
 	} else if( !Q_stricmp( type_s, "navstate" ) ) { flag = BOT_DEBUG_NAVSTATE;
@@ -3472,21 +3467,34 @@ qboolean G_admin_botdbg(  gentity_t *ent )
 	} else if( !Q_stricmp( type_s, "say" ) ) { 		flag = BOT_DEBUG_SAY;
 	} else if( !Q_stricmp( type_s, "nav" ) ) {  	flag = BOT_DEBUG_NAV;
 	} else {
-		ADMP( "^7Unknown debug type\n");
-		success = qfalse;
+		ADMP( "^1Unknown debug type\n");
+		return qfalse;
 	}
 	if(turnoff) {
+		ADMP( "^3Disabling Debug\n" );
 		g_bot_debug_type.integer &= ~flag;
+		if(ent) {
+			ent->client->pers.botDebugTypeFlg &= ~flag;
+		}
 	} else {
+		ADMP( "^3Enabling Debug\n" );
 		g_bot_debug_type.integer |= flag;
-		
-			   if( !Q_stricmp( verb_s, "verbose" ) ) {	g_bot_debug_verbosity.integer = BOT_VERB_DETAIL;
-		} else if( !Q_stricmp( verb_s, "quiet" ) ) {	g_bot_debug_verbosity.integer = BOT_VERB_IMPORTANT;
+		if(ent) {
+			ent->client->pers.botDebugTypeFlg |= flag;
+		}
+		//Verbosity
+		if( !Q_stricmp( verb_s, "verbose" ) ) {	
+			g_bot_debug_verbosity.integer = BOT_VERB_DETAIL;
+		} else if( !Q_stricmp( verb_s, "quiet" ) ) {	
+			g_bot_debug_verbosity.integer = BOT_VERB_IMPORTANT;
 		} else { //normal
 			g_bot_debug_verbosity.integer = BOT_VERB_NORMAL;
 		}
+		if(ent) {
+			ent->client->pers.botDebugVerbosityVal = g_bot_debug_verbosity.integer;
+		}
 	}
-	return success;
+	return qtrue;
 }
 
 qboolean G_reloadnodes( gentity_t *ent )
@@ -3504,8 +3512,8 @@ qboolean G_drawnodes( gentity_t *ent )
         level.drawpath = qfalse;
     } else {
         ADMP( "^2Drawing Paths\n" );
-        G_DrawNodes( ent );
-        level.drawpath = qtrue;
+    	G_DrawNodes();
+	    level.drawpath = qtrue;
     }
     return qtrue;
 }

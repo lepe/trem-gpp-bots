@@ -52,6 +52,7 @@ typedef struct gclient_s gclient_t;
 #define FL_NO_BOTS        0x00002000  // spawn point not for bot use
 #define FL_NO_HUMANS      0x00004000  // spawn point just for bots
 #define FL_FORCE_GESTURE  0x00008000  // spawn point just for bots
+#define FL_PATH_NODE 	  0x00010000  // indicate its a path node. Instead using strcmp of classname
 
 #ifndef RAND_MAX
 #define RAND_MAX 32768
@@ -355,6 +356,9 @@ typedef struct
   qboolean            useUnlagged;  
   // keep track of other players' info for tinfo
   char                cinfo[ MAX_CLIENTS ][ 16 ];
+  //LEPE: debug for admin
+  int				  botDebugTypeFlg;
+  int				  botDebugVerbosityVal;
 } clientPersistant_t;
 
 #define MAX_UNLAGGED_MARKERS 10
@@ -1018,7 +1022,7 @@ void FireWeapon3( gentity_t *ent );
 void G_PathLoad( void );
 void G_EraseNodes(void);
 void G_RedrawNodes( void );
-void G_DrawNodes( gentity_t *ent );
+void G_DrawNodes( void );
 void G_DeployBots( gentity_t *ent );  //LEPE
 void ScoreboardMessage( gentity_t *client );
 void MoveClientToIntermission( gentity_t *client );
@@ -1313,5 +1317,5 @@ void      trap_SendGameStat( const char *data );
 void      trap_AddCommand( const char *cmdName );
 void      trap_RemoveCommand( const char *cmdName );
 
-gentity_t *spawnnode( gentity_t *self, long id );
+gentity_t *spawnnode(long id );
 void nodethink(gentity_t *ent);
