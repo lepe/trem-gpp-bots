@@ -3280,7 +3280,7 @@ void Cmd_Node_f( gentity_t *ent )
 					va("print \"Saved Node #%d.\n\"", i));
 				if(level.drawpath == qtrue)
 				{
-					node = (gentity_t *)spawnnode( ent, i );
+					node = (gentity_t *)spawnnode( i );
 				}
 			}
 			else
@@ -3300,7 +3300,7 @@ void Cmd_Node_f( gentity_t *ent )
 					va("print \"Saved Node #%d.\n\"", level.numPaths));
 				if(level.drawpath == qtrue)
 				{
-					node = (gentity_t *)spawnnode(ent,level.numPaths);
+					node = (gentity_t *)spawnnode(level.numPaths);
 				}
 				level.numPaths++;
 			}
