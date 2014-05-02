@@ -194,6 +194,7 @@ void BotBlockedHuman( gentity_t *self ){
 	
 	if(!g_bot_manual.integer) {
 		self->bot->think.state[ THINK_LEVEL_1] = EXPLORE;
+		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_ALIEN + BOT_DEBUG_STATE, "BlockedHuman: Suggesting EXPLORE as LEVEL_1\n");
 	}
 	if(!g_bot_manual_nav.integer) {
 		if(VectorLength( self->client->ps.velocity ) < 50.0f && (float)Distance( self->client->oldOrigin, self->r.currentOrigin ) < 40 ) { //2.3

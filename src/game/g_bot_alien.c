@@ -141,12 +141,14 @@ void BotNavigateAlien( gentity_t *self )
 }
 /**
  * If an alien bot get's blocked...
- * alien will try to wallwalk if possible (and jump every 5 tries)
+ * alien will try to wallwalk if possible (and jump every X tries)
  * in the case it can not do wallwalk, it will try
  * to jump as much as possible. 
  * The bot will try to go either one way (left) or the other (right) with
  * some random behaviour.
  * @param self
+ * //TODO: nav timer was changed so it is called several times more than before. we need to make the conditions
+ *         fail proof anytime even if timers are adjusted
  */
 void BotBlockedAlien( gentity_t *self )
 {
@@ -422,6 +424,8 @@ void BotAttackAlien( gentity_t *self )
 	int tempEntityIndex = -1;
 	int rand = 0;
 	//TODO: move this code to target prioritization
+	//Use: g_utils.c : G_ClosestEnt(  ) to get the closest entities around ?
+	
 	if(botGetDistanceBetweenPlayer(self, self->bot->Enemy) > tooCloseDistance) { //LEPE: if is far, search for a closer target
 		// try to find closest enemy
 		tempEntityIndex = botFindClosestEnemy(self);

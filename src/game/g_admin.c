@@ -3466,6 +3466,7 @@ qboolean G_admin_botdbg( gentity_t *ent )
 	} else if( !Q_stricmp( type_s, "common" ) ) { 	flag = BOT_DEBUG_COMMON;
 	} else if( !Q_stricmp( type_s, "say" ) ) { 		flag = BOT_DEBUG_SAY;
 	} else if( !Q_stricmp( type_s, "nav" ) ) {  	flag = BOT_DEBUG_NAV;
+	} else if( !Q_stricmp( type_s, "all" ) ) {  	flag = BOT_DEBUG_ALL;
 	} else {
 		ADMP( "^1Unknown debug type\n");
 		return qfalse;

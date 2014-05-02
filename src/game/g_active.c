@@ -721,6 +721,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
 		{
 			//Increase all timers
 			ent->bot->timer.aim	   += msec;
+			ent->bot->timer.nav	   += msec;
 			ent->bot->timer.action += msec;
 			for(t = 0; t < THINK_LEVEL_MAX + 1; t++) {
 				ent->bot->timer.think[t] += msec;
@@ -736,14 +737,15 @@ void ClientTimerActions( gentity_t *ent, int msec )
 					ent->bot->timer.think[t] = 0;
 				}
 			}
-			//Perform actions each 500ms
+			//Perform states
 			if(ent->bot->timer.action >= ent->bot->props.time.action) {
 				//Reset timer
 				ent->bot->timer.action = 0;
-				
-				//Perform timed decisions
-				state = ent->bot->state; //debug
 
+				//Keep current state, so we can debug when it changes
+				state = ent->bot->state; 
+
+				//Perform timed decisions
 				//We check every level suggestion and apply the higher possible level
 				for(t = THINK_LEVEL_MAX; t >= 0; t--) {
 					ent->bot->state = ent->bot->think.state[ t ];
@@ -755,7 +757,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
 				if(state != ent->bot->state) {
 					G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_ACTIVE + BOT_DEBUG_STATE, "%s : State %d -> %d\n", ent->client->pers.netname,  state, ent->bot->state);
 				}
-				//This if is to prevent incorrect values to get in
+				//We execute state. First, we ensure we don't get garbage. 
+				//Then execute idle status and finally the status.
 				if(ent->bot->state >= EXPLORE && ent->bot->state <= IDLE) {
 					if(ent->bot->state != IDLE) {
 						//We always call IDLE to perform common decisions
@@ -773,11 +776,32 @@ void ClientTimerActions( gentity_t *ent, int msec )
 					ent->bot->state = IDLE;
 				}
 			}
-			//Perform aim each 250ms
+			//Perform aim 
 			if(ent->bot->timer.aim >= ent->bot->props.time.aim) {
 				//Reset aim timer
 				ent->bot->timer.aim = 0;
 				ent->bot->funcs.base.aim( ent );
+			}
+			//Perform navigation
+			if(ent->bot->timer.nav >= ent->bot->props.time.nav) {
+				//Reset nav timer
+				ent->bot->timer.nav = 0;
+				//Keep current state, so we can debug when it changes
+				state = ent->bot->path.state; 
+				//Execute navigation
+				if(ent->bot->path.state > IDLENAV && ent->bot->path.state <= LOST) {
+					if(ent->bot->funcs.base.nav[ent->bot->path.state]) {
+						ent->bot->funcs.base.nav[ent->bot->path.state]( ent ); //common code
+					}
+					if(ent->bot->funcs.team.nav[ent->bot->path.state]) {
+						ent->bot->funcs.team.nav[ent->bot->path.state]( ent ); //team code
+					}
+				} else if(ent->bot->path.state != IDLENAV) {
+					G_Printf("Trying to access invalid NAV state: %d\n",state);
+				}
+				if(state != ent->bot->path.state) {
+					G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_ACTIVE + BOT_DEBUG_NAVSTATE, "%s : NAV State %d -> %d\n", ent->client->pers.netname,  state, ent->bot->path.state);
+				}
 			}
 			//execute movements (uses a separate variable timer)
 			ent->bot->funcs.base.move( ent , msec );

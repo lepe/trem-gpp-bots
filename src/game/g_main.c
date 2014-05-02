@@ -473,7 +473,8 @@ void QDECL G_BotDebug(botDebugVerbosity verbosity, int type, const char *fmt, ..
 		if( level.clients[ i ].pers.connected != CON_DISCONNECTED )
 		{
 		  	if( level.clients[ i ].pers.admin ) {
-				if(level.clients[ i ].pers.botDebugTypeFlg & type) {
+				if((level.clients[ i ].pers.botDebugTypeFlg == BOT_DEBUG_ALL) ||
+				   (level.clients[ i ].pers.botDebugTypeFlg & type)) {
 					if(level.clients[ i ].pers.botDebugVerbosityVal >= verbosity) {
 						isadmin = qtrue;
     					ent = &g_entities[ i ];
@@ -485,7 +486,8 @@ void QDECL G_BotDebug(botDebugVerbosity verbosity, int type, const char *fmt, ..
 	}
 	//It it was done by console:
 	if(!isadmin) {
-		if(g_bot_debug_type.integer & type) {
+		if((g_bot_debug_type.integer == BOT_DEBUG_ALL) || 
+		  (g_bot_debug_type.integer & type)) {
 			if(g_bot_debug_verbosity.integer >= verbosity) {
 				G_Printf(text);
 			}

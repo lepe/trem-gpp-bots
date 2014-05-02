@@ -65,6 +65,7 @@ void BotInit( gentity_t *self ) {
 	self->bot->timer.think[THINK_LEVEL_MAX] = 1000;
 	//we set other props:
 	self->bot->props.time.aim = 50;
+	self->bot->props.time.nav = 100;
 	self->bot->props.time.action = 500;
 	//Base functions
 	self->bot->funcs.base.spec				= BotSpectator;
@@ -75,9 +76,9 @@ void BotInit( gentity_t *self ) {
 	//----- common states ----
 	self->bot->funcs.base.status[IDLE]		= BotIdle;
 	self->bot->funcs.base.status[EXPLORE]	= BotExplore;
-	//self->bot->funcs.base.status[ATTACK]	= BotAttack;
+	self->bot->funcs.base.status[ATTACK]	= BotAttack;
 	//self->bot->funcs.base.status[DEFEND]	= BotDefend;
-	//self->bot->funcs.base.status[FOLLOW]	= BotFollow;
+	self->bot->funcs.base.status[FOLLOW]	= BotFollow;
 	//self->bot->funcs.base.status[RETREAT]	= BotRetreat;
 	//self->bot->funcs.base.status[EVADE]		= BotEvade;
 	//self->bot->funcs.base.status[HEAL]		= BotHeal;
@@ -106,7 +107,7 @@ void BotSpectator( gentity_t *self ){
 	for(t = 0; t < THINK_LEVEL_MAX + 1; t++) {
 		self->bot->think.state[t] = UNDEFINED;
 	}
-	self->bot->path.state = TARGETPATH;
+	self->bot->path.state = FINDNEWPATH;
 	self->bot->path.pathChosen = qfalse;
 	self->bot->path.nextNode = qfalse;
 	self->bot->path.targetPath = 0;
@@ -157,10 +158,10 @@ void BotThink( gentity_t *self )
 				self->bot->Friend = NULL;
 				if(self->bot->Enemy->health <= 0) {
 					self->bot->Enemy = NULL;
-					self->bot->think.state[ THINK_LEVEL_1 ] = UNDEFINED;
+					BotResetState( self, ATTACK );
 				}
 			} else {
-				self->bot->think.state[ THINK_LEVEL_1 ] = UNDEFINED;
+				BotResetState( self, ATTACK );
 			}
 			///////////////////////// LEVEL 2 /////////////////////////
 			if(BotKeepThinking( self , THINK_LEVEL_2)) {
@@ -168,18 +169,16 @@ void BotThink( gentity_t *self )
 				if(self->bot->Enemy) {
 					if(!botTargetInRange( self, self->bot->Enemy )) {
 						self->bot->Enemy = NULL;
-						self->bot->think.state[ THINK_LEVEL_2 ] = UNDEFINED;
+						BotResetState( self, ATTACK );
 					}
 				}
 				
 			}
 			///////////////////////// LEVEL 3 /////////////////////////
 			if(BotKeepThinking( self , THINK_LEVEL_3)) {
-					self->bot->think.state[ THINK_LEVEL_3 ] = UNDEFINED;
 			}
 			///////////////////////// LEVEL MAX /////////////////////////
 			if(BotKeepThinking( self , THINK_LEVEL_MAX)) {
-					self->bot->think.state[ THINK_LEVEL_MAX ] = UNDEFINED;
 			}
 			break;
 			
@@ -302,30 +301,10 @@ void G_BotGroupThink( void ) {
  * @param self
  */
 void BotExplore( gentity_t *self ){
-	int state = self->bot->path.state; //debug
 
-	if(self->bot->Enemy || self->bot->Friend)
-	{
-		self->bot->timer.foundPath = level.time;
-	}
-
-	if(state >= TARGETPATH && state <= LOST) {
-		if(self->bot->funcs.base.nav[self->bot->path.state]) {
-			self->bot->funcs.base.nav[self->bot->path.state]( self ); //common code
-		}
-		if(self->bot->funcs.team.nav[self->bot->path.state]) {
-			self->bot->funcs.team.nav[self->bot->path.state]( self ); //team code
-		}
-	} else {
-		G_Printf("Trying to access invalid NAV state: %d\n",state);
-		if(!g_bot_manual_nav.integer) {
-			self->bot->path.state = TARGETPATH;
-		}
-	}
-	if(state != self->bot->path.state) {
-		G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_COMMON + BOT_DEBUG_NAVSTATE, "%s : NAV State %d -> %d\n", self->client->pers.netname,  state, self->bot->path.state);
-	}
-	
+	//We don't add them to the queue, we execute them directly:
+	BotControl( self, BOT_STAND );
+	BotControl( self, BOT_MOVE_FWD );
 }
 /**
  * Do nothing... 
@@ -339,7 +318,9 @@ void BotIdle( gentity_t *self ){
  * Bot will attack to a target
  * @param self
  */
-void BotAttack( gentity_t *self ){}
+void BotAttack( gentity_t *self ){
+	self->bot->timer.foundPath = level.time;
+}
 /**
  * Bot will defend base (camp). If away from spawn, it will retreat first
  * @param self
@@ -349,7 +330,9 @@ void BotDefend( gentity_t *self ){}
  * Bot will follow other players/bot
  * @param self
  */
-void BotFollow( gentity_t *self ){}
+void BotFollow( gentity_t *self ){
+	self->bot->timer.foundPath = level.time;
+}
 /**
  * Bot will retreat to its origin.
  * @param self

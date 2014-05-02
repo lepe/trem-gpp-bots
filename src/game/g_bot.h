@@ -40,6 +40,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BOT_MOVE_NO_TIME_LIMIT	0
 #define BOT_TURN_VAL		30.0f
 #define BOT_TURN_ANGLE_DIV	(360.0f / (float)BOT_TURN_VAL)
+#define BOT_DEBUG_ALL		-1
 
 /*
  * Bot's general headers
@@ -148,7 +149,8 @@ typedef enum
 
 typedef enum
 {
-	TARGETPATH,		//walking to a node
+	IDLENAV,		//don't do anything
+	TARGETPATH,		//walk to a node 
 	FINDNEXTPATH,	//looking for the next node //TODO: this and targetpath are not the same?
 	FINDNEWPATH,	//looking for any close node
 	BLOCKED, 		//blocked, trying to get out of there... 
@@ -197,6 +199,7 @@ typedef struct
 	  	 int think[THINK_LEVEL_MAX + 1]; //cycle time for each think level
 		 int action; //how often we perform actions (states)
 		 int aim;	 //how often we aim
+		 int nav;	 //how often we perform navigation decisions
 	  } time;
   } props;
   //TIMER: used to time actions (variables).
@@ -204,6 +207,7 @@ typedef struct
 	  int	think[THINK_LEVEL_MAX + 1]; //think timer per level
 	  int	improve; 	//buytime for humans, evolvetime for aliens
 	  int	aim; 		//variable used to time every aim loop (see props.time.aim)
+	  int	nav; 		//variable used to time every nav loop (see props.time.nav)
 	  int	action; 	//variable used to time every action loop (see props.time.action)
 	  int 	move; 		//used in g_bot_control.c for the movement queue
 	  int	foundPath; 	//on BotFindN***Path(): if a new/next path is found, we reset this timer

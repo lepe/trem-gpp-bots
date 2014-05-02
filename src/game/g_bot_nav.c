@@ -49,77 +49,45 @@ void BotTargetPath( gentity_t *self )
 	vec3_t  forward, right, up;
 	vec3_t  muzzle;
 	gentity_t *traceEnt;
-	
-	G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE, "(0) Current state: %d\n", self->bot->path.state);
-	
-	/*
-	 * Before, there was a timer called "target" which used to be here (see old code)
-	 * without that timer things are getting strange... for now, I will try to fix the code
-	 * without it.
-	 */
-	//TODO: this is suppose to happen after 1 second
-	//if(BotKeepThinking( self, THINK_LEVEL_MIN )) {
-		//TODO: not sure what this part is exactly for... I think is for targeting path
-		VectorSet( mins, -20, -20, -20 );
-		VectorSet( maxs, 20, 20, 20 );
-		AngleVectors( self->client->ps.viewangles, forward, right, up );
-		CalcMuzzlePoint( self, forward, right, up, muzzle );
-		VectorMA( muzzle, 20, forward, end );
-		trap_Trace( &tr, muzzle, mins, maxs, end, self->s.number, MASK_SHOT );
-		traceEnt = &g_entities[ tr.entityNum ];
 
-	//TODO: this is suppose to happen after 2.5 seconds
-		BotStop( self ); //clear left, right, up, down, buttons
-		BotRun( self );
-		if(self->bot->path.lastpathid >= 0) {
-			if(level.time - self->bot->timer.foundPath > level.paths[self->bot->path.lastpathid].timeout)
-			{
-				if(g_bot_manual_nav.integer) {
-					G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE, "(1) State would have changed to: %d\n", FINDNEWPATH);
-				} else {					
-					G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE, "(1) State changed to: %d\n", FINDNEWPATH);
-					self->bot->path.state = FINDNEWPATH;
-				}
-				self->bot->timer.foundPath = level.time;
-			}
-		}
-		else if( level.time - self->bot->timer.foundPath > 10000 )
+	G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(0) Current NAV state: %d\n", self->bot->path.state);
+	//check if we lost track of the path we were targeting. If we did, find new one
+	if((self->bot->path.lastpathid >= 0 && level.time - self->bot->timer.foundPath > level.paths[self->bot->path.lastpathid].timeout) ||
+		level.time - self->bot->timer.foundPath > 10000)
+	{
 		{
 			if(g_bot_manual_nav.integer) {
-				G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE, "(2) State would have changed to: %d\n", FINDNEWPATH);
-			} else {
-				G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE, "(2) State changed to: %d\n", FINDNEWPATH);
+				G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(1) NAV State would have changed to: %d\n", FINDNEWPATH);
+			} else {					
+				G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(1) NAV State changed to: %d\n", FINDNEWPATH);
 				self->bot->path.state = FINDNEWPATH;
 			}
-			self->bot->timer.foundPath = level.time;
 		}
-		if(distanceToTargetNode(self) < 140) //LEPE: was 70 
-		{
-			if(g_bot_manual_nav.integer) {
-				G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE, "(3) State would have changed to: %d\n", FINDNEXTPATH);
-			} else {
-				G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE, "(3) State changed to: %d\n", FINDNEXTPATH);
-				self->bot->path.state = FINDNEXTPATH;
-			}
-			self->bot->timer.foundPath = level.time;
-		}
-	//}
-
-	//If we haven't move enough, check if we are blocked
-	if(VectorLength( self->client->ps.velocity ) < 50.0f && (float)Distance( self->client->oldOrigin, self->r.currentOrigin ) < 20 ) //2.3
+	}
+	//G_Printf("Target: %d, Distance %d\n",self->bot->path.targetPath, distanceToTargetNode(self));
+	if(distanceToTargetNode(self) < 70) 
 	{
 		if(g_bot_manual_nav.integer) {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE, "(4) State would have changed to: %d\n", BLOCKED);
+			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(3) NAV State would have changed to: %d\n", FINDNEXTPATH);
 		} else {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE, "(4) State changed to: %d\n", BLOCKED);
+			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(3) NAV State changed to: %d\n", FINDNEXTPATH);
+			self->bot->path.state = FINDNEXTPATH;
+		}
+	}
+	//If we haven't move enough, check if we are blocked
+	if(level.time - self->bot->timer.foundPath > 2000 && VectorLength( self->client->ps.velocity ) < 50.0f && (float)Distance( self->client->oldOrigin, self->r.currentOrigin ) < 10 ) //2.3
+	{
+		if(g_bot_manual_nav.integer) {
+			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(4) NAV State would have changed to: %d\n", BLOCKED);
+		} else {
+			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(4) NAV State changed to: %d\n", BLOCKED);
 	    	self->bot->path.state = BLOCKED;
 		}
 	} else {
-		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE, "NOT BLOCKED %d: \n",self->bot->path.state);
+		//G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "NOT BLOCKED %d: \n",self->bot->path.state);
 		//we are not blocked, so don't keep trying
 		self->bot->path.blocked_try = 0;
 	}
-
 }
 
 /**
@@ -155,22 +123,24 @@ void BotFindNewPath( gentity_t *self )
 	}
 	if(pathfound == qtrue)
 	{
+		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "New Path found\n");
 		self->bot->path.targetPath = closestpath;
 		self->bot->timer.foundPath = level.time;
 		if(g_bot_manual_nav.integer) {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE, "(5) State would have changed to: %d\n", TARGETPATH);
+			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(5) NAV State would have changed to: %d\n", TARGETPATH);
 		} else {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE, "(5) State changed to: %d\n", TARGETPATH);
+			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(5) NAV State changed to: %d\n", TARGETPATH);
 			self->bot->path.state = TARGETPATH;
 		}
 	}
 	else
 	{
+		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "New Path NOT found\n");
 		//TODO: for now is treated as BLOCKED but should be LOST
 		if(g_bot_manual_nav.integer) {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE, "(6) State would have changed to: %d\n", BLOCKED);
+			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(6) NAV State would have changed to: %d\n", BLOCKED);
 		} else {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE, "(6) State hanged to: %d\n", BLOCKED);
+			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(6) NAV State hanged to: %d\n", BLOCKED);
 			self->bot->path.state = BLOCKED;
 		}
 	}
@@ -194,8 +164,8 @@ void BotFindNextPath( gentity_t *self )
 	int possiblepaths[5];
     qboolean known = qfalse;
 
-    G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE,"Last Node: %d\n",self->bot->path.lastpathid);
-    G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE,"Options: %i, %i, %i, %i, %i\n",pathessence[0],pathessence[1],pathessence[2],pathessence[3],pathessence[4]);
+    G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Last Path Id: %d\n",self->bot->path.lastpathid);
+    G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Target Path: %d\n",self->bot->path.targetPath);
 	possiblepaths[0] = possiblepaths[1] = possiblepaths[2] = possiblepaths[3] = possiblepaths[4] = 0;
 	for(i = 0; i < 5; i++)
 	{
@@ -213,12 +183,13 @@ void BotFindNextPath( gentity_t *self )
 			possiblenextpath++;
 		}
 	}
+    G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Path Options: %i, %i, %i, %i, %i\n",possiblepaths[0],possiblepaths[1],possiblepaths[2],possiblepaths[3],possiblepaths[4]);
 	if(possiblenextpath == 0)
 	{	
 		if(g_bot_manual_nav.integer) {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE, "(7) State would have changed to: %d\n", FINDNEWPATH);
+			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(7) NAV State would have changed to: %d\n", FINDNEWPATH);
 		} else {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE, "(7) State changed to: %d\n", FINDNEWPATH);
+			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(7) NAV State changed to: %d\n", FINDNEWPATH);
 			self->bot->path.state = FINDNEWPATH;
 		}
 		return;
@@ -226,9 +197,9 @@ void BotFindNextPath( gentity_t *self )
 	else
 	{
 		if(g_bot_manual_nav.integer) {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE, "(8) State would have changed to: %d\n", TARGETPATH);
+			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(8) NAV State would have changed to: %d\n", TARGETPATH);
 		} else {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_STATE, "(8) State changed to: %d\n", TARGETPATH);
+			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(8) NAV State changed to: %d\n", TARGETPATH);
 			self->bot->path.state = TARGETPATH;
 		}
 		if(level.paths[self->bot->path.targetPath].random < 0)
@@ -274,7 +245,6 @@ void BotFindNextPath( gentity_t *self )
                     G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"] TOTAL: %d\n",totalessence);
                 }
                 self->bot->path.lastJoint = self->bot->path.targetPath; //when was the last time we had to choose a path (used to create negative essence)
-
                 randnum = G_Rand();
                 for(i =0; i < possiblenextpath; i++) {
                     accumessence += ((pathessence[i] * pathrank[i]) * 100) / totalessence;
@@ -350,7 +320,6 @@ qboolean botAimAtPath( gentity_t *self )
 		vectoangles( dirToTarget, angleToTarget );
 		//self->client->ps.delta_angles[ 0 ] = ANGLE2SHORT( angleToTarget[ 0 ] ); //this makes bots to move aim in Z angles
 		self->client->ps.delta_angles[ 1 ] = ANGLE2SHORT( angleToTarget[ 1 ] );
-		//G_Printf("Targeting path...\n");
 	}
 	return qtrue;
 }
