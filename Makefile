@@ -36,7 +36,7 @@ ifndef BUILD_SERVER
 endif
 #build the game shared libraries
 ifndef BUILD_GAME_SO
-  BUILD_GAME_SO    =1
+  BUILD_GAME_SO    =0
 endif
 #build the game qvms
 ifndef BUILD_GAME_QVM

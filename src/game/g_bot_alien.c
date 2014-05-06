@@ -157,33 +157,27 @@ void BotBlockedAlien( gentity_t *self )
 	qboolean rand = G_Rand() < 50;
 	
 	if(canwallwalk) BotWallWalk( self ); //if possible
-	//we set next try 
-	self->bot->path.blocked_try++;
-	G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_ALIEN + BOT_DEBUG_NAVSTATE, "[ %d ] Trying to unblock. Rand: %d\n", self->bot->path.blocked_try, rand );
+
+	G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_ALIEN + BOT_DEBUG_NAVSTATE, "[ %d ] Trying to unblock. Rand: %d\n", try, rand );
 	if(try <= 0) {
-		BotRun( self );
+		BotMoveFwd( self );
 		BotJump( self );
-	} else if(try > BOT_TURN_ANGLE_DIV * 2) {
-		self->bot->path.blocked_try = 0; 
-		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_ALIEN + BOT_DEBUG_NAVSTATE, "Reset blocked_try to 0\n" );
-	} else if(try > BOT_TURN_ANGLE_DIV) {
-		if(rand) BotAddMove( self, BOT_LOOK_RIGHT, 0 );
-		if(!canwallwalk || try % 5 == 0) BotJump( self ); 
-	} else if(try > 0) {
-		if(rand) BotAddMove( self, BOT_LOOK_LEFT, 0 );
-		if(!canwallwalk || try % 5 == 0) BotJump( self );
+		VectorCopy(self->r.currentOrigin, self->bot->path.blocked_origin);
+	} else if(try < BOT_TIMER_NAV_SECOND) {
+		if(rand) BotControl( self, BOT_LOOK_RIGHT );
+		if(!canwallwalk || try % BOT_TIMER_NAV_SECOND == 0) BotJump( self ); 
+	} else if(try > BOT_TIMER_NAV_SECOND) {
+		if(rand) BotControl( self, BOT_LOOK_LEFT );
+		if(!canwallwalk || try % BOT_TIMER_NAV_SECOND == 0) BotJump( self );
 	}
 	
-	if(!g_bot_manual.integer) {
-		self->bot->think.state[ THINK_LEVEL_1] = EXPLORE;
-		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_ALIEN + BOT_DEBUG_STATE, "BlockedAlien: Suggesting EXPLORE as LEVEL_1\n");
-	}
-	if(!g_bot_manual_nav.integer) {
-		if(VectorLength( self->client->ps.velocity ) < 50.0f && (float)Distance( self->client->oldOrigin, self->r.currentOrigin ) < 40 ) { //2.3
-			self->bot->path.state = TARGETPATH;
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_ALIEN + BOT_DEBUG_NAVSTATE, "BlockedAlien: Path state (TARGETPATH): %d\n", TARGETPATH);
-		}
-	}
+	if(try >= BOT_TIMER_NAV_SECOND * 4) {
+		self->bot->path.blocked_try = 0; 
+		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_ALIEN + BOT_DEBUG_NAVSTATE, "Reset blocked_try to 0\n" );
+	} else {
+		//we set next try 
+		self->bot->path.blocked_try++;
+	}	
 }
 /**
  * Evolve to a higher class
@@ -510,6 +504,7 @@ void BotAttackAlien( gentity_t *self )
 	} else {
 		BotResetState( self, ATTACK );
 		self->bot->Enemy = NULL;
+		self->client->pers.cmd.buttons = 0;
 	}
 }
 

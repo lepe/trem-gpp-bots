@@ -122,14 +122,13 @@ void BotHumanThink( gentity_t *self )
 		self->bot->think.state[ THINK_LEVEL_1 ] = IMPROVE;
 	}
 
-	//Heal if near medi pad
-	if(self->health <= 80 && level.time - self->bot->timer.improve > 5000) 
-	{
-		self->bot->Struct = botFindClosestBuildable( self, 500, BA_H_MEDISTAT );
-		if(self->bot->Struct) {
-			self->bot->think.state[ THINK_LEVEL_1 ] = HEAL;
-			//self->bot->timer.improve = level.time;
-		}
+	//Suggest Heal if low HP
+	if(self->health <= 20) {
+		self->bot->think.state[ THINK_LEVEL_3 ] = HEAL;
+	} if(self->health <= 50) {
+		self->bot->think.state[ THINK_LEVEL_2 ] = HEAL;
+	} else if(self->health < 100) {
+		self->bot->think.state[ THINK_LEVEL_1 ] = HEAL;
 	}
 	
 	if(!self->bot->Enemy && self->bot->state != HEAL) { 
@@ -178,29 +177,25 @@ void BotBlockedHuman( gentity_t *self ){
 	 * to help the bot to remove block */
 	if(low_stamina) self->client->ps.stats[ STAT_STAMINA ] = 1000;
 
-	//we set next try 
-	self->bot->path.blocked_try++;
+	G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_NAVSTATE, "[ %d ] Trying to unblock. Rand: %d\n", try, rand );
 	if(try <= 0) {
-		BotStand( self );
-		BotRun( self );
-	} else if(try > (BOT_TURN_ANGLE_DIV + 10) * 2) {
+		BotMoveFwd( self );
+		VectorCopy(self->r.currentOrigin, self->bot->path.blocked_origin);
+		if(!low_stamina) BotJump( self );
+	} else if(try < BOT_TIMER_NAV_SECOND) {
+		if(rand) BotControl( self, BOT_LOOK_RIGHT );
+	} else if(try == BOT_TIMER_NAV_SECOND) {
+		if(!low_stamina) BotJump( self );
+	} else if(try > BOT_TIMER_NAV_SECOND * 2) {
+		if(rand) BotControl( self, BOT_LOOK_LEFT );
+	}
+	if(try >= BOT_TIMER_NAV_SECOND * 4) {
 		self->bot->path.blocked_try = 0; 
-	} else if(try > BOT_TURN_ANGLE_DIV + 10) {
-		if(rand) BotAddMove( self, BOT_LOOK_RIGHT, 0 );
-	} else if(try > 10) {
-		if(rand) BotAddMove( self, BOT_LOOK_LEFT, 0 );
+		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_NAVSTATE, "Reset blocked_try to 0\n" );
+	} else {
+		//we set next try 
+		self->bot->path.blocked_try++;
 	}
-	BotJump( self );
-	
-	if(!g_bot_manual.integer) {
-		self->bot->think.state[ THINK_LEVEL_1] = EXPLORE;
-		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_ALIEN + BOT_DEBUG_STATE, "BlockedHuman: Suggesting EXPLORE as LEVEL_1\n");
-	}
-	if(!g_bot_manual_nav.integer) {
-		if(VectorLength( self->client->ps.velocity ) < 50.0f && (float)Distance( self->client->oldOrigin, self->r.currentOrigin ) < 40 ) { //2.3
-			self->bot->path.state = TARGETPATH;
-		}
-	}	
 }
 
 /**
@@ -548,11 +543,18 @@ void BotAttackHuman( gentity_t *self )
 		} else {
 			if(self->client->ps.weapon == WP_PAIN_SAW || self->client->ps.weapon == WP_FLAMER)
 			{
+				BotStand( self );
 				BotRun( self );
 			}
 			else
 			{
-				BotCrouch( self );
+				if(Distance( self->s.pos.trBase, self->bot->Enemy->s.pos.trBase ) < 200) {
+					BotStand( self );
+					BotAddMove( self, BOT_MOVE_BACK, 500);
+				} else {
+					BotStop( self );
+					BotCrouch( self );
+				}
 			}
 		}
 		
@@ -571,8 +573,9 @@ void BotAttackHuman( gentity_t *self )
 		
 		if(self->client->ps.weapon == WP_FLAMER)
 		{
-			if(Distance( self->s.pos.trBase, self->bot->Enemy->s.pos.trBase ) < 200)
+			if(Distance( self->s.pos.trBase, self->bot->Enemy->s.pos.trBase ) < 200) {
 				self->client->pers.cmd.buttons |= BUTTON_ATTACK;
+			}
 		}
 		else if(self->client->ps.weapon == WP_LUCIFER_CANNON)
 		{
@@ -584,6 +587,7 @@ void BotAttackHuman( gentity_t *self )
 		}
 	} else {
 		self->bot->Enemy = NULL;
+		self->client->pers.cmd.buttons = 0;
 	}
 }
 
@@ -592,12 +596,6 @@ void BotAttackHuman( gentity_t *self )
  * @param self
  */
 void BotIdleHuman( gentity_t *self ) {
-	//Use medkit if low hp
-	if(BG_InventoryContainsUpgrade( UP_MEDKIT, self->client->ps.stats ) && 
-			self->health <= 40) //TODO: remove hardcoded value
-	{
-		BG_ActivateUpgrade( UP_MEDKIT, self->client->ps.stats );
-	}
 	//Recharge energy weapons near RC or Repeater
 	if((G_BuildableRange( self->client->ps.origin, 100, BA_H_REACTOR ) ||
 		G_BuildableRange( self->client->ps.origin, 100, BA_H_REPEATER )) && 
@@ -646,6 +644,23 @@ void BotBuildHuman( gentity_t *self ) {
  * @param client
  */
 void BotHealHuman( gentity_t *self ) {
+	//Use medkit if low hp
+	if(BG_InventoryContainsUpgrade( UP_MEDKIT, self->client->ps.stats ))
+	{
+		if(self->health <= 40) { //TODO: remove hardcoded value
+			BG_ActivateUpgrade( UP_MEDKIT, self->client->ps.stats );
+			BotResetState( self, HEAL );
+		}
+	} else {
+		if(!self->bot->Struct) {
+			self->bot->Struct = botFindClosestBuildable( self, 200, BA_H_MEDISTAT );
+		}
+		//TODO: if there is no a MEDIPAD nearby, search for it (pathfinding)
+		//For now, just forget about it
+		if(!self->bot->Struct) {
+			BotResetState( self, HEAL );
+		}
+	}
 }
 
 /**

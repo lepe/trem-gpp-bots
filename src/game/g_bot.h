@@ -36,11 +36,20 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BOT_LONG_RANGE 		2
 
 //Adjust this value if move actions are being discarded
-#define BOT_MOVE_QUEUE		50
+#define BOT_MOVE_QUEUE		100
 #define BOT_MOVE_NO_TIME_LIMIT	0
 #define BOT_TURN_VAL		30.0f
 #define BOT_TURN_ANGLE_DIV	(360.0f / (float)BOT_TURN_VAL)
 #define BOT_DEBUG_ALL		-1
+
+//timers
+#define BOT_TIMER_AIM		50	//Just aim
+#define BOT_TIMER_NAV		100	//Aim to path, find next path, etc.
+#define BOT_TIMER_ACTION	500 //Perform states
+#define BOT_TIMER_NAV_SECOND	1000 / BOT_TIMER_NAV	//used in Blocked code
+#define BOT_TIMER_THINK_LEVEL_3_START_AT	3000  //this shift timer ahead so it won't overlap MAX
+#define BOT_TIMER_THINK_LEVEL_MAX_START_AT	1000  //this shift timer ahead so it won't overlap LVL3
+extern const int BOT_TIMER[];
 
 /*
  * Bot's general headers
@@ -129,33 +138,33 @@ typedef enum
 
 typedef enum
 {
-	UNDEFINED,		//used to automatically change states
+	UNDEFINED,		//0 used to automatically change states
 	// Valid States:
-	EXPLORE,		//explore the map: this will become one of the following:
-	ATTACK,			//engage in combat
-	DEFEND,			//stay in an area for some time (camp)
-	FOLLOW, 		//following another player
-	RETREAT, 		//go back to base
-	EVADE, 			//perform evasive technique
-	HEAL,			//heal itself
-	REPAIR,			//repair building
-	BUILD,			//build something
-	RUSH,			//rushing into the enemy
-	PATROL,			//patrol the area
-	IMPROVE,		//improve: buy for humans, evolve for aliens
+	EXPLORE,		//1 explore the map: this will become one of the following:
+	ATTACK,			//2 engage in combat
+	DEFEND,			//3 stay in an area for some time (camp)
+	FOLLOW, 		//4 following another player
+	RETREAT, 		//5 go back to base
+	EVADE, 			//6 perform evasive technique
+	HEAL,			//7 heal itself
+	REPAIR,			//8 repair building
+	BUILD,			//9 build something
+	RUSH,			//10 rushing into the enemy
+	PATROL,			//11 patrol the area
+	IMPROVE,		//12 improve: buy for humans, evolve for aliens
 		//<-- add new states here	(add to: g_bot_common, g_bot_alien.c and g_bot_human.c)
-	IDLE			//just think. it is also used as enum count
+	IDLE			//13 just think. it is also used as enum count
 } botState;
 
 typedef enum
 {
-	IDLENAV,		//don't do anything
-	TARGETPATH,		//walk to a node 
-	FINDNEXTPATH,	//looking for the next node //TODO: this and targetpath are not the same?
-	FINDNEWPATH,	//looking for any close node
-	BLOCKED, 		//blocked, trying to get out of there... 
+	IDLENAV,		//0 don't do anything
+	TARGETPATH,		//1 walk to a node 
+	FINDNEXTPATH,	//2 looking for the next node //TODO: this and targetpath are not the same?
+	FINDNEWPATH,	//3 looking for any close node
+	BLOCKED, 		//4 blocked, trying to get out of there... 
 		//<-- add new states here (add to: g_bot_common, g_bot_alien.c and g_bot_human.c)
-	LOST			//lost... doing random stuff (like crying) //used also for enum count
+	LOST			//5 lost... doing random stuff (like crying) //used also for enum count
 } botNavState;
 
 typedef struct
@@ -183,6 +192,7 @@ typedef struct
 	  int           numCrumb; //counter of max path length
 	  int           lastJoint; //keep id of last junction
 	  int 			blocked_try; //We increase this value each time we try to unblock the bot
+	  vec3_t		blocked_origin; //keep where we got stucked
   } path;
   //MOVE: variables and properties related to Movements
   struct {
@@ -193,22 +203,13 @@ typedef struct
 	  int read; //index used to know which queue slot to read from 
 	  int write; //index used to know which queue slot to write into
   } move;
-  //PROPERTIES: these values may not change during the game.
-  struct {
-	  struct {
-	  	 int think[THINK_LEVEL_MAX + 1]; //cycle time for each think level
-		 int action; //how often we perform actions (states)
-		 int aim;	 //how often we aim
-		 int nav;	 //how often we perform navigation decisions
-	  } time;
-  } props;
   //TIMER: used to time actions (variables).
   struct {
 	  int	think[THINK_LEVEL_MAX + 1]; //think timer per level
 	  int	improve; 	//buytime for humans, evolvetime for aliens
-	  int	aim; 		//variable used to time every aim loop (see props.time.aim)
-	  int	nav; 		//variable used to time every nav loop (see props.time.nav)
-	  int	action; 	//variable used to time every action loop (see props.time.action)
+	  int	aim; 		//variable used to time every aim loop (see BOT_TIMER_AIM)
+	  int	nav; 		//variable used to time every nav loop (see BOT_TIMER_NAV)
+	  int	action; 	//variable used to time every action loop (see BOT_TIMER_ACTION)
 	  int 	move; 		//used in g_bot_control.c for the movement queue
 	  int	foundPath; 	//on BotFindN***Path(): if a new/next path is found, we reset this timer
   } timer;
@@ -303,7 +304,7 @@ int G_Rand( void ); //LEPE
 int G_Rand_Range( int start, int end ); //LEPE
 int botGetDistanceBetweenPlayer( gentity_t *self, gentity_t *player );
 qboolean botTargetInRange( gentity_t *self, gentity_t *target );
-qboolean botAimAtTarget( gentity_t *self, gentity_t *target );
+qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch);
 qboolean botFindClosestEnemy( gentity_t *self );
 qboolean botFindClosestFriend( gentity_t *self );
 gentity_t *botFindClosestBuildable( gentity_t *self, float r, buildable_t buildable );
@@ -313,6 +314,7 @@ void BotControl( gentity_t *self, botMove move );
 void BotDoMove( gentity_t *self, int msec ); 
 void BotAddMove( gentity_t *self, botMove move, int time ); 
 void BotCleanMove( gentity_t *self );
+void BotClearQueue( gentity_t *self );
 void BotRun( gentity_t *self );
 void BotJump( gentity_t *self );
 void BotStop( gentity_t *self );

@@ -170,7 +170,7 @@ int botGetDistanceBetweenPlayer( gentity_t *self, gentity_t *player ) {
  * @param target [gentity_t] buildable, player or bot
  * @return boolean (always true)
  */
-qboolean botAimAtTarget( gentity_t *self, gentity_t *target ) {
+qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch ) {
     int tooCloseDistance = 100; //LEPE
     int distance = 0;
 	vec3_t dirToTarget, angleToTarget, highPoint, targetUp, targetStraight, realBase;
@@ -206,9 +206,11 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target ) {
 	}
 	// Grab the angles to use with delta_angles
 	vectoangles( dirToTarget, angleToTarget );
-	self->client->ps.delta_angles[ 0 ] = ANGLE2SHORT( angleToTarget[ 0 ] );
-	self->client->ps.delta_angles[ 1 ] = ANGLE2SHORT( angleToTarget[ 1 ] );
-	//self->client->ps.delta_angles[ 2 ] = ANGLE2SHORT( angleToTarget[ 2 ] );
+	if(pitch) {
+		self->client->ps.delta_angles[ PITCH ] = ANGLE2SHORT( angleToTarget[ PITCH ] );
+	}
+	self->client->ps.delta_angles[ YAW ] = ANGLE2SHORT( angleToTarget[ YAW ] );
+	//self->client->ps.delta_angles[ ROLL ] = ANGLE2SHORT( angleToTarget[ ROLL ] );
 
     //LEPE: added if... Humans keep jumping when they are too close of a buildable
     if(target->s.eType == ET_BUILDABLE) {

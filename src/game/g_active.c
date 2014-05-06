@@ -733,12 +733,12 @@ void ClientTimerActions( gentity_t *ent, int msec )
 			
 			//Reset timers which are over time.
 			for(t = 0; t < THINK_LEVEL_MAX + 1; t++) {
-				if(ent->bot->timer.think[t] >= ent->bot->props.time.think[t]) {
+				if(ent->bot->timer.think[t] >= BOT_TIMER[t]) {
 					ent->bot->timer.think[t] = 0;
 				}
 			}
 			//Perform states
-			if(ent->bot->timer.action >= ent->bot->props.time.action) {
+			if(ent->bot->timer.action >= BOT_TIMER_ACTION) {
 				//Reset timer
 				ent->bot->timer.action = 0;
 
@@ -777,13 +777,13 @@ void ClientTimerActions( gentity_t *ent, int msec )
 				}
 			}
 			//Perform aim 
-			if(ent->bot->timer.aim >= ent->bot->props.time.aim) {
+			if(ent->bot->timer.aim >= BOT_TIMER_AIM) {
 				//Reset aim timer
 				ent->bot->timer.aim = 0;
 				ent->bot->funcs.base.aim( ent );
 			}
 			//Perform navigation
-			if(ent->bot->timer.nav >= ent->bot->props.time.nav) {
+			if(ent->bot->timer.nav >= BOT_TIMER_NAV) {
 				//Reset nav timer
 				ent->bot->timer.nav = 0;
 				//Keep current state, so we can debug when it changes

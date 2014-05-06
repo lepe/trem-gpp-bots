@@ -43,13 +43,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 void BotTargetPath( gentity_t *self )
 {
-	trace_t  tr;
-	vec3_t  end;
-	vec3_t  mins, maxs;
-	vec3_t  forward, right, up;
-	vec3_t  muzzle;
-	gentity_t *traceEnt;
-
 	G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(0) Current NAV state: %d\n", self->bot->path.state);
 	//check if we lost track of the path we were targeting. If we did, find new one
 	if((self->bot->path.lastpathid >= 0 && level.time - self->bot->timer.foundPath > level.paths[self->bot->path.lastpathid].timeout) ||
@@ -86,7 +79,7 @@ void BotTargetPath( gentity_t *self )
 	} else {
 		//G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "NOT BLOCKED %d: \n",self->bot->path.state);
 		//we are not blocked, so don't keep trying
-		self->bot->path.blocked_try = 0;
+		//self->bot->path.blocked_try = 0; 
 	}
 }
 
@@ -208,7 +201,7 @@ void BotFindNextPath( gentity_t *self )
 		}
 		else
 		{
-            //LEPE: bots decide here which path to follow based on the strength of the essence, previous nodes and posible unexplored nodes
+            //LEPE: bots decide here which path to follow based on the strength of the essence, previous nodes and possible unexplored nodes
             //-------------
 			nextpath = 0;
             if(possiblenextpath > 1) {
@@ -273,7 +266,14 @@ void BotFindNextPath( gentity_t *self )
  * @param self
  */
 void BotBlocked( gentity_t *self ) {
-	if (self->bot->path.blocked_try % 50 == 0) BotGesture( self );
+	if (G_Rand() < 10) BotGesture( self );
+	if(!g_bot_manual_nav.integer) {
+		if(Distance( self->bot->path.blocked_origin, self->r.currentOrigin ) > 50) {
+			self->bot->path.state = TARGETPATH;
+			self->bot->path.blocked_try = 0;
+			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_COMMON + BOT_DEBUG_NAVSTATE, "Blocked: Path state (TARGETPATH): %d\n", TARGETPATH);
+		}
+	}
 }
 
 /**
@@ -318,8 +318,8 @@ qboolean botAimAtPath( gentity_t *self )
 		VectorSubtract( level.paths[self->bot->path.targetPath].coord, top, dirToTarget );
 		VectorNormalize( dirToTarget );
 		vectoangles( dirToTarget, angleToTarget );
-		//self->client->ps.delta_angles[ 0 ] = ANGLE2SHORT( angleToTarget[ 0 ] ); //this makes bots to move aim in Z angles
-		self->client->ps.delta_angles[ 1 ] = ANGLE2SHORT( angleToTarget[ 1 ] );
+		//self->client->ps.delta_angles[ PITCH ] = ANGLE2SHORT( angleToTarget[ PITCH ] ); //this makes bots to move aim in Z angles
+		self->client->ps.delta_angles[ YAW ] = ANGLE2SHORT( angleToTarget[ YAW ] );
 	}
 	return qtrue;
 }

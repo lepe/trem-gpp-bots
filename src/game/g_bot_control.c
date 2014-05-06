@@ -83,28 +83,38 @@ void BotDoMove( gentity_t *self, int msec ) {
 	}
 }
 /**
- * Adds a movement to the queue
+ * Adds a movement to the queue (used mainly to create sequence of movements)
+ * if no time is required, use either the shortcut, like BotRun(), or 
+ * use BotControl();
  * @param self
  * @param move
  */
 void BotAddMove( gentity_t *self, botMove move, int time ) {
-	if(self->bot->move.queue[ self->bot->move.write ].action == BOT_EMPTY_MOVE) {
-		self->bot->move.queue[ self->bot->move.write ].action = move;
-		self->bot->move.queue[ self->bot->move.write ].time = time;
-		self->bot->move.write++;
-		if(self->bot->move.write == BOT_MOVE_QUEUE) {
-			self->bot->move.write = 0;
-		}
+	int prev;
+	//Get the previous action on queue
+	prev = self->bot->move.write - 1;
+	if(prev < 0) prev = BOT_MOVE_QUEUE;
+	if(self->bot->move.queue[ prev ].time == BOT_MOVE_NO_TIME_LIMIT && self->bot->move.queue[ prev ].action == move) {
+		//As it is a repeating-non-stop action, we ignore it.
 	} else {
-		/* 
-		 * Queue is not large enough or sometimes we are adding elements to the queue in a faster
-		 * pace than we read them. Other reason is that we are adding a high time value to the queue, which
-		 * fill the queue quickly. For example:
-		 * if we add this: BotAddMove( self, BOT_MOVE_FWD, 10000 ); 
-		 * Bots will move forward for 10 seconds. Meanwhile, other processes may be adding more movements to
-		 * the queue reaching the limit. To prevent locking the queue, you can split the action in smaller parts.
-		 */
-		G_Printf("Movement dropped! Please set BOT_MOVE_QUEUE to a higher value or fix times --see BotAddMove()--.\n");
+		if(self->bot->move.queue[ self->bot->move.write ].action == BOT_EMPTY_MOVE) {
+			self->bot->move.queue[ self->bot->move.write ].action = move;
+			self->bot->move.queue[ self->bot->move.write ].time = time;
+			self->bot->move.write++;
+			if(self->bot->move.write == BOT_MOVE_QUEUE) {
+				self->bot->move.write = 0;
+			}
+		} else {
+			/* 
+			 * Queue is not large enough or sometimes we are adding elements to the queue in a faster
+			 * pace than we read them. Other reason is that we are adding a high time value to the queue, which
+			 * fill the queue quickly. For example:
+			 * if we add this: BotAddMove( self, BOT_MOVE_FWD, 10000 ); 
+			 * Bots will move forward for 10 seconds. Meanwhile, other processes may be adding more movements to
+			 * the queue reaching the limit. To prevent locking the queue, you can split the action in smaller parts.
+			 */
+			G_Printf("%s: Movement dropped (%d) with time (%d)! Please set BOT_MOVE_QUEUE to a higher value or fix times --see BotAddMove()--.\n",self->client->pers.netname ,move,time);
+		}
 	}
 }
 /**
@@ -136,7 +146,7 @@ void BotCleanMove( gentity_t *self ) {
 			break;
 		case BOT_POUNCE:
 			self->client->pers.cmd.buttons = 0;
- 			self->client->ps.delta_angles[ 0 ] = self->client->ps.delta_angles[ 0 ] + ANGLE2SHORT( 45 ); //this makes bots to move aim in Z angles
+ 			self->client->ps.delta_angles[ PITCH ] -= ANGLE2SHORT( 45.0f ); //this makes bots to move aim in Z angles
 			break;
 		case BOT_GESTURE:
 			self->client->pers.cmd.buttons = 0;
@@ -167,7 +177,6 @@ void BotControl( gentity_t *self, botMove move ) {
 		case BOT_STOP: 				
 			self->client->pers.cmd.buttons = 0;
 			self->client->pers.cmd.forwardmove = 0;
-			self->client->pers.cmd.upmove = 0;
 			self->client->pers.cmd.rightmove = 0;
 			break;
 		case BOT_CROUCH: 			
@@ -194,20 +203,20 @@ void BotControl( gentity_t *self, botMove move ) {
 			self->client->pers.cmd.forwardmove = BOT_BCK_VAL;
 			break;
 		case BOT_LOOK_UP:			
- 			self->client->ps.delta_angles[ 0 ] = self->client->ps.delta_angles[ 0 ] - ANGLE2SHORT( BOT_TURN_VAL ); //this makes bots to move aim in Z angles
+ 			self->client->ps.delta_angles[ PITCH ] -= ANGLE2SHORT( BOT_TURN_VAL ); //this makes bots to move aim in Z angles
 			break;
 		case BOT_LOOK_DOWN: 		
- 			self->client->ps.delta_angles[ 0 ] = self->client->ps.delta_angles[ 0 ] + ANGLE2SHORT( BOT_TURN_VAL ); //this makes bots to move aim in Z angles
+ 			self->client->ps.delta_angles[ PITCH ] += ANGLE2SHORT( BOT_TURN_VAL ); //this makes bots to move aim in Z angles
 			break;
 		case BOT_LOOK_LEFT:			
-			self->client->ps.delta_angles[ 1 ] = self->client->ps.delta_angles[ 1 ] + ANGLE2SHORT( BOT_TURN_VAL );
+			self->client->ps.delta_angles[ YAW ] += ANGLE2SHORT( BOT_TURN_VAL );
 			break;
 		case BOT_LOOK_RIGHT:		
-			self->client->ps.delta_angles[ 1 ] = self->client->ps.delta_angles[ 1 ] - ANGLE2SHORT( BOT_TURN_VAL );
+			self->client->ps.delta_angles[ YAW ] -= ANGLE2SHORT( BOT_TURN_VAL );
 			break;
 		case BOT_POUNCE:
 			self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
- 			self->client->ps.delta_angles[ 0 ] = self->client->ps.delta_angles[ 0 ] - ANGLE2SHORT( 45 ); 
+ 			self->client->ps.delta_angles[ PITCH ] -= ANGLE2SHORT( 45.0f ); 
 			break;
 		case BOT_GESTURE:
 			self->client->pers.cmd.buttons |= BUTTON_GESTURE;
@@ -217,26 +226,42 @@ void BotControl( gentity_t *self, botMove move ) {
 			break;
 	}
 }
+/**
+ * Clears queue (usually when bot is dead)
+ * @param self
+ */
+void BotClearQueue( gentity_t *self )
+{
+	int q;
+	for(q = 0; q < BOT_MOVE_QUEUE; q++) {
+		self->bot->move.queue[ q ].action = BOT_EMPTY_MOVE;
+		self->bot->move.queue[ q ].time = 0;
+	}
+	self->bot->move.write = 0;
+	self->bot->move.read = 0;
+}
+
+
 //------------------ PUBLIC FUNCTIONS -----------------
 /*
  * These functions serve as shurtcut for: BotAddMove() 
  * to use custome timed actions use BotAddMove instead.
  */
-void BotRun( gentity_t *self )		{ BotAddMove( self, BOT_RUN, BOT_MOVE_NO_TIME_LIMIT ); }
+void BotRun( gentity_t *self )		{ BotControl( self, BOT_RUN ); }
 void BotJump( gentity_t *self )		{ BotAddMove( self, BOT_JUMP, 500 ); }
-void BotStop( gentity_t *self )		{ BotAddMove( self, BOT_STOP, BOT_MOVE_NO_TIME_LIMIT ); }
-void BotMoveRight( gentity_t *self ){ BotAddMove( self, BOT_MOVE_RIGHT, BOT_MOVE_NO_TIME_LIMIT ); }
-void BotMoveLeft( gentity_t *self )	{ BotAddMove( self, BOT_MOVE_LEFT, BOT_MOVE_NO_TIME_LIMIT ); }
-void BotMoveFwd( gentity_t *self )	{ BotAddMove( self, BOT_MOVE_FWD, BOT_MOVE_NO_TIME_LIMIT ); }
-void BotMoveBack( gentity_t *self )	{ BotAddMove( self, BOT_MOVE_BACK, BOT_MOVE_NO_TIME_LIMIT ); }
+void BotStop( gentity_t *self )		{ BotControl( self, BOT_STOP ); }
+void BotMoveRight( gentity_t *self ){ BotControl( self, BOT_MOVE_RIGHT ); }
+void BotMoveLeft( gentity_t *self )	{ BotControl( self, BOT_MOVE_LEFT ); }
+void BotMoveFwd( gentity_t *self )	{ BotControl( self, BOT_MOVE_FWD ); }
+void BotMoveBack( gentity_t *self )	{ BotControl( self, BOT_MOVE_BACK ); }
 void BotPounce( gentity_t *self )	{ BotLookUp( self, 45 ); BotAddMove( self, BOT_POUNCE, 2000 ); }
-//void BotCharge( gentity_t *self )	{ BotAddMove( self, BOT_RUN, BOT_MOVE_NO_TIME_LIMIT ); }
-void BotWallWalk( gentity_t *self )	{ BotAddMove( self, BOT_WALLWALK, BOT_MOVE_NO_TIME_LIMIT ); }
-void BotCrouch( gentity_t *self )	{ BotAddMove( self, BOT_CROUCH, BOT_MOVE_NO_TIME_LIMIT ); }
-void BotStand ( gentity_t *self )	{ BotAddMove( self, BOT_STAND, BOT_MOVE_NO_TIME_LIMIT ); }
-void BotGesture ( gentity_t *self )	{ BotAddMove( self, BOT_GESTURE, 0 ); }
-//void BotFlyUp( gentity_t *self )	{ BotAddMove( self, BOT_RUN, BOT_MOVE_NO_TIME_LIMIT ); }
-//void BotFlyDown( gentity_t *self )	{ BotAddMove( self, BOT_RUN, BOT_MOVE_NO_TIME_LIMIT ); }
+//void BotCharge( gentity_t *self )	{ BotAddMove( self, BOT_RUN ); }
+void BotWallWalk( gentity_t *self )	{ BotControl( self, BOT_WALLWALK ); }
+void BotCrouch( gentity_t *self )	{ BotControl( self, BOT_CROUCH ); }
+void BotStand ( gentity_t *self )	{ BotControl( self, BOT_STAND ); }
+void BotGesture ( gentity_t *self )	{ BotControl( self, BOT_GESTURE ); }
+//void BotFlyUp( gentity_t *self )	{ BotAddMove( self, BOT_RUN ); }
+//void BotFlyDown( gentity_t *self )	{ BotAddMove( self, BOT_RUN ); }
 
 /*
  LOOK functions should be separated from Move QUEUE as they will make everything slower

@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "g_local.h"
 
+const int BOT_TIMER[] = { 500, 1000, 2000, 4000, 4000 };
 //----- initialize bots ----
 void BotInit( gentity_t *self ) {
 	/* 
@@ -55,18 +56,9 @@ void BotInit( gentity_t *self ) {
 	 *     3       3       3       3       3       3  (L3)
 	 *         X       X       X       X       X      (MAX)
 	 */
-	self->bot->props.time.think[THINK_LEVEL_MIN] = 500; 
-	self->bot->props.time.think[THINK_LEVEL_1] 	 = 1000; 
-	self->bot->props.time.think[THINK_LEVEL_2]   = 2000; 
-	self->bot->props.time.think[THINK_LEVEL_3]   = 4000; 
-	self->bot->props.time.think[THINK_LEVEL_MAX] = 4000;
 	//we move timers phase a little bit to distribuite load
-	self->bot->timer.think[THINK_LEVEL_3]   = 3000; 
-	self->bot->timer.think[THINK_LEVEL_MAX] = 1000;
-	//we set other props:
-	self->bot->props.time.aim = 50;
-	self->bot->props.time.nav = 100;
-	self->bot->props.time.action = 500;
+	self->bot->timer.think[THINK_LEVEL_3]   = BOT_TIMER_THINK_LEVEL_3_START_AT; 
+	self->bot->timer.think[THINK_LEVEL_MAX] = BOT_TIMER_THINK_LEVEL_MAX_START_AT;
 	//Base functions
 	self->bot->funcs.base.spec				= BotSpectator;
 	//self->bot->funcs.base.target			= BotGetTarget;
@@ -81,7 +73,7 @@ void BotInit( gentity_t *self ) {
 	self->bot->funcs.base.status[FOLLOW]	= BotFollow;
 	//self->bot->funcs.base.status[RETREAT]	= BotRetreat;
 	//self->bot->funcs.base.status[EVADE]		= BotEvade;
-	//self->bot->funcs.base.status[HEAL]		= BotHeal;
+	self->bot->funcs.base.status[HEAL]		= BotHeal;
 	////self->bot->funcs.base.status[REPAIR] <-- implemented in human
 	//self->bot->funcs.base.status[BUILD]		= BotBuild;
 	//self->bot->funcs.base.status[RUSH]		= BotRush;
@@ -107,6 +99,7 @@ void BotSpectator( gentity_t *self ){
 	for(t = 0; t < THINK_LEVEL_MAX + 1; t++) {
 		self->bot->think.state[t] = UNDEFINED;
 	}
+	BotClearQueue( self );
 	self->bot->path.state = FINDNEWPATH;
 	self->bot->path.pathChosen = qfalse;
 	self->bot->path.nextNode = qfalse;
@@ -158,6 +151,7 @@ void BotThink( gentity_t *self )
 				self->bot->Friend = NULL;
 				if(self->bot->Enemy->health <= 0) {
 					self->bot->Enemy = NULL;
+					self->client->pers.cmd.buttons = 0;
 					BotResetState( self, ATTACK );
 				}
 			} else {
@@ -187,10 +181,10 @@ void BotThink( gentity_t *self )
 				if(self->bot->Friend->health <= 0) {
 					//TODO: report to CHAT function
 					self->bot->Friend = NULL;
-					self->bot->think.state[ THINK_LEVEL_1 ] = UNDEFINED;
+					BotResetState( self, FOLLOW );
 				}
 			} else {
-				self->bot->think.state[ THINK_LEVEL_1 ] = UNDEFINED;
+				BotResetState( self, FOLLOW );
 			}
 			///////////////////////// LEVEL 2 /////////////////////////
 			if(BotKeepThinking( self , THINK_LEVEL_2)) {
@@ -198,17 +192,21 @@ void BotThink( gentity_t *self )
 				if(self->bot->Friend) {
 					if(!botTargetInRange( self, self->bot->Friend )) {
 						self->bot->Friend = NULL;
-						self->bot->think.state[ THINK_LEVEL_2 ] = UNDEFINED;
+						BotResetState( self, FOLLOW );
 					}
 				}
 				
 			}
 			break;
 		case HEAL: 
-			//wait until you are 100% (or timeout)
-			if(self->health == 100 || level.time - self->bot->timer.action > 10000) {
-				self->bot->think.state[ THINK_LEVEL_1 ] = UNDEFINED;
-			}
+			//wait until you are 100% 
+			if(self->health == 100) 
+			{
+				if(self->bot->Struct) {
+					self->bot->Struct = NULL;
+				}
+				BotResetState( self, HEAL );
+			} 
 			break;
 		default:
 			break;
@@ -230,12 +228,12 @@ void BotAim( gentity_t *self )
 		case ATTACK:
 		case DEFEND:
 			if(self->bot->Enemy) {
-				botAimAtTarget(self, self->bot->Enemy);
+				botAimAtTarget(self, self->bot->Enemy, qtrue);
 			}
 			break;
 		case FOLLOW:
 			if(self->bot->Friend) {
-				botAimAtTarget(self, self->bot->Friend);
+				botAimAtTarget(self, self->bot->Friend, qtrue);
 			}
 			break;
 		case REPAIR:
@@ -243,7 +241,7 @@ void BotAim( gentity_t *self )
 		case IMPROVE:
 		case HEAL:
 			if(self->bot->Struct) {
-				botAimAtTarget(self, self->bot->Struct);
+				botAimAtTarget(self, self->bot->Struct, qfalse);
 			}
 			break;
 		default:
@@ -268,7 +266,7 @@ void BotAim( gentity_t *self )
 qboolean BotKeepThinking( gentity_t *self, botThinkLevel level )
 {
 	//TODO: calculate impulsive behaviour
-	if(self->bot->timer.think[level] >= self->bot->props.time.think[level]) {
+	if(self->bot->timer.think[level] >= BOT_TIMER[level]) {
 		return qtrue;
 	} else {
 		return qfalse;
@@ -301,10 +299,10 @@ void G_BotGroupThink( void ) {
  * @param self
  */
 void BotExplore( gentity_t *self ){
-
 	//We don't add them to the queue, we execute them directly:
 	BotControl( self, BOT_STAND );
-	BotControl( self, BOT_MOVE_FWD );
+	BotControl( self, BOT_RUN );
+	//TODO: if bot gets stuck, decrease node essence.
 }
 /**
  * Do nothing... 
@@ -347,7 +345,14 @@ void BotEvade( gentity_t *self ){}
  * Bot will try to heal itself
  * @param self
  */
-void BotHeal( gentity_t *self ){}
+void BotHeal( gentity_t *self ){
+	if(self->bot->Struct) 
+	{
+		if(botGetDistanceBetweenPlayer( self, self->bot->Struct) < 50) {
+			BotStop( self );
+		}
+	}
+}
 /**
  * Bot will try to be useful building something
  * @param self
