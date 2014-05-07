@@ -79,4 +79,14 @@ if [[ "$WEB_DIR" != "" ]]; then
     ln -s $DEPLOY_DIR/$PK3VM .
 fi
 cd $ROOT_PWD
+# copy the start script if it is not there
+if [ ! -f $DEPLOY_DIR/start.sh ]; then
+    cp start.sh $DEPLOY_DIR/start.sh
+fi
+if [ ! -d $DEPLOY_DIR/$MOD ]; then
+    mkdir $DEPLOY_DIR/$MOD;
+fi
+if [ ! -d $DEPLOY_DIR/$MOD/bots ]; then
+    cp -R gpp-bot/* $DEPLOY_DIR/$MOD/
+fi
 exit 0
