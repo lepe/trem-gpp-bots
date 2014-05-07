@@ -100,6 +100,8 @@ void BotSpectator( gentity_t *self ){
 		self->bot->think.state[t] = UNDEFINED;
 	}
 	BotClearQueue( self );
+	BotStop( self );
+	BotStand( self );
 	self->bot->path.state = FINDNEWPATH;
 	self->bot->path.pathChosen = qfalse;
 	self->bot->path.nextNode = qfalse;

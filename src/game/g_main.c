@@ -1022,6 +1022,10 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
     level.humanTeamLocked = qtrue;
     trap_Cvar_Set( "g_lockTeamsAtStart", "0" );
   }
+  //LEPE: start bots
+  if(level.numAlienClients == 0 && level.numHumanClients == 0) {
+ 	trap_SendConsoleCommand( EXEC_APPEND, "exec bots/start.cfg\n" ); 
+  }
 }
 
 /*
@@ -2878,9 +2882,6 @@ void G_DeployBots( gentity_t *ent )
     if(g_bot_join.integer) {
          G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN,"A Players: %d\nH Players: %d\n",level.numAlienClients,level.numHumanClients);
         if(! (ent->r.svFlags & SVF_BOT)) { 
-            if(level.numAlienClients == 0 && level.numHumanClients == 0) {
-                trap_SendConsoleCommand( EXEC_APPEND, "exec bots/start.cfg\n" ); 
-            }
             if(level.numAlienClients - level.alienBots >= 0) {
                 trap_SendConsoleCommand( EXEC_APPEND, va("exec bots/A%d.cfg\n", level.numAlienClients - level.alienBots) ); 
             } 

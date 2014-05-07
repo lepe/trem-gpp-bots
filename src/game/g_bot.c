@@ -105,9 +105,12 @@ void G_BotAdd( char *name, team_t team, int skill, int ignore ) {
 	Info_SetValueForKey( userinfo, "name", name );
 	Info_SetValueForKey( userinfo, "rate", "25000" ); //25000
 	Info_SetValueForKey( userinfo, "snaps", "40" );
-
+	//so we can connect if server is password protected
+	if(g_needpass.integer == 1) {
+		  Info_SetValueForKey( userinfo, "password", g_password.string);
+	}
 	trap_SetUserinfo( clientNum, userinfo );
-
+	
 	// have it connect to the game as a normal client
 	if(ClientConnect(clientNum, qtrue) != NULL ) {
 		// won't let us join
