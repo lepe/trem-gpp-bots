@@ -96,6 +96,13 @@ void BotBeforeSpawnAlien( gentity_t *self )
  */
 void BotAlienThink( gentity_t *self )
 {
+	//DRETCH: ignore structures that can't destroy
+	if(self->bot->Enemy && self->client->pers.classSelection == PCL_ALIEN_LEVEL0) {
+		if(self->bot->Enemy->spawned && self->bot->Enemy->s.eType == ET_BUILDABLE) {
+			self->bot->Enemy = NULL;
+			BotResetState( self, ATTACK );
+		}
+	}
 	///////////////////////// LEVEL 1 /////////////////////////
 	if(!BotKeepThinking( self , THINK_LEVEL_1)) return;
 
@@ -134,9 +141,9 @@ void BotNavigateAlien( gentity_t *self )
 			 (self->client->pers.classSelection == PCL_ALIEN_LEVEL3_UPG && 
 			  self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG_UPG)) {
 				BotRun( self );
-				BotPounce( self );
+				Bot_Pounce( self, 30 );
 	} else if(self->client->pers.classSelection == PCL_ALIEN_LEVEL4) {
-			 self->client->pers.cmd.buttons |= BUTTON_ATTACK2; 
+		BotSecAttack( self );
 	}
 }
 /**
@@ -414,97 +421,149 @@ void BotEvolve( gentity_t *self )
  */
 void BotAttackAlien( gentity_t *self )
 {
-	int tooCloseDistance = 100; // about 1/3 of turret range
+	int closeDistance = LEVEL2_AREAZAP_RANGE; 
+	int veryCloseDistance = LEVEL4_CLAW_RANGE; 
 	int tempEntityIndex = -1;
 	int rand = 0;
+	int distance = botGetDistanceBetweenPlayer(self, self->bot->Enemy);
+	int anglediff = 0;
 	//TODO: move this code to target prioritization
 	//Use: g_utils.c : G_ClosestEnt(  ) to get the closest entities around ?
 	
-	if(botGetDistanceBetweenPlayer(self, self->bot->Enemy) > tooCloseDistance) { //LEPE: if is far, search for a closer target
+	if(distance > closeDistance) { //LEPE: if is far, search for a closer target
 		// try to find closest enemy
 		tempEntityIndex = botFindClosestEnemy(self);
-		if(tempEntityIndex >= 0)
+		if(tempEntityIndex >= 0) {
 			self->bot->Enemy = &g_entities[tempEntityIndex];
+			distance = botGetDistanceBetweenPlayer(self, self->bot->Enemy);
+		}
 	}
-	if(botTargetInRange(self, self->bot->Enemy) && G_Visible(self, self->bot->Enemy, CONTENTS_SOLID)) //LEPE: test if its visible
+	//If we are closer than what humans can reach to us
+	if(distance < g_human_range.integer)
 	{
-	  //ROTAX
 			rand = G_Rand();
 				
 			BotWallWalk( self ); // enable wallwalk if possible
-			//BotPounce( self ); //if possible
 			
-			if(self->bot->Enemy->client) {
-				BotRun( self );
+			BotRun( self );
+			//If we are not close enough and the target is a bot or a player, strafe
+			//TODO: we could apply bot difficulty here. Like, easy bots will not strafe
+			if(distance > veryCloseDistance && self->bot->Enemy->s.eType == ET_PLAYER) {
 				Bot_Strafe( self );
+			} else {
+				//TODO: test it
+				BotClearQueue( self ); //remove queued movements (probably Strafe), as we are too close
 			}
 
 			self->client->pers.cmd.buttons = 0;
 			if (self->client->pers.classSelection == PCL_ALIEN_BUILDER0)
 			{
-				self->client->pers.cmd.buttons |= BUTTON_GESTURE;
+				if (distance <= LEVEL0_BITE_RANGE) {
+ 					BotSecAttack( self );
+				} else {
+					BotGesture( self );
+				}
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_BUILDER0_UPG)//adv granger
 			{
-				if (rand > 10)
- 					self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
-				else
-					self->client->pers.cmd.buttons |= BUTTON_USE_HOLDABLE;
+				if (distance <= LEVEL0_BITE_RANGE) {
+ 					BotSecAttack( self );
+				} else {
+					BotMidAttack( self );
+				}
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL0)//dretch
             {
-                //LEPE: ignore structures that can't destroy
-                if(self->bot->Enemy->spawned && self->bot->Enemy->s.eType == ET_BUILDABLE) {
-                    self->bot->Enemy = NULL;
-                    return;
-                }
+				//do nothing special yet
             }
+			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL1)//basilisk
+			{
+				if (distance <= LEVEL1_CLAW_RANGE) {
+					BotMainAttack( self );
+				}
+				if (distance <= LEVEL1_GRAB_RANGE) {
+					BotStop( self );
+					BotMoveFwd( self );
+					anglediff = botGetAngleBetweenPlayer( self, self->bot->Enemy );
+					if(anglediff > 90 && anglediff <= 180) {
+						BotMoveLeft( self );
+					} else if(anglediff > 180 && anglediff < 270) {
+						BotMoveRight( self );
+					} else {
+						BotJump( self );
+						BotMainAttack( self );
+					}
+				}
+			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL1_UPG)//adv basilisk
 			{
-				if (rand > 15)
-					self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
-				else
-					self->client->pers.cmd.buttons |= BUTTON_ATTACK;
+				if (distance <= LEVEL1_CLAW_U_RANGE) {
+					BotMainAttack( self );
+				} 
+				if (distance <= LEVEL1_PCLOUD_RANGE) {
+ 					BotSecAttack( self );
+				}
+				if (distance <= LEVEL1_GRAB_U_RANGE) {
+					BotStop( self );
+					BotMoveFwd( self );
+					anglediff = botGetAngleBetweenPlayer( self, self->bot->Enemy );
+					if(anglediff > 90 && anglediff <= 180) {
+						BotMoveLeft( self );
+					} else if(anglediff > 180 && anglediff < 270) {
+						BotMoveRight( self );
+					} else {
+						BotJump( self );
+					}
+				}
+			}
+			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL2)//marauder
+			{
+				if (distance <= LEVEL2_CLAW_RANGE) {
+					BotMainAttack( self );
+				}
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL2_UPG)//adv marauder
 			{
-				if (Distance( self->s.pos.trBase, self->bot->Enemy->s.pos.trBase ) > LEVEL2_CLAW_RANGE)
-					self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
-				else
-					self->client->pers.cmd.buttons |= BUTTON_ATTACK;
+				if (distance <= LEVEL2_CLAW_U_RANGE) {
+					BotMainAttack( self );
+				} 
+				if (distance <= LEVEL2_AREAZAP_RANGE) {
+ 					BotSecAttack( self );
+				}
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL3)//dragon
 			{
-				if(Distance( self->s.pos.trBase, self->bot->Enemy->s.pos.trBase ) > LEVEL3_CLAW_RANGE - 10 &&  //LEPE: using the constant
-					self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG)
-					self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
-				else
-					self->client->pers.cmd.buttons |= BUTTON_ATTACK;
+				if(distance > LEVEL3_CLAW_RANGE && self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG) {
+ 					BotSecAttack( self );
+				} else {
+					BotMainAttack( self );
+				}
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL3_UPG)//adv dragon
 			{
-				if(self->client->ps.ammo > 0 && 
-					Distance( self->s.pos.trBase, self->bot->Enemy->s.pos.trBase ) > 150)
-					    self->client->pers.cmd.buttons |= BUTTON_USE_HOLDABLE; //it can shoot and attack at the same time
-
-					if(Distance( self->s.pos.trBase, self->bot->Enemy->s.pos.trBase ) > LEVEL3_CLAW_UPG_RANGE - 10 &&  //LEPE: using constant.
-						self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG_UPG)
-						self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
-					else
-						self->client->pers.cmd.buttons |= BUTTON_ATTACK;
+				//it can shoot and attack at the same time
+				if(self->client->ps.ammo > 0 && distance > 150) {
+					   BotMidAttack( self ); 
+				}
+				if(distance > LEVEL3_CLAW_UPG_RANGE && self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG_UPG) {
+ 					BotSecAttack( self ); //TODO: should Bot_Pounce be used here?
+				} else {
+					BotMainAttack( self );
+				}
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL4)//tyrant
 			{
-				if (Distance( self->s.pos.trBase, self->bot->Enemy->s.pos.trBase ) > LEVEL4_CLAW_RANGE)
-					self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
-				else
-					self->client->pers.cmd.buttons |= BUTTON_ATTACK;
+				if (distance > LEVEL4_CLAW_RANGE) {
+ 					BotSecAttack( self );
+				} else {
+					BotMainAttack( self );
+				}
 			}
 			return;
 	} else {
 		BotResetState( self, ATTACK );
 		self->bot->Enemy = NULL;
-		self->client->pers.cmd.buttons = 0;
+		BotControl( self, BOT_RESET_BUTTONS );
 	}
 }
 
@@ -540,7 +599,7 @@ void BotHealAlien( gentity_t *self ) {
 		if(!self->bot->Struct && self->health <= 40) {
 			self->bot->Friend = botFindClosestBasilisk( self, 400 );
 			if(self->bot->Friend) {
-				//self->bot->state = FOLLOW;
+				self->bot->state = FOLLOW;
 			}
 		}
 	}

@@ -512,23 +512,35 @@ void BotBuy( gentity_t *self )
  */
 void BotAttackHuman( gentity_t *self )
 {
-	int tooCloseDistance = 100; // about 1/3 of turret range
+	int tooCloseDistance = 200; 
 	int tempEntityIndex = -1;
+	int distance = botGetDistanceBetweenPlayer(self, self->bot->Enemy);
 	//TODO: move this code to target prioritization
-	if(G_Rand() < 50 && botGetDistanceBetweenPlayer(self, self->bot->Enemy) > tooCloseDistance) { //LEPE: change target 50% of times. 
+	if(G_Rand() < 10 && distance > tooCloseDistance) { //LEPE: change target 10% of times. 
 		// try to find closest enemy
 		tempEntityIndex = botFindClosestEnemy(self);
-		if(tempEntityIndex >= 0)
+		if(tempEntityIndex >= 0) {
 			self->bot->Enemy = &g_entities[tempEntityIndex];
+			distance = botGetDistanceBetweenPlayer(self, self->bot->Enemy);
+		}
 	}
-	if(botTargetInRange(self, self->bot->Enemy) && G_Visible(self, self->bot->Enemy, CONTENTS_SOLID)) //LEPE: test if its visible
+	//Use nades
+	if(distance < tooCloseDistance && (self->bot->Enemy->s.eType == ET_BUILDABLE || self->bot->Enemy->s.eType == PCL_ALIEN_LEVEL4)) {	//LEPE: Nades on buildings or tyrants
+	    if(BG_InventoryContainsUpgrade(UP_GRENADE,self->client->ps.stats)) {
+            G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_UTIL + BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "NADE ACTIVATED!\n");
+            BG_ActivateUpgrade(UP_GRENADE,self->client->ps.stats);
+	    }
+	}
+	
+	if(distance < g_human_range.integer) 
 	{
 	  //ROTAX
 		int rand = 0;
 		rand = G_Rand();
 
-		if(self->bot->Enemy->client) {
-			if(Distance( self->s.pos.trBase, self->bot->Enemy->s.pos.trBase ) < 300 && 
+		//If its a player or bot
+		if(self->bot->Enemy->s.eType == ET_PLAYER) {
+			if(distance < 300 && 
 				self->client->ps.weapon != WP_PAIN_SAW && 
 				self->client->ps.weapon != WP_FLAMER)
 			{
@@ -540,15 +552,17 @@ void BotAttackHuman( gentity_t *self )
 				BotRun( self );
 				Bot_Strafe( self );
 			}
-		} else {
+		} 
+		else if(self->bot->Enemy->s.eType == ET_BUILDABLE)  //If its a structure
+		{
 			if(self->client->ps.weapon == WP_PAIN_SAW || self->client->ps.weapon == WP_FLAMER)
 			{
 				BotStand( self );
-				BotRun( self );
+				BotMoveFwd( self );
 			}
 			else
 			{
-				if(Distance( self->s.pos.trBase, self->bot->Enemy->s.pos.trBase ) < 200) {
+				if(distance < 200) {
 					BotStand( self );
 					BotAddMove( self, BOT_MOVE_BACK, 500);
 				} else {
@@ -558,7 +572,6 @@ void BotAttackHuman( gentity_t *self )
 			}
 		}
 		
-		self->client->pers.cmd.buttons = 0;
 		//Use blaster if weapon out of ammo. self->s.weapon is current weapon that might not be out.
 		if(self->client->ps.weapon != WP_BLASTER && 
 			self->client->ps.weapon != WP_PAIN_SAW && 
@@ -573,21 +586,25 @@ void BotAttackHuman( gentity_t *self )
 		
 		if(self->client->ps.weapon == WP_FLAMER)
 		{
-			if(Distance( self->s.pos.trBase, self->bot->Enemy->s.pos.trBase ) < 200) {
-				self->client->pers.cmd.buttons |= BUTTON_ATTACK;
+			if(distance < 200) {
+				BotMainAttack( self );
 			}
 		}
 		else if(self->client->ps.weapon == WP_LUCIFER_CANNON)
 		{
-			self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
+			if(self->bot->Enemy->s.eType == ET_BUILDABLE || self->bot->Enemy->s.eType == PCL_ALIEN_LEVEL4) {
+				Bot_FullLuci( self );
+			} else {
+				BotSecAttack( self );
+			}
 		}
 		else
 		{
-			self->client->pers.cmd.buttons |= BUTTON_ATTACK;
+			BotMainAttack( self );
 		}
 	} else {
 		self->bot->Enemy = NULL;
-		self->client->pers.cmd.buttons = 0;
+		BotControl( self, BOT_RESET_BUTTONS );
 	}
 }
 

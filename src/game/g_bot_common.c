@@ -155,15 +155,17 @@ void BotThink( gentity_t *self )
 					self->bot->Enemy = NULL;
 					self->client->pers.cmd.buttons = 0;
 					BotResetState( self, ATTACK );
+					BotClearQueue( self );
 				}
 			} else {
 				BotResetState( self, ATTACK );
+				BotClearQueue( self );
 			}
 			///////////////////////// LEVEL 2 /////////////////////////
 			if(BotKeepThinking( self , THINK_LEVEL_2)) {
 			
 				if(self->bot->Enemy) {
-					if(!botTargetInRange( self, self->bot->Enemy )) {
+					if(botGetDistanceBetweenPlayer(self, self->bot->Enemy) > g_human_range.integer) {
 						self->bot->Enemy = NULL;
 						BotResetState( self, ATTACK );
 					}
@@ -192,7 +194,8 @@ void BotThink( gentity_t *self )
 			if(BotKeepThinking( self , THINK_LEVEL_2)) {
 			
 				if(self->bot->Friend) {
-					if(!botTargetInRange( self, self->bot->Friend )) {
+					//TODO: change fixed value to a variable
+					if(botGetDistanceBetweenPlayer(self, self->bot->Enemy) > 300) {
 						self->bot->Friend = NULL;
 						BotResetState( self, FOLLOW );
 					}
@@ -301,9 +304,9 @@ void G_BotGroupThink( void ) {
  * @param self
  */
 void BotExplore( gentity_t *self ){
-	//We don't add them to the queue, we execute them directly:
-	BotControl( self, BOT_STAND );
-	BotControl( self, BOT_RUN );
+	BotStand( self );
+	BotRun( self );
+	BotControl( self, BOT_LOOK_CENTER );
 	//TODO: if bot gets stuck, decrease node essence.
 }
 /**

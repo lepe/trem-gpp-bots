@@ -219,7 +219,7 @@ void G_BotCmd( int clientNum, char *command, int value, int value2 ) {
 	  	  ent->bot->think.state[ THINK_LEVEL_MAX ] = value;
 	  }
 	  
-  } else if( !Q_stricmp( command, "nav" ) ) { //LEPE: change bot state. Requires g_bot_manual = 1
+  } else if( !Q_stricmp( command, "nav" ) ) { //LEPE: change bot state. Requires g_bot_manual_nav = 1
 	  
 	  if(g_bot_manual_nav.integer) {
 	  	  ent->bot->path.state = value;
@@ -232,11 +232,13 @@ void G_BotCmd( int clientNum, char *command, int value, int value2 ) {
 		  	BotAddMove( ent, (botMove)value, value2 );
 		  } else {
 			  switch(value) {
-				  case 20: BotLookUp( ent , value2 ); break;
-				  case 21: BotLookDown( ent , value2 ); break;
-				  case 22: BotLookLeft( ent , value2 ); break;
-				  case 23: BotLookRight( ent , value2 ); break;
-				  case 30: Bot_Strafe( ent ); break;
+				  case 50: BotLookUp( ent , value2 ); break;
+				  case 51: BotLookDown( ent , value2 ); break;
+				  case 52: BotLookLeft( ent , value2 ); break;
+				  case 53: BotLookRight( ent , value2 ); break;
+				  case 60: Bot_Strafe( ent ); break;
+				  case 61: Bot_Pounce( ent, value2 ); break;
+				  case 62: Bot_FullLuci( ent ); break;
 				  default:
 		  	 		trap_SendServerCommand(-1, "print \"unknown move value\n\"");
 					break;

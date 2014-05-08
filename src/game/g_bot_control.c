@@ -149,6 +149,10 @@ void BotCleanMove( gentity_t *self ) {
  			self->client->ps.delta_angles[ PITCH ] -= ANGLE2SHORT( 45.0f ); //this makes bots to move aim in Z angles
 			break;
 		case BOT_GESTURE:
+		case BOT_FULL_LUCI:
+		case BOT_MAIN_ATTACK:
+		case BOT_SEC_ATTACK:
+		case BOT_MID_ATTACK:
 			self->client->pers.cmd.buttons = 0;
 			break;
 		default:
@@ -202,6 +206,9 @@ void BotControl( gentity_t *self, botMove move ) {
 		case BOT_MOVE_BACK: 		
 			self->client->pers.cmd.forwardmove = BOT_BCK_VAL;
 			break;
+		case BOT_LOOK_CENTER:
+			self->client->ps.delta_angles[ PITCH ] = 0;
+			break;
 		case BOT_LOOK_UP:			
  			self->client->ps.delta_angles[ PITCH ] -= ANGLE2SHORT( BOT_TURN_VAL ); //this makes bots to move aim in Z angles
 			break;
@@ -218,8 +225,21 @@ void BotControl( gentity_t *self, botMove move ) {
 			self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
  			self->client->ps.delta_angles[ PITCH ] -= ANGLE2SHORT( 45.0f ); 
 			break;
+		case BOT_MAIN_ATTACK:
+		case BOT_FULL_LUCI:
+			self->client->pers.cmd.buttons |= BUTTON_ATTACK;
+			break;
+		case BOT_SEC_ATTACK:
+			self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
+			break;
+		case BOT_MID_ATTACK:
+			self->client->pers.cmd.buttons |= BUTTON_USE_HOLDABLE;
+			break;
 		case BOT_GESTURE:
 			self->client->pers.cmd.buttons |= BUTTON_GESTURE;
+			break;
+		case BOT_RESET_BUTTONS:
+			self->client->pers.cmd.buttons = 0;
 			break;
 		default:
 			G_Printf("Invalid Bot Movement: %d\n", move);
@@ -254,14 +274,13 @@ void BotMoveRight( gentity_t *self ){ BotControl( self, BOT_MOVE_RIGHT ); }
 void BotMoveLeft( gentity_t *self )	{ BotControl( self, BOT_MOVE_LEFT ); }
 void BotMoveFwd( gentity_t *self )	{ BotControl( self, BOT_MOVE_FWD ); }
 void BotMoveBack( gentity_t *self )	{ BotControl( self, BOT_MOVE_BACK ); }
-void BotPounce( gentity_t *self )	{ BotLookUp( self, 45 ); BotAddMove( self, BOT_POUNCE, 2000 ); }
-//void BotCharge( gentity_t *self )	{ BotAddMove( self, BOT_RUN ); }
 void BotWallWalk( gentity_t *self )	{ BotControl( self, BOT_WALLWALK ); }
 void BotCrouch( gentity_t *self )	{ BotControl( self, BOT_CROUCH ); }
 void BotStand ( gentity_t *self )	{ BotControl( self, BOT_STAND ); }
 void BotGesture ( gentity_t *self )	{ BotControl( self, BOT_GESTURE ); }
-//void BotFlyUp( gentity_t *self )	{ BotAddMove( self, BOT_RUN ); }
-//void BotFlyDown( gentity_t *self )	{ BotAddMove( self, BOT_RUN ); }
+void BotMainAttack ( gentity_t *self ){ BotControl( self, BOT_MAIN_ATTACK ); }
+void BotSecAttack ( gentity_t *self ){ BotControl( self, BOT_SEC_ATTACK ); }
+void BotMidAttack ( gentity_t *self ){ BotControl( self, BOT_MID_ATTACK ); }
 
 /*
  LOOK functions should be separated from Move QUEUE as they will make everything slower
@@ -310,22 +329,20 @@ void BotTurn( gentity_t *self, int pitch, int yaw ){
 }
 
 //########### ALIEN SPECIFIC ################
-/*
-static void Charge( gentity_t *self ) {
-
-
+//void Charge( gentity_t *self ) {}
+void Bot_Pounce( gentity_t *self, int angle )	{ 
+	BotLookUp( self, angle ); 
+	BotAddMove( self, BOT_POUNCE, LEVEL3_POUNCE_TIME_UPG ); 
 }
 
 //########### HUMAN SPECIFIC ################
 
-static void FlyUp( gentity_t *self ) {
-
+//void BotFlyUp( gentity_t *self )	{ BotAddMove( self, BOT_RUN ); }
+//void BotFlyDown( gentity_t *self )	{ BotAddMove( self, BOT_RUN ); }
+void Bot_FullLuci( gentity_t *self )	{ 
+	BotAddMove( self, BOT_FULL_LUCI, LCANNON_CHARGE_TIME_MAX - 500 ); 
 }
-static void FlyDown( gentity_t *self ) {
-
-}
-*/
-//########### COMBOS ################
+//########### COMMON ################
 /**
  * Strafe movement.
  * @param self [gentity_t] : BOT

@@ -52,106 +52,6 @@ int G_Rand_Range( int start, int end ) {
     return (int)(rand() % (start - end)) + end;
 }
 
-/**
- * Check if target is in attack/shoot range to the BOT
- * @param self [gentity_t] a BOT
- * @param target [gentity_t] buildable, player or bot
- * @return boolean
- * 
- * TODO: split this code into human/alien?
- */
-qboolean botTargetInRange( gentity_t *self, gentity_t *target ) {
-	trace_t   trace;
-	gentity_t *traceEnt;
-	vec3_t  forward, right, up;
-	vec3_t  muzzle;
-	AngleVectors( self->client->ps.viewangles, forward, right, up );
-	CalcMuzzlePoint( self, forward, right, up, muzzle );
-
-	if( !self || !target )
-		return qfalse;
-
-	if( target->health <= 0 )
-		return qfalse;
-	
-	if( self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-		 self->client->ps.stats[ STAT_CLASS ] != PCL_ALIEN_LEVEL3_UPG &&
-		 self->client->ps.stats[ STAT_CLASS ] != PCL_ALIEN_LEVEL3 &&
-		 target->s.pos.trBase[2] - self->s.pos.trBase[2] > 150)
-		return qfalse;
-	if(self->client->ps.weapon == WP_PAIN_SAW && 
-		target->s.pos.trBase[2] - self->s.pos.trBase[2] > 150)
-	{
-		return qfalse;
-	}
-	else if(self->client->ps.weapon == WP_FLAMER && 
-		target->s.pos.trBase[2] - self->s.pos.trBase[2] > 200)
-	{
-		return qfalse;
-	}
-	if(self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS)
-	{
-		if(self->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL4 && 
-			Distance( self->s.pos.trBase, target->s.pos.trBase ) > g_level4_range.integer)
-		{return qfalse;}
-		else if(self->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL3_UPG && 
-			Distance( self->s.pos.trBase, target->s.pos.trBase ) > g_level3UPG_range.integer)
-		{return qfalse;}
-		else if(self->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL3 && 
-			Distance( self->s.pos.trBase, target->s.pos.trBase ) > g_level3_range.integer)
-		{return qfalse;}
-		else if(self->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL2_UPG && 
-			Distance( self->s.pos.trBase, target->s.pos.trBase ) > g_level2UPG_range.integer)
-		{return qfalse;}
-		else if(self->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL2 && 
-			Distance( self->s.pos.trBase, target->s.pos.trBase ) > g_level2_range.integer)
-		{return qfalse;}
-		else if(self->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL1_UPG && 
-			Distance( self->s.pos.trBase, target->s.pos.trBase ) > g_level1UPG_range.integer)
-		{return qfalse;}
-		else if(self->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL1 && 
-			Distance( self->s.pos.trBase, target->s.pos.trBase ) > g_level1_range.integer)
-		{return qfalse;}
-		else if(self->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL0 && 
-			Distance( self->s.pos.trBase, target->s.pos.trBase ) > g_level0_range.integer)
-		{return qfalse;}
-		else if(self->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0 && 
-			Distance( self->s.pos.trBase, target->s.pos.trBase ) > 100)
-		{return qfalse;}
-		else if(self->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0_UPG && 
-			Distance( self->s.pos.trBase, target->s.pos.trBase ) > 200)
-		{return qfalse;}
-	}
-	else if((self->client->ps.stats[ STAT_CLASS ] == PCL_HUMAN || 
-		self->client->ps.stats[ STAT_CLASS ] == PCL_HUMAN_BSUIT ) && 
-		Distance( self->s.pos.trBase, target->s.pos.trBase ) > g_human_range.integer)
-	{return qfalse;}
-	else
-	{
-		if(Distance( self->s.pos.trBase, target->s.pos.trBase ) > 3000)
-		{return qfalse;}
-	}
-	//BG_FindViewheightForClass(  self->client->ps.stats[ STAT_CLASS ], &vh, NULL );
-	//top[2]=vh;
-	//VectorAdd( self->s.pos.trBase, top, top);
-	//draw line between us and the target and see what we hit
-	//trap_Trace( &trace, self->s.pos.trBase, NULL, NULL, target->s.pos.trBase, self->s.number, MASK_SHOT );
-
-	trap_Trace( &trace, muzzle, NULL, NULL, target->s.pos.trBase, self->s.number, MASK_SHOT );
-	traceEnt = &g_entities[ trace.entityNum ];
-    //if( trace.fraction < 1.0 )
-    //{return qfalse;}
-    // check that we hit a human and not an object
-    //if( !traceEnt->client )
-    // return qfalse;
-
-    //check our target is in LOS
-    if(!(traceEnt == target))
-            return qfalse;
-
-	return qtrue;
-}
-
 // ROTAX: really an int? what if it's too long? If it is, we are fuxed.
 /**
  * Get Distance between player and target
@@ -163,6 +63,18 @@ int botGetDistanceBetweenPlayer( gentity_t *self, gentity_t *player ) {
 	return (int)Distance( self->s.pos.trBase, player->s.pos.trBase );
 }
 
+/**
+ * Get the difference between angles (bot and target).
+ * If the target is facing to the same angle as the bot is, that should be 0
+ * If the target is facing the bot, it should be 180
+ * @param self [gentity_t] a BOT
+ * @param player [gentity_t] a player or bot
+ * @return float (angle)
+ */
+int botGetAngleBetweenPlayer( gentity_t *self, gentity_t *player ) {
+	return abs(SHORT2ANGLE(self->client->ps.delta_angles[ YAW ]) - SHORT2ANGLE(player->client->ps.delta_angles[ YAW ]));
+}
+
 /*
  * Bot AIM at target
  * Perform calculations on where to shoot / attack
@@ -171,8 +83,6 @@ int botGetDistanceBetweenPlayer( gentity_t *self, gentity_t *player ) {
  * @return boolean (always true)
  */
 qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch ) {
-    int tooCloseDistance = 100; //LEPE
-    int distance = 0;
 	vec3_t dirToTarget, angleToTarget, highPoint, targetUp, targetStraight, realBase;
 
 	// Calculate the point on top of model (head) (well, 15% lower).
@@ -197,13 +107,6 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch ) {
 	    dirToTarget[1] += self->bot->profile.skill * cos( self->client->time1000 );
 	} 
 
-	//TODO: move this from here to g_bot_human.c
-	if( target->s.eType == ET_BUILDABLE || target->s.eType == PCL_ALIEN_LEVEL4 ) {	//LEPE: Nades on buildings or tyrants
-	    if(BG_InventoryContainsUpgrade(UP_GRENADE,self->client->ps.stats)) {
-            G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_UTIL + BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "NADE ACTIVATED!\n");
-            BG_ActivateUpgrade(UP_GRENADE,self->client->ps.stats);
-	    }
-	}
 	// Grab the angles to use with delta_angles
 	vectoangles( dirToTarget, angleToTarget );
 	if(pitch) {
@@ -213,29 +116,19 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch ) {
 	//self->client->ps.delta_angles[ ROLL ] = ANGLE2SHORT( angleToTarget[ ROLL ] );
 
     //LEPE: added if... Humans keep jumping when they are too close of a buildable
-    if(target->s.eType == ET_BUILDABLE) {
-        distance = botGetDistanceBetweenPlayer(self, target);
-        if(distance > tooCloseDistance)
-            BotStand( self ); //do nothing (stand position)
-        else if (self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS) {
-            BotCrouch( self ); //keep down
-		}
-    } else {
+	//it was done here for simplification as angles are already calculated. However
+	//this code should be moved to g_bot_human.c
+	if(self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS) {
         if(angleToTarget[0] > -350 && angleToTarget[0] < -180) { // down
-            if( self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) {
-            	BotCrouch( self ); //keep down
-            }
+            BotCrouch( self ); //keep down
         }
         else if(angleToTarget[0] < -6.0 && angleToTarget[0] > -180) { // up
-				BotJump( self );
+			if(!G_Visible(self, target, CONTENTS_SOLID)) BotJump( self );
         }
         else { // don't do anything
 			BotStand( self );
         }
-    }
-
-//	trap_SendServerCommand( -1, va( "print \"%f\n\"", angleToTarget[0]) );
-
+	}
 	return qtrue;
 }
 
@@ -243,18 +136,17 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch ) {
  * Find closest enemy
  * @param self [gentity_t] a BOT
  * @return boolean (true if Enemy found)
- * //TODO: convert this function to use prioritization and split aliens/humans
+ * //TODO: convert this function to use prioritization
  */
 qboolean botFindClosestEnemy( gentity_t *self ) {
 	int vectorRange = MGTURRET_RANGE * 3; //TODO: convert this to bot range
 	int i;
 	int total_entities;
 	int entityList[ MAX_GENTITIES ];
-	/**
-	int possibleTargets[ MAX_GENTITIES ]; //should we limit the number?
-	int closerTarget;
-	int closerTargetDistance;
-	 */
+	int distance;
+	int closerTargetDistance = g_human_range.integer;
+	qboolean targetFound = qfalse;
+	gentity_t *closerTarget;
 	vec3_t    range;
 	vec3_t    mins, maxs;
 	gentity_t *target;
@@ -271,18 +163,24 @@ qboolean botFindClosestEnemy( gentity_t *self ) {
 		if( (target->client && target->client->ps.stats[ STAT_TEAM ] != self->client->ps.stats[ STAT_TEAM ]) ||
 			(target->s.eType == ET_BUILDABLE && target->buildableTeam != self->client->ps.stats[ STAT_TEAM ]) ) 
 		{
-			if( botTargetInRange( self, target ) ) {
-				self->bot->Enemy = target;
-				return qtrue;
+			distance = botGetDistanceBetweenPlayer(self, target);
+			if( distance < closerTargetDistance && G_Visible(self, target, CONTENTS_SOLID) ) {
+				closerTargetDistance = distance;
+				closerTarget = target;
+				//G_Printf("Found target at distance: %d\n",distance);
+				targetFound = qtrue;
 				//if(!LevelThinking( self, THINK_LEVEL_1 )) return qtrue; //in case the bot is impulsive, will stop here
 			}
 		}
+	}
+	if(targetFound) {
+		self->bot->Enemy = closerTarget;
 	}
 	//who is attacking you?
 	//who is closer?
 	//if(!LevelThinking( self, THINK_LEVEL_3 )) return qtrue; //in case the bot is cautious
 	//self->bot->funcs.Target( self );
-	return qfalse; //TODO: return accordingly
+	return targetFound; 
 }
 /**
  * Find closest friend
@@ -312,7 +210,7 @@ qboolean botFindClosestFriend( gentity_t *self ) {
 		//Search for any friend player
 		if(target != self && target->client && target->client->ps.stats[ STAT_TEAM ] == self->client->ps.stats[ STAT_TEAM ] )
 		{
-			if(botTargetInRange( self, target ) ) {
+			if( botGetDistanceBetweenPlayer(self, target) < 500 ) {
 				//Do not follow if its following
 				leader = target;
 				while(leader->bot->Friend && max < 20) {

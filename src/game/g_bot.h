@@ -116,14 +116,20 @@ typedef enum
 	BOT_MOVE_RIGHT,			//8
 	BOT_MOVE_FWD,			//9
 	BOT_MOVE_BACK,			//10
-	BOT_LOOK_UP,			//11
-	BOT_LOOK_DOWN,			//12
-	BOT_LOOK_LEFT,			//13
-	BOT_LOOK_RIGHT,			//14
-	BOT_POUNCE,				//15
-	BOT_GESTURE,			//16
+	BOT_LOOK_CENTER,		//11
+	BOT_LOOK_UP,			//12
+	BOT_LOOK_DOWN,			//13
+	BOT_LOOK_LEFT,			//14
+	BOT_LOOK_RIGHT,			//15
+	BOT_POUNCE,				//16
+	BOT_RESET_BUTTONS,		//17
+	BOT_MAIN_ATTACK,		//18
+	BOT_SEC_ATTACK,			//19
+	BOT_MID_ATTACK,			//20
+	BOT_FULL_LUCI,			//21
+	BOT_GESTURE,			//22
 		//<-- add movements here
-	BOT_STOP				//17
+	BOT_STOP				//23
 } botMove;
 
 typedef enum
@@ -303,6 +309,7 @@ void setCrumb( gentity_t *self, int closestpath );
 int G_Rand( void ); //LEPE
 int G_Rand_Range( int start, int end ); //LEPE
 int botGetDistanceBetweenPlayer( gentity_t *self, gentity_t *player );
+int botGetAngleBetweenPlayer( gentity_t *self, gentity_t *player );
 qboolean botTargetInRange( gentity_t *self, gentity_t *target );
 qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch);
 qboolean botFindClosestEnemy( gentity_t *self );
@@ -326,20 +333,24 @@ void BotWallWalk( gentity_t *self );
 void BotCrouch( gentity_t *self );
 void BotStand ( gentity_t *self );
 void BotGesture ( gentity_t *self );
+void BotMainAttack ( gentity_t *self );
+void BotSecAttack ( gentity_t *self );
+void BotMidAttack ( gentity_t *self );
 void BotLookUp( gentity_t *self, int deg );
 void BotLookDown( gentity_t *self, int deg );
 void BotLookLeft( gentity_t *self, int deg );
 void BotLookRight( gentity_t *self, int deg );
 void BotTurn( gentity_t *self, int pitch, int yaw );
-void BotPounce( gentity_t *self );
-/*
-void BotCharge( gentity_t *self );
-void BotSprint( gentity_t *self );
-void BotFlyUp( gentity_t *self );
-void BotFlyDown( gentity_t *self );
- */
 /* Combos */
 void Bot_Strafe( gentity_t *self );
+void Bot_Pounce( gentity_t *self, int angle );
+void Bot_FullLuci( gentity_t *self );
+/*
+void Bot_Charge( gentity_t *self );
+void Bot_Sprint( gentity_t *self );
+void Bot_FlyUp( gentity_t *self );
+void Bot_FlyDown( gentity_t *self );
+ */
 
 // g_bot_common.c
 void BotExecState( gentity_t *self );
