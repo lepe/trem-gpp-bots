@@ -147,14 +147,6 @@ vmCvar_t  g_tag;
 vmCvar_t  g_pathediting;
 vmCvar_t  g_human_range;
 vmCvar_t  g_human_strafe;
-vmCvar_t  g_level0_range;
-vmCvar_t  g_level1_range;
-vmCvar_t  g_level1UPG_range;
-vmCvar_t  g_level2_range;
-vmCvar_t  g_level2UPG_range;
-vmCvar_t  g_level3_range;
-vmCvar_t  g_level3UPG_range;
-vmCvar_t  g_level4_range;
 vmCvar_t  g_bot;
 vmCvar_t  g_bot_spawnprotection;
 vmCvar_t  g_bot_evolve;
@@ -230,14 +222,6 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_bot_spawnprotection, "g_bot_spawnprotection", "2000", CVAR_ARCHIVE, 0, qfalse },
   { &g_human_range, "g_human_range", "3000", CVAR_ARCHIVE, 0, qfalse },
   { &g_human_strafe, "g_human_strafe", "0", CVAR_ARCHIVE, 0, qfalse },
-  { &g_level0_range, "g_level0_range", "300", CVAR_ARCHIVE, 0, qfalse },
-  { &g_level1_range, "g_level1_range", "300", CVAR_ARCHIVE, 0, qfalse },
-  { &g_level1UPG_range, "g_level1UPG_range", "300", CVAR_ARCHIVE, 0, qfalse },
-  { &g_level2_range, "g_level2_range", "350", CVAR_ARCHIVE, 0, qfalse },
-  { &g_level2UPG_range, "g_level2UPG_range", "400", CVAR_ARCHIVE, 0, qfalse },
-  { &g_level3_range, "g_level3_range", "500", CVAR_ARCHIVE, 0, qfalse },
-  { &g_level3UPG_range, "g_level3UPG_range", "600", CVAR_ARCHIVE, 0, qfalse },
-  { &g_level4_range, "g_level4_range", "300", CVAR_ARCHIVE, 0, qfalse },
   { &g_bot_evolve, "g_bot_evolve", "1", 0, 0, qfalse },
   { &g_bot_mgun, "g_bot_mgun", "1", 0, 0, qfalse },
   { &g_bot_shotgun, "g_bot_shotgun", "1", 0, 0, qfalse },

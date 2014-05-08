@@ -6,12 +6,37 @@ The current code was based on a P-Bot 2.x GPP port from Tremulous 1.1 P-Bot (htt
 CHANGE LOG
 
 v.2.0
-* all code was cleaned, restructured or recoded.
-* practically everything about bots, is controlled throught bot-> struct.
-* new debug system
-* added thinking levels
-* bot profiles
-* many, many changes
+-- CODE --
+* GPP-Bot mod was created based in pbot (most of the pbot code was removed, recoded or translated, and divided in several files and functions)
+* practically everything about bots, is controlled throught bot-> struct
+* bot thinking process now happens in levels at different times
+* bots control functions to simplify code, like: BotJump()
+* bot States were added
+* Action queue which allows sequence of movements
+* Paths are not limited in size
+* Paths now use -1 to represent NULL nodes
+* bots can join on password protected servers
+* bots ping was added
+* all alien bots now attack based on their own capabilities (range constants)
+* Introduced (but not fully implemented): profiles, range behavior, group thinking, some bot states as RUSH,PATROL,etc
+-- ADMINISTRATION --
+* new debug system which allow administrators to debug specific parts of the code (botdbg TAG VERBOSITY)
+* "dnodes" does not depend on users anymore
+* bots can be controlled manually (botcmd BOT move ...)
+* bots states can be controlled manually (botcmd BOT state/nav )
+-- GAMEPLAY --
+* Fully charged lucis at tyrants and structures
+* Basilisks and Dretches attack improved
+* Humans use medipads when are low in HP
+* Aliens use boosters and follow basiliks when are low in HP
+* Strafe is now random (but consistent)
+* Blocked-State code for both, aliens and humans recoded
+* Bots are able to follow and create leaderships in groups (need to be fixed)
+* Bots do something on maps without nodes (nothing great yet)
+* Targets are chosen on proximity (before was on entity order)
+-- OTHER --
+* teams are not locked anymore and 2 bots by team are deployed by default
+* bots/start.cfg is executed on map load
 
 v.16
 * goons pounce and rants rush to move faster, maras jump more.

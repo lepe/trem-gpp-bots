@@ -310,7 +310,6 @@ int G_Rand( void ); //LEPE
 int G_Rand_Range( int start, int end ); //LEPE
 int botGetDistanceBetweenPlayer( gentity_t *self, gentity_t *player );
 int botGetAngleBetweenPlayer( gentity_t *self, gentity_t *player );
-qboolean botTargetInRange( gentity_t *self, gentity_t *target );
 qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch);
 qboolean botFindClosestEnemy( gentity_t *self );
 qboolean botFindClosestFriend( gentity_t *self );
