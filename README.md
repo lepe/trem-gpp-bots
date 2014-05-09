@@ -34,6 +34,7 @@ v.2.0
 * Bots are able to follow and create leaderships in groups (need to be fixed)
 * Bots do something on maps without nodes (nothing great yet)
 * Targets are chosen on proximity (before was on entity order)
+* Human bots now have basic repair capabilities
 -- OTHER --
 * teams are not locked anymore and 2 bots by team are deployed by default
 * bots/start.cfg is executed on map load

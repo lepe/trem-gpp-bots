@@ -141,7 +141,7 @@ void BotNavigateAlien( gentity_t *self )
 			 (self->client->pers.classSelection == PCL_ALIEN_LEVEL3_UPG && 
 			  self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG_UPG)) {
 				BotRun( self );
-				Bot_Pounce( self, 30 );
+				if(G_Rand() < 30) Bot_Pounce( self, 30 );
 	} else if(self->client->pers.classSelection == PCL_ALIEN_LEVEL4) {
 		BotSecAttack( self );
 	}

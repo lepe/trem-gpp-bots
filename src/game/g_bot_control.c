@@ -113,7 +113,7 @@ void BotAddMove( gentity_t *self, botMove move, int time ) {
 			 * Bots will move forward for 10 seconds. Meanwhile, other processes may be adding more movements to
 			 * the queue reaching the limit. To prevent locking the queue, you can split the action in smaller parts.
 			 */
-			G_Printf("%s: Movement dropped (%d) with time (%d)! Please set BOT_MOVE_QUEUE to a higher value or fix times --see BotAddMove()--.\n",self->client->pers.netname ,move,time);
+			//G_Printf("%s: Movement dropped (%d) with time (%d)! Please set BOT_MOVE_QUEUE to a higher value or fix times --see BotAddMove()--.\n",self->client->pers.netname ,move,time);
 		}
 	}
 }

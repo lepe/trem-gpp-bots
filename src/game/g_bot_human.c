@@ -100,8 +100,11 @@ void BotBeforeSpawnHuman( gentity_t *self )
     G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "Bot is about to spawn\n");
 	self->client->pers.classSelection = PCL_HUMAN;
 	self->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
-	self->client->pers.humanItemSelection = WP_MACHINEGUN;
-	//self->client->pers.humanItemSelection = WP_HBUILD; //LEPE (for future reference when builders become a reality)
+	if(G_Rand() < 10) { //G_TimeTilSuddenDeath() > 0 && 
+		self->client->pers.humanItemSelection = WP_HBUILD; 
+	} else {
+		self->client->pers.humanItemSelection = WP_MACHINEGUN;
+	}
 	G_PushSpawnQueue( &level.humanSpawnQueue, clientNum );
 }
 /**
@@ -115,22 +118,44 @@ void BotBeforeSpawnHuman( gentity_t *self )
  */
 void BotHumanThink( gentity_t *self )
 {
-	//Buy stuff from arm if within range
-	if(G_BuildableRange( self->client->ps.origin, 100, BA_H_ARMOURY ) && 
-			level.time - self->bot->timer.improve > 5000) 
-	{
-		self->bot->think.state[ THINK_LEVEL_1 ] = IMPROVE;
-	}
-
 	//Suggest Heal if low HP
 	if(self->health <= 20) {
 		self->bot->think.state[ THINK_LEVEL_3 ] = HEAL;
+		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Heal as LEVEL3 in HumanThink\n");
 	} if(self->health <= 50) {
 		self->bot->think.state[ THINK_LEVEL_2 ] = HEAL;
+		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Heal as LEVEL2 in HumanThink\n");
 	} else if(self->health < 100) {
 		self->bot->think.state[ THINK_LEVEL_1 ] = HEAL;
+		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Heal as LEVEL1 in HumanThink\n");
 	}
 	
+	//Repair if has a ckit
+	if(BG_InventoryContainsWeapon( WP_HBUILD, self->client->ps.stats )) {
+		self->bot->Struct = botFindDamagedStructure( self , 300 );
+		if(self->bot->Struct) {
+			self->bot->think.state[ THINK_LEVEL_2 ] = REPAIR;
+			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Repair as LEVEL2 in HumanThink\n");
+		} else {
+			BotResetState( self, REPAIR );
+			self->bot->Struct = botFindClosestBuildable( self, 300, BA_H_ARMOURY );
+			if(self->bot->Struct) {
+				self->bot->think.state[ THINK_LEVEL_1 ] = IMPROVE;
+				G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Improve as LEVEL1 in HumanThink -> Repair\n");
+			}
+		}
+	}
+	//Buy stuff from arm if within range
+	if(level.time - self->bot->timer.improve > 10000 && !(self->bot->Struct)) {
+		self->bot->Struct = botFindClosestBuildable( self, 300, BA_H_ARMOURY );
+		if(self->bot->Struct) {
+			self->bot->think.state[ THINK_LEVEL_1 ] = IMPROVE;
+			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Improve as LEVEL1 in HumanThink\n");
+		} else {
+			BotResetState( self, IMPROVE );
+		}
+	}
+
 	if(!self->bot->Enemy && self->bot->state != HEAL) { 
 		if(botFindClosestFriend( self )) {
 			//self->bot->think.state[ THINK_LEVEL_1 ] = FOLLOW;
@@ -152,14 +177,13 @@ void BotHumanThink( gentity_t *self )
  * @param self
  */
 void BotNavigateHuman( gentity_t *self ){
-	/*
+	//If we are tired, stop, crouch and wait...
 	if(self->client->ps.stats[ STAT_STAMINA ] < 100)
 	{
 		BotStop( self );
 		BotCrouch( self );
-		self->bot->timer.foundPath += 100;
+		self->bot->timer.foundPath += 3000;
 	}
-	 */
 }
 	
 /**
@@ -214,7 +238,10 @@ void BotBuy( gentity_t *self )
 	//int maxAmmo, maxClips;
     int prob = 0; //probability to buy item //LEPE
 	int clientNum = self->client - level.clients;
-	if(self->client->ps.stats[ STAT_TEAM ] != TEAM_HUMANS){return;}
+	//Do not buy if you are not close enough
+	if(!G_BuildableRange( self->client->ps.origin, 100, BA_H_ARMOURY )){ return; }
+	//Clear going to ARM
+	self->bot->Struct = NULL;
     
     /************************ SELL WEAPONS *******************************/
 
@@ -292,6 +319,18 @@ void BotBuy( gentity_t *self )
 		G_AddCreditToClient( self->client, (short)BG_Weapon( weapon )->price, qfalse );
 	}
 
+	/******************************* CHECK FOR DAMAGED BUILDINGS **************************/
+	self->bot->Struct = botFindDamagedStructure( self , 300 );
+	if(self->bot->Struct) {
+		weapon = WP_HBUILD;
+		boughtweap = qtrue;
+		G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "Changed to CKIT\n");
+	}
+	//Remove CKIT
+	if(BG_InventoryContainsWeapon( WP_HBUILD, self->client->ps.stats ))
+	{
+		self->client->ps.stats[ STAT_WEAPON ] = WP_NONE;
+	}
     /****************************** BUY WEAPONS AND EQUIP *********************************/
 
 	prob = self->bot->set.battlesuit[g_humanStage.integer];
@@ -334,8 +373,8 @@ void BotBuy( gentity_t *self )
 			G_AddCreditToClient( self->client, -(short)BG_Upgrade( upgrade )->price, qfalse );
 		}
 	}
-    //LEPE: from here, we add some % of buying weapons
-    prob = self->bot->set.lcannon[g_humanStage.integer];
+	//LEPE: from here, we add some % of buying weapons
+	prob = self->bot->set.lcannon[g_humanStage.integer];
 	if((G_Rand() < prob) && g_humanStage.integer == 2 && g_bot_lcannon.integer > 0) 
 	{
 		weapon = WP_LUCIFER_CANNON;
@@ -346,10 +385,10 @@ void BotBuy( gentity_t *self )
 			boughtweap = qtrue;
 			buybatt = qtrue;
 			energyweap = qtrue;
-    		G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "Bought LUCIFER_CANNON\n");
+			G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "Bought LUCIFER_CANNON\n");
 		}
 	}
-    prob = self->bot->set.prifle[g_humanStage.integer];
+	prob = self->bot->set.prifle[g_humanStage.integer];
 	if((G_Rand() < prob) && g_humanStage.integer == 1 && boughtweap == qfalse && g_bot_prifle.integer > 0)
 	{
 		weapon = WP_PULSE_RIFLE;
@@ -360,10 +399,10 @@ void BotBuy( gentity_t *self )
 			boughtweap = qtrue;
 			buybatt = qtrue;
 			energyweap = qtrue;
-    		G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "Bought PULSE\n");
+			G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "Bought PULSE\n");
 		}
 	}
-    prob = self->bot->set.chaingun[g_humanStage.integer];
+	prob = self->bot->set.chaingun[g_humanStage.integer];
 	if((G_Rand() < prob) && boughtweap == qfalse && g_bot_chaingun.integer > 0)
 	{
 		weapon = WP_CHAINGUN;
@@ -372,10 +411,10 @@ void BotBuy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
-            G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought CHAINGUN\n");
+			G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought CHAINGUN\n");
 		}
 	}
-    prob = self->bot->set.flamer[g_humanStage.integer];
+	prob = self->bot->set.flamer[g_humanStage.integer];
 	if((G_Rand() < prob) && g_humanStage.integer == 1 && boughtweap == qfalse && g_bot_flamer.integer > 0) 
 	{
 		weapon = WP_FLAMER;
@@ -384,10 +423,10 @@ void BotBuy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
-            G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought FLAMER\n");
+			G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought FLAMER\n");
 		}
 	}
-    prob = self->bot->set.mdriver[g_humanStage.integer];
+	prob = self->bot->set.mdriver[g_humanStage.integer];
 	if((G_Rand() < prob) && boughtweap == qfalse && g_bot_mdriver.integer > 0)
 	{
 		weapon = WP_MASS_DRIVER;
@@ -398,10 +437,10 @@ void BotBuy( gentity_t *self )
 			boughtweap = qtrue;
 			buybatt = qtrue;
 			energyweap = qtrue;
-            G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought MASS_DRIVER\n");
+			G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought MASS_DRIVER\n");
 		}
 	}
-    prob = self->bot->set.lasgun[g_humanStage.integer];
+	prob = self->bot->set.lasgun[g_humanStage.integer];
 	if((G_Rand() < prob) && boughtweap == qfalse && g_bot_lasgun.integer > 0)
 	{
 		weapon = WP_LAS_GUN;
@@ -412,10 +451,10 @@ void BotBuy( gentity_t *self )
 			boughtweap = qtrue;
 			buybatt = qtrue;
 			energyweap = qtrue;
-            G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought LAS_GUN\n");
+			G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought LAS_GUN\n");
 		}
 	}
-    prob = self->bot->set.shotgun[g_humanStage.integer];
+	prob = self->bot->set.shotgun[g_humanStage.integer];
 	if((G_Rand() < prob) && boughtweap == qfalse && g_bot_shotgun.integer > 0)
 	{
 		weapon = WP_SHOTGUN;
@@ -424,10 +463,10 @@ void BotBuy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
-            G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought SHOTGUN\n");
+			G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought SHOTGUN\n");
 		}
 	}
-    prob = self->bot->set.painsaw[g_humanStage.integer];
+	prob = self->bot->set.painsaw[g_humanStage.integer];
 	if((G_Rand() < prob) && boughtweap == qfalse && g_bot_painsaw.integer > 0)
 	{
 		weapon = WP_PAIN_SAW;
@@ -436,10 +475,10 @@ void BotBuy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
-            G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought PAIN_SAW\n");
+			G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought PAIN_SAW\n");
 		}
 	}
-    //100% prob if reached this point
+	//100% prob if reached this point
 	if(boughtweap == qfalse && g_bot_mgun.integer > 0)
 	{
 		weapon = WP_MACHINEGUN;
@@ -448,18 +487,19 @@ void BotBuy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
-            G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"MACHINEGUN for FREE!\n");
+			G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"MACHINEGUN for FREE!\n");
 		}
 	}
 	//Buy Nades
 	upgrade = UP_GRENADE;
-    prob = self->bot->set.nade[g_humanStage.integer];
+	prob = self->bot->set.nade[g_humanStage.integer];
 	if((G_Rand() < prob) &! BG_InventoryContainsUpgrade( upgrade, self->client->ps.stats ) && g_humanStage.integer > 0 && 
 			BG_Upgrade( upgrade )->price <= (short)self->client->ps.persistant[ PERS_CREDIT ]) {
 		BG_AddUpgradeToInventory( upgrade, self->client->ps.stats );
 		G_AddCreditToClient( self->client, -(short)BG_Upgrade( upgrade )->price, qfalse );
 		G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"NADE Bought\n");
 	}
+	//Buy Selected Weapon
 	if(boughtweap == qtrue)
 	{
 // 		BG_AddWeaponToInventory( weapon, self->client->ps.stats );
@@ -476,7 +516,7 @@ void BotBuy( gentity_t *self )
 		G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"BLASTER?\n");
 	}
 	upgrade = UP_BATTPACK;
-    prob = self->bot->set.battery[g_humanStage.integer];
+	prob = self->bot->set.battery[g_humanStage.integer];
 	if((G_Rand() < prob) &! BG_InventoryContainsUpgrade( upgrade, self->client->ps.stats ) && 
 		BG_Upgrade( upgrade )->price <= (short)self->client->ps.persistant[ PERS_CREDIT ] &&
 		!(BG_Upgrade( upgrade )->slots & BG_SlotsForInventory( self->client->ps.stats )) && 
@@ -497,8 +537,6 @@ void BotBuy( gentity_t *self )
 		maxAmmo = (int)( (float)maxAmmo * BATTPACK_MODIFIER );
 	}
 	BG_PackAmmoArray( self->s.weapon, self->client->ps.ammo, self->client->ps.powerups, maxAmmo, maxClips );*/
-	//if(boughtup == qtrue || boughtweap == qtrue)
-	//{ClientUserinfoChanged( clientNum );}
 	ClientUserinfoChanged( clientNum, qfalse );
 	self->bot->timer.improve = level.time;
 	//We reset current state
@@ -649,6 +687,10 @@ void BotTargetHuman( gentity_t *self ) {
  * @param client
  */
 void BotRepair( gentity_t *self ) {
+	if(BG_InventoryContainsWeapon( WP_HBUILD, self->client->ps.stats ) && 
+			self->client->ps.persistant[ PERS_NEWWEAPON ] != WP_HBUILD) {
+		G_ForceWeaponChange( self, WP_HBUILD );
+	}
 }
 /**
  * Use CKIT to build

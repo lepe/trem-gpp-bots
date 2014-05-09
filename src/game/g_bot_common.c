@@ -213,6 +213,17 @@ void BotThink( gentity_t *self )
 				BotResetState( self, HEAL );
 			} 
 			break;
+		case REPAIR:
+			if(self->bot->Struct) {
+				if(self->bot->Struct->health == BG_Buildable( self->bot->Struct->s.modelindex )->health)
+				{
+					self->bot->Struct = NULL;
+					BotResetState( self, REPAIR );
+				}
+			} else {
+				BotResetState( self, REPAIR );
+			}
+			break;
 		default:
 			break;
 	}
@@ -242,6 +253,10 @@ void BotAim( gentity_t *self )
 			}
 			break;
 		case REPAIR:
+			if(self->bot->Struct) {
+				botAimAtTarget(self, self->bot->Struct, qtrue);
+			}
+			break;
 		case BUILD:
 		case IMPROVE:
 		case HEAL:
@@ -323,6 +338,10 @@ void BotIdle( gentity_t *self ){
  */
 void BotAttack( gentity_t *self ){
 	self->bot->timer.foundPath = level.time;
+	//Stop attacking if you can't see it
+	if(!G_Visible(self, self->bot->Enemy, CONTENTS_SOLID)) {
+		BotControl( self, BOT_RESET_BUTTONS );
+	}
 }
 /**
  * Bot will defend base (camp). If away from spawn, it will retreat first

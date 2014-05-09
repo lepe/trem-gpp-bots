@@ -36,7 +36,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BOT_LONG_RANGE 		2
 
 //Adjust this value if move actions are being discarded
-#define BOT_MOVE_QUEUE		100
+#define BOT_MOVE_QUEUE		10
 #define BOT_MOVE_NO_TIME_LIMIT	0
 #define BOT_TURN_VAL		30.0f
 #define BOT_TURN_ANGLE_DIV	(360.0f / (float)BOT_TURN_VAL)
@@ -314,6 +314,7 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch);
 qboolean botFindClosestEnemy( gentity_t *self );
 qboolean botFindClosestFriend( gentity_t *self );
 gentity_t *botFindClosestBuildable( gentity_t *self, float r, buildable_t buildable );
+gentity_t *botFindDamagedStructure( gentity_t *self, float r );
 
 // g_bot_control.c
 void BotControl( gentity_t *self, botMove move );

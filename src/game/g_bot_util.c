@@ -234,8 +234,8 @@ qboolean botFindClosestFriend( gentity_t *self ) {
 Based on g_buildable.c : G_FindBuildable and G_BuildableRange
 Finds a buildable of the specified type within range
 @param self [gentity_t] BOT
-@param buildable [buildable_t] Buildable type
 @param r [float] range to check
+@param buildable [buildable_t] Buildable type
 ================
 */
 gentity_t *botFindClosestBuildable( gentity_t *self, float r, buildable_t buildable )
@@ -261,8 +261,51 @@ gentity_t *botFindClosestBuildable( gentity_t *self, float r, buildable_t builda
 	
     if( ent->buildableTeam == TEAM_HUMANS && !ent->powered )
       continue;
+	
+	if(!G_Visible(self, ent, CONTENTS_SOLID))
+  	  continue;
 
     if( ent->s.modelindex == buildable && !( ent->s.eFlags & EF_DEAD ) )
+      return ent;
+  }
+
+  return NULL;
+}
+/**
+ * Find the closest Damaged structure (HUMANS)
+ * //TODO: repair prioritization
+	@param self [gentity_t] BOT
+	@param r [float] range to check
+ 	@return gentity_t
+ */
+gentity_t *botFindDamagedStructure( gentity_t *self, float r ) 
+{
+  int       entityList[ MAX_GENTITIES ];
+  vec3_t    range;
+  vec3_t    mins, maxs;
+  int       i, num;
+  gentity_t *ent;
+
+  VectorSet( range, r, r, r );
+  VectorAdd( self->client->ps.origin, range, maxs );
+  VectorSubtract( self->client->ps.origin, range, mins );
+
+  num = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
+
+  for( i = 0; i < num; i++ )
+  {
+    ent = &g_entities[ entityList[ i ] ];
+
+    if( ent->s.eType != ET_BUILDABLE )
+      continue;
+	
+    if( ent->buildableTeam == TEAM_HUMANS && !ent->powered )
+      continue;
+
+	if(!G_Visible(self, ent, CONTENTS_SOLID))
+  	  continue;
+	
+    if( ent->health < BG_Buildable( ent->s.modelindex )->health && !( ent->s.eFlags & EF_DEAD ) && ent->spawned )
       return ent;
   }
 
