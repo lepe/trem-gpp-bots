@@ -6,7 +6,6 @@ The current code was based on a P-Bot 2.x GPP port from Tremulous 1.1 P-Bot (htt
 CHANGE LOG
 
 v.2.0
--- CODE --
 * GPP-Bot mod was created based in pbot (most of the pbot code was removed, recoded or translated, and divided in several files and functions)
 * practically everything about bots, is controlled throught bot-> struct
 * bot thinking process now happens in levels at different times
@@ -19,12 +18,10 @@ v.2.0
 * bots ping was added
 * all alien bots now attack based on their own capabilities (range constants)
 * Introduced (but not fully implemented): profiles, range behavior, group thinking, some bot states as RUSH,PATROL,etc
--- ADMINISTRATION --
 * new debug system which allow administrators to debug specific parts of the code (botdbg TAG VERBOSITY)
 * "dnodes" does not depend on users anymore
 * bots can be controlled manually (botcmd BOT move ...)
 * bots states can be controlled manually (botcmd BOT state/nav )
--- GAMEPLAY --
 * Fully charged lucis at tyrants and structures
 * Basilisks and Dretches attack improved
 * Humans use medipads when are low in HP
@@ -34,8 +31,11 @@ v.2.0
 * Bots are able to follow and create leaderships in groups (need to be fixed)
 * Bots do something on maps without nodes (nothing great yet)
 * Targets are chosen on proximity (before was on entity order)
+<<<<<<< HEAD
 * Human bots now have basic repair capabilities
 -- OTHER --
+=======
+>>>>>>> fe775b58d648db7412e6de1c29e8671c32a8381c
 * teams are not locked anymore and 2 bots by team are deployed by default
 * bots/start.cfg is executed on map load
 
