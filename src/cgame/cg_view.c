@@ -578,6 +578,18 @@ void CG_OffsetFirstPersonView( void )
     origin[ 2 ] += cg.predictedPlayerState.viewheight;
     return;
   }
+  // camera shake effect
+  else if( cg.snap->ps.stats[ STAT_SHAKE ] > 0 )
+  {
+    float fac, mag;
+
+    fac = (float) cg.snap->ps.stats[ STAT_SHAKE ] *
+          cg_cameraShakeMagnitude.value * 0.15f;
+
+    angles[ 0 ] += crandom() * fac;
+    angles[ 1 ] += crandom() * fac;
+    angles[ 2 ] += crandom() * fac;
+  }
 
   // add angles based on damage kick
   if( cg.damageTime )

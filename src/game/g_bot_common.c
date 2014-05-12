@@ -111,6 +111,9 @@ void BotSpectator( gentity_t *self ){
 	self->bot->path.numCrumb   = 0;
 	self->bot->path.lastJoint  = 0;
 	self->bot->path.blocked_try= 0;
+    self->bot->Struct = NULL;
+    self->bot->Friend = NULL;
+    self->bot->Enemy  = NULL;
 	G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_COMMON + BOT_DEBUG_THINK, "Bot is spectator\n");
 	//TODO: check what else we need to reset
 }
