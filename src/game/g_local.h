@@ -1239,6 +1239,7 @@ extern  vmCvar_t  g_bot_goon;
 extern  vmCvar_t  g_bot_advgoon;
 extern  vmCvar_t  g_bot_tyrant;
 
+extern  vmCvar_t  g_bot_essence;  //use essence 
 extern  vmCvar_t  g_bot_manual;  //set bots in manual mode
 extern  vmCvar_t  g_bot_manual_nav;  //set bots navigation in manual mode
 extern  vmCvar_t  g_bot_join;  //disable bots join

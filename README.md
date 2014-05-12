@@ -32,6 +32,7 @@ v.2.0
 * Bots do something on maps without nodes (nothing great yet)
 * Targets are chosen on proximity (before was on entity order)
 * Human bots now have basic repair capabilities
+* Human bots try to keep a distance when attacking structures (except saw and flame weapons)
 * teams are not locked anymore and 2 bots by team are deployed by default
 * bots/start.cfg is executed on map load
 

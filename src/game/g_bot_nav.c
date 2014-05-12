@@ -195,62 +195,64 @@ void BotFindNextPath( gentity_t *self )
 			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(8) NAV State changed to: %d\n", TARGETPATH);
 			self->bot->path.state = TARGETPATH;
 		}
-		if(level.paths[self->bot->path.targetPath].random < 0)
+		if(possiblenextpath == 1)
 		{
 			nextpath = 0;
 		}
 		else
 		{
-            //LEPE: bots decide here which path to follow based on the strength of the essence, previous nodes and possible unexplored nodes
-            //-------------
-			nextpath = 0;
-            if(possiblenextpath > 1) {
-                G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH, "Possible Paths: %d .",possiblenextpath);
-                for(i =0; i < possiblenextpath; i++) {
-                    G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"[ %d :",possiblepaths[i]);
-                    known = qfalse;
-                    for(j=0; j < self->bot->path.numCrumb; j++) {
-                        if(self->bot->path.crumb[j] == possiblepaths[i]) {
-                            known = qtrue;
-                            break;
-                        }
-                    } 
-                    pathessence[i] = level.paths[possiblepaths[i]].essence;
-                    essence = pathessence[i] > 50 ? GOOD_ESSENCE : (pathessence[i] < 50 ? BAD_ESSENCE : NO_ESSENCE);
-                    G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"%d",pathessence[i]);
-                    if(known == qfalse && essence == GOOD_ESSENCE) {
-                        G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 50");
-                        pathrank[i] = 50;                    
-                    } else if(known == qfalse && essence == NO_ESSENCE) {
-                        G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 30");
-                        pathrank[i] = 30;                    
-                    } else if(known == qtrue && (essence == GOOD_ESSENCE || essence == NO_ESSENCE)) {
-                        G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 15");
-                        pathrank[i] = 15;                    
-                    } else if(known == qfalse) { //bad essence implied
-                        G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 5");
-                        pathrank[i] = 5;                    
-                    } else { //known && bad essence implied
-                        G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 1");
-                        pathrank[i] = 1;                    
-                    }
-                    totalessence += pathessence[i] * pathrank[i];
-                    G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"] TOTAL: %d\n",totalessence);
-                }
-                self->bot->path.lastJoint = self->bot->path.targetPath; //when was the last time we had to choose a path (used to create negative essence)
-                randnum = G_Rand();
-                for(i =0; i < possiblenextpath; i++) {
-                    accumessence += ((pathessence[i] * pathrank[i]) * 100) / totalessence;
-                    if(randnum <= accumessence) {
-                        G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"SELECTED : %d\n",possiblepaths[i]);
-                        nextpath = i;
-                        break;
-                    }
-                } 
-            }
-            //LEPE: set next crumb
-            setCrumb( self, possiblepaths[nextpath] );
+			if(g_bot_essence.integer == 1) {
+				//bots decide here which path to follow based on the strength of the essence, previous nodes and possible unexplored nodes
+				//-------------
+				G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH, "Possible Paths: %d .",possiblenextpath);
+				for(i =0; i < possiblenextpath; i++) {
+					G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"[ %d :",possiblepaths[i]);
+					known = qfalse;
+					for(j=0; j < self->bot->path.numCrumb; j++) {
+						if(self->bot->path.crumb[j] == possiblepaths[i]) {
+							known = qtrue;
+							break;
+						}
+					} 
+					pathessence[i] = level.paths[possiblepaths[i]].essence;
+					essence = pathessence[i] > 50 ? GOOD_ESSENCE : (pathessence[i] < 50 ? BAD_ESSENCE : NO_ESSENCE);
+					G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"%d",pathessence[i]);
+					if(known == qfalse && essence == GOOD_ESSENCE) {
+						G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 50");
+						pathrank[i] = 50;                    
+					} else if(known == qfalse && essence == NO_ESSENCE) {
+						G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 30");
+						pathrank[i] = 30;                    
+					} else if(known == qtrue && (essence == GOOD_ESSENCE || essence == NO_ESSENCE)) {
+						G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 15");
+						pathrank[i] = 15;                    
+					} else if(known == qfalse) { //bad essence implied
+						G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 5");
+						pathrank[i] = 5;                    
+					} else { //known && bad essence implied
+						G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 1");
+						pathrank[i] = 1;                    
+					}
+					totalessence += pathessence[i] * pathrank[i];
+					G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"] TOTAL: %d\n",totalessence);
+				}
+				self->bot->path.lastJoint = self->bot->path.targetPath; //when was the last time we had to choose a path (used to create negative essence)
+				randnum = G_Rand();
+				for(i =0; i < possiblenextpath; i++) {
+					accumessence += ((pathessence[i] * pathrank[i]) * 100) / totalessence;
+					if(randnum <= accumessence) {
+						G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"SELECTED : %d\n",possiblepaths[i]);
+						nextpath = i;
+						break;
+					}
+				}
+			} else {
+				nextpath = G_Rand_Range(0,possiblenextpath-1);
+						G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"RANDOMLY SELECTED : %d\n",possiblepaths[i]);
+			}
 		}
+		//LEPE: set next crumb
+		setCrumb( self, possiblepaths[nextpath] );
 		self->bot->path.lastpathid = self->bot->path.targetPath;
 		self->bot->path.targetPath = possiblepaths[nextpath];
 		self->bot->timer.foundPath = level.time;

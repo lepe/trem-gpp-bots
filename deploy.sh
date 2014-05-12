@@ -8,7 +8,7 @@ MOD=gpp-bot
 # can be relative or absolute
 WEB_DIR=web
 # Set package version
-VERSION="0.0";
+VERSION="2.0.2";
 
 #if [1], it will copy the resulting PK3 to
 #user's directory to speed testing
@@ -80,13 +80,13 @@ if [[ "$WEB_DIR" != "" ]]; then
 fi
 cd $ROOT_PWD
 # copy the start script if it is not there
-if [ ! -f $DEPLOY_DIR/start.sh ]; then
-    cp start.sh $DEPLOY_DIR/start.sh
+if [ ! -f $GAME_DIR/start.sh ]; then
+    cp start.sh $GAME_DIR/start.sh
 fi
-if [ ! -d $DEPLOY_DIR/$MOD ]; then
-    mkdir $DEPLOY_DIR/$MOD;
+if [ ! -d $GAME_DIR/$MOD ]; then
+    mkdir $GEAME_DIR/$MOD;
 fi
-if [ ! -d $DEPLOY_DIR/$MOD/bots ]; then
-    cp -R gpp-bot/* $DEPLOY_DIR/$MOD/
+if [ ! -d $GAME_DIR/$MOD/bots ]; then
+    cp -R gpp-bot/* $GAME_DIR/$MOD/
 fi
 exit 0

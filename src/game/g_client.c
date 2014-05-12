@@ -821,6 +821,7 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   char      filename[ MAX_QPATH ];
   char      oldname[ MAX_NAME_LENGTH ];
   char      newname[ MAX_NAME_LENGTH ];
+  char      s_newname[ MAX_NAME_LENGTH ];
   char      err[ MAX_STRING_CHARS ];
   qboolean  revertName = qfalse;
   gclient_t *client;
@@ -885,6 +886,15 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
       trap_SendServerCommand( ent - g_entities, va( "print \"%s\n\"", err ) );
       revertName = qtrue;
     }
+	//LEPE: Players are not allowed to have [BOT] or [bot] in names
+	if(!(ent->r.svFlags & SVF_BOT)) {
+		G_DecolorString(newname, s_newname, sizeof(newname));
+		if (Com_StringContains(s_newname, "[BOT]", 0)) {
+		  trap_SendServerCommand( ent - g_entities,
+			"print \"You cannot use [BOT] in your name\n\"" );
+		  revertName = qtrue;
+		}
+	}
 
     if( revertName )
     {

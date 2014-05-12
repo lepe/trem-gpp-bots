@@ -51,10 +51,23 @@ void G_BotAdd( char *name, team_t team, int skill, int ignore ) {
 	gentity_t *ent;
     namelog_t *namelog;
     char name_s[ MAX_NAME_LENGTH ];
-    char name_tmp_s[ MAX_NAME_LENGTH ];
+    char name_tmp_s[ MAX_NAME_LENGTH ] = "";
 	
 	reservedSlots = trap_Cvar_VariableIntegerValue( "sv_privateclients" );
 
+	//If bot name does not contains [BOT], prepend it.
+	G_DecolorString(name, name_s, MAX_NAME_LENGTH);
+	G_Printf("No color: %s\n",name_s);
+	if (! (Com_StringContains(name_s, "[BOT]", 0))) {
+		if(team == TEAM_HUMANS) {
+			strcat(name_tmp_s, "^1[BOT]");
+		} else if(team == TEAM_ALIENS) {
+			strcat(name_tmp_s, "^4[BOT]");
+		}
+		strcat(name_tmp_s, name);
+		strcpy(name, name_tmp_s);
+	}
+	
     // LEPE: check if no player/bot exists with that name	
     G_SanitiseString(name, name_s, sizeof(name_s) );
     for( namelog = level.namelogs; namelog; namelog = namelog->next ) {
@@ -113,11 +126,10 @@ void G_BotAdd( char *name, team_t team, int skill, int ignore ) {
 	
 	// have it connect to the game as a normal client
 	if(ClientConnect(clientNum, qtrue) != NULL ) {
+		G_Printf("Something weird happened. Bot was not added.");
 		// won't let us join
 		return;
 	}
-// 	bot->r.svFlags |= SVF_BOT;
-// 	bot->client->sess.spectatorState |= PM_SPECTATOR;
 	ClientBegin( clientNum );
     G_BotDebug(BOT_VERB_IMPORTANT, BOT_DEBUG_GENERAL, "Bot Added: %s\n", name_s);
 	G_ChangeTeam( ent, team );
