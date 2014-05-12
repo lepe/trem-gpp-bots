@@ -34,6 +34,7 @@ v.2.0
 * Human bots now have basic repair capabilities
 * Human bots try to keep a distance when attacking structures (except saw and flame weapons)
 * teams are not locked anymore and 2 bots by team are deployed by default
+* [BOT] tag in names is reserved only for bots
 * bots/start.cfg is executed on map load
 
 v.16

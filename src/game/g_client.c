@@ -887,7 +887,7 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
       revertName = qtrue;
     }
 	//LEPE: Players are not allowed to have [BOT] or [bot] in names
-	if(!(ent->r.svFlags & SVF_BOT)) {
+	if(!(ent->r.svFlags & SVF_BOT) && g_bot_tagname.integer == 1) {
 		G_DecolorString(newname, s_newname, sizeof(newname));
 		if (Com_StringContains(s_newname, "[BOT]", 0)) {
 		  trap_SendServerCommand( ent - g_entities,

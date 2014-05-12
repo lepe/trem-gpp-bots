@@ -170,6 +170,7 @@ vmCvar_t  g_bot_advgoon;
 vmCvar_t  g_bot_tyrant;
 
 vmCvar_t  g_bot_essence;
+vmCvar_t  g_bot_tagname;
 vmCvar_t  g_bot_manual;
 vmCvar_t  g_bot_manual_nav;
 //Debug for console:
@@ -242,6 +243,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_bot_tyrant, "g_bot_tyrant", "1", 0, 0, qfalse },
   { &g_bot_join, "g_bot_join", "1", 0, 0, qfalse },
   { &g_bot_essence, "g_bot_essence", "1", 0, 0, qfalse },
+  { &g_bot_tagname, "g_bot_tagname", "1", 0, 0, qfalse },
   { &g_bot_manual, "g_bot_manual", "0", 0, 0, qfalse },
   { &g_bot_manual_nav, "g_bot_manual_nav", "0", 0, 0, qfalse },
   

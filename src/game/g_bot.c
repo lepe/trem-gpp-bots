@@ -56,18 +56,18 @@ void G_BotAdd( char *name, team_t team, int skill, int ignore ) {
 	reservedSlots = trap_Cvar_VariableIntegerValue( "sv_privateclients" );
 
 	//If bot name does not contains [BOT], prepend it.
-	G_DecolorString(name, name_s, MAX_NAME_LENGTH);
-	G_Printf("No color: %s\n",name_s);
-	if (! (Com_StringContains(name_s, "[BOT]", 0))) {
-		if(team == TEAM_HUMANS) {
-			strcat(name_tmp_s, "^1[BOT]");
-		} else if(team == TEAM_ALIENS) {
-			strcat(name_tmp_s, "^4[BOT]");
+	if(g_bot_tagname.integer == 1) {
+		G_DecolorString(name, name_s, MAX_NAME_LENGTH);
+		if (! (Com_StringContains(name_s, "[BOT]", 0))) {
+			if(team == TEAM_HUMANS) {
+				strcat(name_tmp_s, "^1[BOT]");
+			} else if(team == TEAM_ALIENS) {
+				strcat(name_tmp_s, "^4[BOT]");
+			}
+			strcat(name_tmp_s, name);
+			strcpy(name, name_tmp_s);
 		}
-		strcat(name_tmp_s, name);
-		strcpy(name, name_tmp_s);
 	}
-	
     // LEPE: check if no player/bot exists with that name	
     G_SanitiseString(name, name_s, sizeof(name_s) );
     for( namelog = level.namelogs; namelog; namelog = namelog->next ) {

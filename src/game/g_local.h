@@ -1240,6 +1240,7 @@ extern  vmCvar_t  g_bot_advgoon;
 extern  vmCvar_t  g_bot_tyrant;
 
 extern  vmCvar_t  g_bot_essence;  //use essence 
+extern  vmCvar_t  g_bot_tagname;  //use [BOT] tag name automatically for bots and restrict it for players
 extern  vmCvar_t  g_bot_manual;  //set bots in manual mode
 extern  vmCvar_t  g_bot_manual_nav;  //set bots navigation in manual mode
 extern  vmCvar_t  g_bot_join;  //disable bots join
