@@ -175,6 +175,8 @@ qboolean botFindClosestEnemy( gentity_t *self ) {
 	}
 	if(targetFound) {
 		self->bot->Enemy = closerTarget;
+	} else {
+		self->bot->Enemy = NULL;
 	}
 	//who is attacking you?
 	//who is closer?
@@ -220,7 +222,7 @@ qboolean botFindClosestFriend( gentity_t *self ) {
 				if(leader != self) {
 					self->bot->Friend = leader;
 					leader->bot->Friend = NULL; //be sure he is not following anyone
-					G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_UTIL,"%s following %s\n", self->client->pers.netname, leader->client->pers.netname);
+					G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_UTIL,"following %s\n", leader->client->pers.netname);
 				}
 				return qtrue;
 			}

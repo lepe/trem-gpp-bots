@@ -80,7 +80,8 @@ void BotInitHuman( gentity_t *self ){
 	self->bot->set.armour[S3] 	= 100;
 	self->bot->set.armour[S2] 	= 100;
 	self->bot->set.armour[S1] 	= 100;
-	self->bot->set.helmet[S1] 	= 100;
+	self->bot->set.helmet[S2] 	= 100;
+	self->bot->set.helmet[S3] 	= 100;
 	self->bot->set.battlesuit[S3]= 100;
 }
 /**
@@ -97,7 +98,7 @@ void BotBeforeSpawnHuman( gentity_t *self )
 	//any ckit player near node? YES -> mgun
 	//any building damaged? -do we have DC? YES -> mgun
 	//several highly damaged buildings? NO -> mgun
-    G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "Bot is about to spawn\n");
+    G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "Bot is about to spawn\n");
 	self->client->pers.classSelection = PCL_HUMAN;
 	self->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
 	if(G_Rand() < 10) { //G_TimeTilSuddenDeath() > 0 && 
@@ -118,30 +119,35 @@ void BotBeforeSpawnHuman( gentity_t *self )
  */
 void BotHumanThink( gentity_t *self )
 {
-	//Suggest Heal if low HP
-	if(self->health <= 20) {
-		self->bot->think.state[ THINK_LEVEL_3 ] = HEAL;
-		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Heal as LEVEL3 in HumanThink\n");
-	} if(self->health <= 50) {
-		self->bot->think.state[ THINK_LEVEL_2 ] = HEAL;
-		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Heal as LEVEL2 in HumanThink\n");
-	} else if(self->health < 100) {
-		self->bot->think.state[ THINK_LEVEL_1 ] = HEAL;
-		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Heal as LEVEL1 in HumanThink\n");
+	//If we have an enemy, forget about healing
+	if(self->bot->Enemy) {
+		//If we have an enemy, change the weapon
+		if(BG_InventoryContainsWeapon( WP_HBUILD, self->client->ps.stats )) G_ForceWeaponChange( self, WP_BLASTER );
+	} else {
+		//Suggest Heal if low HP
+		if(self->health <= 20) {
+			self->bot->think.state[ THINK_LEVEL_3 ] = HEAL;
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Heal as LEVEL3 in HumanThink\n");
+		} if(self->health <= 50) {
+			self->bot->think.state[ THINK_LEVEL_2 ] = HEAL;
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Heal as LEVEL2 in HumanThink\n");
+		} else if(self->health < 100) {
+			self->bot->think.state[ THINK_LEVEL_1 ] = HEAL;
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Heal as LEVEL1 in HumanThink\n");
+		}
 	}
-	
 	//Repair if has a ckit
 	if(BG_InventoryContainsWeapon( WP_HBUILD, self->client->ps.stats )) {
 		self->bot->Struct = botFindDamagedStructure( self , 300 );
 		if(self->bot->Struct) {
 			self->bot->think.state[ THINK_LEVEL_2 ] = REPAIR;
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Repair as LEVEL2 in HumanThink\n");
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Repair as LEVEL2 in HumanThink\n");
 		} else {
 			BotResetState( self, REPAIR );
 			self->bot->Struct = botFindClosestBuildable( self, 300, BA_H_ARMOURY );
 			if(self->bot->Struct) {
 				self->bot->think.state[ THINK_LEVEL_1 ] = IMPROVE;
-				G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Improve as LEVEL1 in HumanThink -> Repair\n");
+				G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Improve as LEVEL1 in HumanThink -> Repair\n");
 			}
 		}
 	}
@@ -150,7 +156,7 @@ void BotHumanThink( gentity_t *self )
 		self->bot->Struct = botFindClosestBuildable( self, 300, BA_H_ARMOURY );
 		if(self->bot->Struct) {
 			self->bot->think.state[ THINK_LEVEL_1 ] = IMPROVE;
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Improve as LEVEL1 in HumanThink\n");
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Improve as LEVEL1 in HumanThink\n");
 		} else {
 			BotResetState( self, IMPROVE );
 		}
@@ -170,6 +176,12 @@ void BotHumanThink( gentity_t *self )
 	if(BotKeepThinking( self , THINK_LEVEL_2)) {
 
 	}
+	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"HUMAN THINK: LVL1:%d, LVL2:%d, LVL3:%d, MAX:%d \n", 
+			self->bot->think.state[ THINK_LEVEL_1 ],
+			self->bot->think.state[ THINK_LEVEL_2 ],
+			self->bot->think.state[ THINK_LEVEL_3 ],
+			self->bot->think.state[ THINK_LEVEL_MAX ]
+			);
 }
 
 /**
@@ -201,7 +213,7 @@ void BotBlockedHuman( gentity_t *self ){
 	 * to help the bot to remove block */
 	if(low_stamina) self->client->ps.stats[ STAT_STAMINA ] = 1000;
 
-	G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_NAVSTATE, "[ %d ] Trying to unblock. Rand: %d\n", try, rand );
+	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_NAVSTATE, "[ %d ] Trying to unblock. Rand: %d\n", try, rand );
 	if(try <= 0) {
 		BotMoveFwd( self );
 		VectorCopy(self->r.currentOrigin, self->bot->path.blocked_origin);
@@ -215,7 +227,7 @@ void BotBlockedHuman( gentity_t *self ){
 	}
 	if(try >= BOT_TIMER_NAV_SECOND * 4) {
 		self->bot->path.blocked_try = 0; 
-		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_NAVSTATE, "Reset blocked_try to 0\n" );
+		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_NAVSTATE, "Reset blocked_try to 0\n", self->client->pers.netname );
 	} else {
 		//we set next try 
 		self->bot->path.blocked_try++;
@@ -324,7 +336,7 @@ void BotBuy( gentity_t *self )
 	if(self->bot->Struct) {
 		weapon = WP_HBUILD;
 		boughtweap = qtrue;
-		G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "Changed to CKIT\n");
+		G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "Changed to CKIT\n");
 	}
 	//Remove CKIT
 	if(BG_InventoryContainsWeapon( WP_HBUILD, self->client->ps.stats ))
@@ -385,7 +397,7 @@ void BotBuy( gentity_t *self )
 			boughtweap = qtrue;
 			buybatt = qtrue;
 			energyweap = qtrue;
-			G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "Bought LUCIFER_CANNON\n");
+			G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "Bought LUCIFER_CANNON\n");
 		}
 	}
 	prob = self->bot->set.prifle[g_humanStage.integer];
@@ -399,7 +411,7 @@ void BotBuy( gentity_t *self )
 			boughtweap = qtrue;
 			buybatt = qtrue;
 			energyweap = qtrue;
-			G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "Bought PULSE\n");
+			G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "Bought PULSE\n");
 		}
 	}
 	prob = self->bot->set.chaingun[g_humanStage.integer];
@@ -411,7 +423,7 @@ void BotBuy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
-			G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought CHAINGUN\n");
+			G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought CHAINGUN\n");
 		}
 	}
 	prob = self->bot->set.flamer[g_humanStage.integer];
@@ -423,7 +435,7 @@ void BotBuy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
-			G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought FLAMER\n");
+			G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought FLAMER\n");
 		}
 	}
 	prob = self->bot->set.mdriver[g_humanStage.integer];
@@ -437,7 +449,7 @@ void BotBuy( gentity_t *self )
 			boughtweap = qtrue;
 			buybatt = qtrue;
 			energyweap = qtrue;
-			G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought MASS_DRIVER\n");
+			G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought MASS_DRIVER\n");
 		}
 	}
 	prob = self->bot->set.lasgun[g_humanStage.integer];
@@ -451,7 +463,7 @@ void BotBuy( gentity_t *self )
 			boughtweap = qtrue;
 			buybatt = qtrue;
 			energyweap = qtrue;
-			G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought LAS_GUN\n");
+			G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought LAS_GUN\n");
 		}
 	}
 	prob = self->bot->set.shotgun[g_humanStage.integer];
@@ -463,7 +475,7 @@ void BotBuy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
-			G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought SHOTGUN\n");
+			G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought SHOTGUN\n");
 		}
 	}
 	prob = self->bot->set.painsaw[g_humanStage.integer];
@@ -475,7 +487,7 @@ void BotBuy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
-			G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought PAIN_SAW\n");
+			G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought PAIN_SAW\n");
 		}
 	}
 	//100% prob if reached this point
@@ -487,7 +499,7 @@ void BotBuy( gentity_t *self )
 			!(BG_Weapon( weapon )->slots & BG_SlotsForInventory( self->client->ps.stats )))
 		{
 			boughtweap = qtrue;
-			G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"MACHINEGUN for FREE!\n");
+			G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"MACHINEGUN for FREE!\n");
 		}
 	}
 	//Buy Nades
@@ -497,7 +509,7 @@ void BotBuy( gentity_t *self )
 			BG_Upgrade( upgrade )->price <= (short)self->client->ps.persistant[ PERS_CREDIT ]) {
 		BG_AddUpgradeToInventory( upgrade, self->client->ps.stats );
 		G_AddCreditToClient( self->client, -(short)BG_Upgrade( upgrade )->price, qfalse );
-		G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"NADE Bought\n");
+		G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"NADE Bought\n");
 	}
 	//Buy Selected Weapon
 	if(boughtweap == qtrue)
@@ -513,7 +525,7 @@ void BotBuy( gentity_t *self )
 	{
 		weapon = WP_BLASTER;
 		G_ForceWeaponChange( self, weapon );
-		G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"BLASTER?\n");
+		G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"BLASTER?\n");
 	}
 	upgrade = UP_BATTPACK;
 	prob = self->bot->set.battery[g_humanStage.integer];
@@ -525,7 +537,7 @@ void BotBuy( gentity_t *self )
 	{
 		BG_AddUpgradeToInventory( upgrade, self->client->ps.stats );
 		G_AddCreditToClient( self->client, -(short)BG_Upgrade( upgrade )->price, qfalse );
-		G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought BATTPACK\n");
+		G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Bought BATTPACK\n");
 	}
 	else
 	{buybatt = qfalse;}
@@ -553,6 +565,9 @@ void BotAttackHuman( gentity_t *self )
 	int tooCloseDistance = 200; 
 	int tempEntityIndex = -1;
 	int distance = botGetDistanceBetweenPlayer(self, self->bot->Enemy);
+	
+    G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_UTIL + BOT_DEBUG_HUMAN, "Enemy: %p\n", self->bot->Enemy);
+    G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_UTIL + BOT_DEBUG_HUMAN, "Distance: %d\n", distance);
 	//TODO: move this code to target prioritization
 	if(G_Rand() < 10 && distance > tooCloseDistance) { //LEPE: change target 10% of times. 
 		// try to find closest enemy
@@ -565,17 +580,13 @@ void BotAttackHuman( gentity_t *self )
 	//Use nades
 	if(distance < tooCloseDistance && (self->bot->Enemy->s.eType == ET_BUILDABLE || self->bot->Enemy->s.eType == PCL_ALIEN_LEVEL4)) {	//LEPE: Nades on buildings or tyrants
 	    if(BG_InventoryContainsUpgrade(UP_GRENADE,self->client->ps.stats)) {
-            G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_UTIL + BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "NADE ACTIVATED!\n");
+            G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_UTIL + BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "NADE ACTIVATED!\n");
             BG_ActivateUpgrade(UP_GRENADE,self->client->ps.stats);
 	    }
 	}
 	
 	if(distance < g_human_range.integer) 
 	{
-	  //ROTAX
-		int rand = 0;
-		rand = G_Rand();
-
 		//If its a player or bot
 		if(self->bot->Enemy->s.eType == ET_PLAYER) {
 			if(distance < 300 && 
@@ -603,6 +614,7 @@ void BotAttackHuman( gentity_t *self )
 				if(distance < 200) {
 					BotStand( self );
 					BotAddMove( self, BOT_MOVE_BACK, 500);
+					BotStartMove( self );
 				} else {
 					BotStop( self );
 					BotCrouch( self );
@@ -679,7 +691,6 @@ void BotIdleHuman( gentity_t *self ) {
  * @param self
  */
 void BotTargetHuman( gentity_t *self ) {
-
 }
 
 /**
@@ -711,9 +722,7 @@ void BotHealHuman( gentity_t *self ) {
 			BotResetState( self, HEAL );
 		}
 	} else {
-		if(!self->bot->Struct) {
-			self->bot->Struct = botFindClosestBuildable( self, 200, BA_H_MEDISTAT );
-		}
+		self->bot->Struct = botFindClosestBuildable( self, 200, BA_H_MEDISTAT );
 		//TODO: if there is no a MEDIPAD nearby, search for it (pathfinding)
 		//For now, just forget about it
 		if(!self->bot->Struct) {

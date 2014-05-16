@@ -1041,7 +1041,8 @@ void G_CheckVote( team_t team );
 void LogExit( const char *string );
 int  G_TimeTilSuddenDeath( void );
 //LEPE
-void QDECL G_BotDebug(botDebugVerbosity verbosity, int type, const char *fmt, ... );
+void QDECL G_Debug(botDebugVerbosity verbosity, int type, const char *fmt, ... );
+void QDECL G_BotDebug(gentity_t *self, botDebugVerbosity verbosity, int type, const char *fmt, ... );
 
 //
 // g_client.c

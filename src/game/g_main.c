@@ -434,16 +434,13 @@ void QDECL G_Error( const char *fmt, ... )
   trap_Error( text );
 }
 /**
- * Debug messages for bots
- * @param type [int] : (Bitwise AND) botDebugType
+ * Debug messages related to bots but not bots.
+ * @param verbosity
+ * @param type
  * @param fmt
  * @param ...
- * 
- * BotDebugType works like tags to flag this debug message.
- * It can contain one or more types
- * 
  */
-void QDECL G_BotDebug(botDebugVerbosity verbosity, int type, const char *fmt, ... )
+void QDECL G_Debug(botDebugVerbosity verbosity, int type, const char *fmt, ... )
 {
 	int i;
 	qboolean isadmin = qfalse;
@@ -478,6 +475,64 @@ void QDECL G_BotDebug(botDebugVerbosity verbosity, int type, const char *fmt, ..
 		  (g_bot_debug_type.integer & type)) {
 			if(g_bot_debug_verbosity.integer <= verbosity) {
 				G_Printf(text);
+			}
+		}
+	}
+}
+/**
+ * Debug messages for bots (requires entities)
+ * @param type [int] : (Bitwise AND) botDebugType
+ * @param fmt
+ * @param ...
+ * 
+ * BotDebugType works like tags to flag this debug message.
+ * It can contain one or more types
+ * 
+ */
+void QDECL G_BotDebug(gentity_t *self, botDebugVerbosity verbosity, int type, const char *fmt, ... )
+{
+	int i;
+	qboolean isadmin = qfalse;
+	gentity_t *ent;
+	//Process the message:
+	va_list argptr;
+	char    text[ 1024 ];
+	char    fulltext[ 1536 ] = "";
+	char    dfulltext[ 1536 ] = "";
+
+	if(self->bot->debug) {
+		va_start( argptr, fmt );
+		Q_vsnprintf( text, sizeof( text ), fmt, argptr );
+		va_end( argptr );
+		//Append bot name:
+		strcat(fulltext, self->client->pers.netname);
+		strcat(fulltext, " : ^7");
+		strcat(fulltext, text);
+		//Let it know to requested admins:
+		for( i = 0; i < level.maxclients; i++ )
+		{
+			if( level.clients[ i ].pers.connected != CON_DISCONNECTED )
+			{
+				if( level.clients[ i ].pers.admin ) {
+					if((level.clients[ i ].pers.botDebugTypeFlg == BOT_DEBUG_ALL) ||
+					   (level.clients[ i ].pers.botDebugTypeFlg & type)) {
+						if(level.clients[ i ].pers.botDebugVerbosityVal <= verbosity) {
+							isadmin = qtrue;
+							ent = &g_entities[ i ];
+							G_admin_print( ent , fulltext );
+						}
+					}
+				}
+			}
+		}
+		//It it was done by console:
+		if(!isadmin) {
+			G_DecolorString(fulltext, dfulltext, sizeof(fulltext));
+			if((g_bot_debug_type.integer == BOT_DEBUG_ALL) || 
+			  (g_bot_debug_type.integer & type)) {
+				if(g_bot_debug_verbosity.integer <= verbosity) {
+					G_Printf(dfulltext);
+				}
 			}
 		}
 	}
@@ -728,7 +783,7 @@ void G_PathLoad( void )
 		}
 	path++;
 	}
-	G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH, "Loaded %d paths\n", level.numPaths);
+	G_Debug(BOT_VERB_NORMAL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH, "Loaded %d paths\n", level.numPaths);
 }
 /*
   Drawing nodes
@@ -813,7 +868,6 @@ void G_RedrawNodes( void )
 {
 	long i;
     int pid; //path_id
-    gentity_t *ent;
     //We need to remove the current ones first before adding them
     for( i = 0; i < MAX_GENTITIES; i++ )
     {
@@ -824,7 +878,7 @@ void G_RedrawNodes( void )
             if(level.paths[pid].essence != 50) {
                 //if(ent == NULL) ent = g_entities[i].parent; //recover parent entity before removing node
                 if(g_entities[i].nextthink - 2000 < level.time - 1000) { //do not create it again if was created less than a sec before
-                    G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Deleting entity: %i, to Update node %d with essence: %d\n", i, pid, level.paths[pid].essence);
+                    G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Deleting entity: %i, to Update node %d with essence: %d\n", i, pid, level.paths[pid].essence);
                     G_FreeEntity(&g_entities[i]);
                     spawnnode(pid);
                 }
@@ -896,14 +950,12 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
     {
       char serverinfo[ MAX_INFO_STRING ];
       qtime_t qt;
-      int t;
 
       trap_GetServerinfo( serverinfo, sizeof( serverinfo ) );
 
       G_LogPrintf( "------------------------------------------------------------\n" );
       G_LogPrintf( "InitGame: %s\n", serverinfo );
 
-      t = trap_RealTime( &qt );
       G_LogPrintf("RealTime: %04i/%02i/%02i %02i:%02i:%02i\n",
             qt.tm_year+1900, qt.tm_mon+1, qt.tm_mday,
             qt.tm_hour, qt.tm_min, qt.tm_sec );
@@ -2715,7 +2767,7 @@ void G_RunFrame( int levelTime )
             max = level.paths[i].essence > max ? level.paths[i].essence : max; 
             min = level.paths[i].essence < min ? level.paths[i].essence : min; 
             if(level.paths[i].essence > (50 + essence_mod)) {
-                G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Reducing Essence of path %i to %i\n", i, level.paths[i].essence);
+                G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Reducing Essence of path %i to %i\n", i, level.paths[i].essence);
                 level.paths[i].essence = level.paths[i].essence - essence_mod; //TODO: convert to sv_essence_rate or something like that
             } else if(level.paths[i].essence < 50) { //for negative essence
                 level.paths[i].essence = level.paths[i].essence + essence_mod; 
@@ -2723,8 +2775,8 @@ void G_RunFrame( int levelTime )
                 level.paths[i].essence = 50;
             }
         }
-        G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Max essence: %i\n", max); 
-        G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Min essence: %i\n", min);
+        G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Max essence: %i\n", max); 
+        G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Min essence: %i\n", min);
         G_RedrawNodes( );
   }
   level.essenceFadeTimer += (levelTime - level.time);
@@ -2868,7 +2920,7 @@ void G_RunFrame( int levelTime )
 void G_DeployBots( gentity_t *ent ) 
 {
     if(g_bot_join.integer) {
-         G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN,"A Players: %d\nH Players: %d\n",level.numAlienClients,level.numHumanClients);
+         G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN,"A Players: %d\nH Players: %d\n",level.numAlienClients,level.numHumanClients);
         if(! (ent->r.svFlags & SVF_BOT)) { 
             if(level.numAlienClients - level.alienBots >= 0) {
                 trap_SendConsoleCommand( EXEC_APPEND, va("exec bots/A%d.cfg\n", level.numAlienClients - level.alienBots) ); 
@@ -2877,6 +2929,6 @@ void G_DeployBots( gentity_t *ent )
                 trap_SendConsoleCommand( EXEC_APPEND, va("exec bots/H%d.cfg\n", level.numHumanClients - level.humanBots) ); 
             }
         }
-        G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN,"A Bots: %d\nH Bots: %d\n",level.alienBots,level.humanBots);
+        G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN,"A Bots: %d\nH Bots: %d\n",level.alienBots,level.humanBots);
     }
 }

@@ -37,7 +37,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 //Adjust this value if move actions are being discarded
 #define BOT_MOVE_QUEUE		10
-#define BOT_MOVE_NO_TIME_LIMIT	0
 #define BOT_TURN_VAL		30.0f
 #define BOT_TURN_ANGLE_DIV	(360.0f / (float)BOT_TURN_VAL)
 #define BOT_DEBUG_ALL		-1
@@ -74,7 +73,7 @@ typedef enum
 
 /**
  * Debug flags for bots.
- * Example: G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_THINK + BOT_DEBUG_ALIEN, "This is test # %d\n", 1);
+ * Example: G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_THINK + BOT_DEBUG_ALIEN, "This is test # %d\n", 1);
  * In order to turn ON/OFF debug options, cvars are used, example:
  * > g_debugBotThink 1
  * If you add one more debug type here, also add the cvar in g_main.c 
@@ -180,6 +179,7 @@ typedef struct
   gentity_t		*Friend;
   gentity_t		*Struct; //used for repairing or healing
   botState		state;
+  qboolean		debug; 	//debug this bot
   //THINK: variables used to decide per thinking level
   struct {
 	  botState 		state[THINK_LEVEL_MAX + 1];
@@ -200,7 +200,7 @@ typedef struct
 	  int 			blocked_try; //We increase this value each time we try to unblock the bot
 	  vec3_t		blocked_origin; //keep where we got stucked
   } path;
-  //MOVE: variables and properties related to Movements
+  //MOVE: variables and properties related to Advanced Movements (combinations)
   struct {
 	  struct {
 		  botMove action;
@@ -208,6 +208,7 @@ typedef struct
 	  } queue[BOT_MOVE_QUEUE];
 	  int read; //index used to know which queue slot to read from 
 	  int write; //index used to know which queue slot to write into
+	  qboolean exec; //used to start performing a movement
   } move;
   //TIMER: used to time actions (variables).
   struct {
@@ -221,6 +222,7 @@ typedef struct
   } timer;
   //PROFILE: bot personality
   struct {
+  /*
 	  int	obedient; //follows esssence or it goes to explore often
 	  int	aggressive; //try to attack more often or stays at base (camp) and repairs/build more
 	  int	cooperative; //try to keep close to other bots
@@ -229,6 +231,7 @@ typedef struct
 	  int	evasive; //The more, it will try not to go straight to the target but will be slower. 
 	  int	talkative; //How much it talks
 	  int	impulsive; //How much it takes to take decisions
+   */
 	  int	skill; //deprecated?
   } profile;
   //SETTINGS: 
@@ -318,6 +321,7 @@ gentity_t *botFindDamagedStructure( gentity_t *self, float r );
 
 // g_bot_control.c
 void BotControl( gentity_t *self, botMove move );
+void BotStartMove( gentity_t *self );
 void BotDoMove( gentity_t *self, int msec ); 
 void BotAddMove( gentity_t *self, botMove move, int time ); 
 void BotCleanMove( gentity_t *self );

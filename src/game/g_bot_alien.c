@@ -80,7 +80,7 @@ void BotBeforeSpawnAlien( gentity_t *self )
 	//is enemy near egg? YES -> dretch
 	//are any building destroyed near egg? (need to keep record of initial builds) NO -> dretch
 	//any granger near egg? YES -> dretch
-    G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_ALIEN + BOT_DEBUG_THINK, "Bot is about to spawn\n");
+    G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_ALIEN + BOT_DEBUG_THINK, "Bot is about to spawn\n");
 	self->client->pers.classSelection = PCL_ALIEN_LEVEL0;
 	self->client->ps.stats[ STAT_CLASS ] = PCL_ALIEN_LEVEL0;
 	G_PushSpawnQueue( &level.alienSpawnQueue, clientNum );
@@ -165,7 +165,7 @@ void BotBlockedAlien( gentity_t *self )
 	
 	if(canwallwalk) BotWallWalk( self ); //if possible
 
-	G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_ALIEN + BOT_DEBUG_NAVSTATE, "[ %d ] Trying to unblock. Rand: %d\n", try, rand );
+	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_ALIEN + BOT_DEBUG_NAVSTATE, "[ %d ] Trying to unblock. Rand: %d\n", try, rand );
 	if(try <= 0) {
 		BotMoveFwd( self );
 		BotJump( self );
@@ -180,7 +180,7 @@ void BotBlockedAlien( gentity_t *self )
 	
 	if(try >= BOT_TIMER_NAV_SECOND * 4) {
 		self->bot->path.blocked_try = 0; 
-		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_ALIEN + BOT_DEBUG_NAVSTATE, "Reset blocked_try to 0\n" );
+		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_ALIEN + BOT_DEBUG_NAVSTATE, "Reset blocked_try to 0\n" );
 	} else {
 		//we set next try 
 		self->bot->path.blocked_try++;
@@ -424,7 +424,6 @@ void BotAttackAlien( gentity_t *self )
 	int closeDistance = LEVEL2_AREAZAP_RANGE; 
 	int veryCloseDistance = LEVEL4_CLAW_RANGE; 
 	int tempEntityIndex = -1;
-	int rand = 0;
 	int distance = botGetDistanceBetweenPlayer(self, self->bot->Enemy);
 	int anglediff = 0;
 	//TODO: move this code to target prioritization
@@ -441,8 +440,6 @@ void BotAttackAlien( gentity_t *self )
 	//If we are closer than what humans can reach to us
 	if(distance < g_human_range.integer)
 	{
-			rand = G_Rand();
-				
 			BotWallWalk( self ); // enable wallwalk if possible
 			
 			BotRun( self );

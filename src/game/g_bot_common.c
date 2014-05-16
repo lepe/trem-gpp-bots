@@ -114,7 +114,7 @@ void BotSpectator( gentity_t *self ){
     self->bot->Struct = NULL;
     self->bot->Friend = NULL;
     self->bot->Enemy  = NULL;
-	G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_COMMON + BOT_DEBUG_THINK, "Bot is spectator\n");
+	G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_COMMON + BOT_DEBUG_THINK, "Bot is spectator\n");
 	//TODO: check what else we need to reset
 }
 /**
@@ -143,7 +143,11 @@ void BotThink( gentity_t *self )
 	if(BotKeepThinking( self , THINK_LEVEL_1)) return;
 	
 	if(botFindClosestEnemy( self )) {
-		self->bot->think.state[ THINK_LEVEL_1 ] = ATTACK;
+		self->bot->think.state[ THINK_LEVEL_3 ] = ATTACK;
+		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_COMMON, "Enemy Found: %p. Attack LEVEL_3\n", self->bot->Enemy);
+	} else {
+		BotResetState( self, ATTACK );
+		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_COMMON, "Enemy not found. Reset ATTACK\n");
 	}
 	
 	switch(self->bot->state) {
@@ -151,6 +155,14 @@ void BotThink( gentity_t *self )
 			//TODO: this first IF condition should be inside ATTACK function as we need to
 			//keep record that it was able to kill it. Depending on target type, it should
 			//decide what state should be next.
+
+			//In case your enemy became your friend, don't shoot at him/her!
+			if(self->client->pers.teamSelection == self->bot->Enemy->client->pers.teamSelection) {
+				self->bot->Enemy = NULL;
+				//Say: I know I was too much for you. You came to the right side
+			}
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_COMMON, "Enemy: %p\n",self->bot->Enemy);
+			
 			if(self->bot->Enemy){
 				//Prevent firing to friends
 				self->bot->Friend = NULL;
@@ -184,6 +196,11 @@ void BotThink( gentity_t *self )
 			break;
 			
 		case FOLLOW:
+			//In case your friend became your enemy, don't follow him/her!
+			if(self->client->pers.teamSelection == self->bot->Enemy->client->pers.teamSelection) {
+				self->bot->Friend = NULL;
+				//Say: traitor! I will burn you house down and eat all your plants!
+			}
 			if(self->bot->Friend) {
 				if(self->bot->Friend->health <= 0) {
 					//TODO: report to CHAT function
@@ -230,6 +247,12 @@ void BotThink( gentity_t *self )
 		default:
 			break;
 	}
+	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_COMMON + BOT_DEBUG_THINK,"COMMON THINK: LVL1:%d, LVL2:%d, LVL3:%d, MAX:%d \n",  
+			self->bot->think.state[ THINK_LEVEL_1 ],
+			self->bot->think.state[ THINK_LEVEL_2 ],
+			self->bot->think.state[ THINK_LEVEL_3 ],
+			self->bot->think.state[ THINK_LEVEL_MAX ]
+			);
 }
 /**
  * Bot will aim to path, target, etc. according to state
@@ -341,10 +364,6 @@ void BotIdle( gentity_t *self ){
  */
 void BotAttack( gentity_t *self ){
 	self->bot->timer.foundPath = level.time;
-	//Stop attacking if you can't see it
-	if(!G_Visible(self, self->bot->Enemy, CONTENTS_SOLID)) {
-		BotControl( self, BOT_RESET_BUTTONS );
-	}
 }
 /**
  * Bot will defend base (camp). If away from spawn, it will retreat first

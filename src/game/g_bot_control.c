@@ -45,9 +45,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * Bot movement related functions
  */
 
-//Private functions
-
-
+/**
+ * Bot will start performing an advanced movement.
+ * @param self
+ */
+void BotStartMove( gentity_t *self ) {
+	self->bot->move.exec = qtrue;
+}
 /**
  * Perform bot movements (read from queue)
  * movement functions are declared in g_bot_control.c
@@ -56,30 +60,27 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 void BotDoMove( gentity_t *self, int msec ) {
 	int time;
 	botMove move;
-	
-	move = self->bot->move.queue[ self->bot->move.read ].action;
-	//if there is some action:
-	if( move > BOT_EMPTY_MOVE ) {
-		if(self->bot->timer.move == 0) {
-			BotControl( self, move );
-			self->bot->timer.move += msec;
-		} else {
-			time = self->bot->move.queue[ self->bot->move.read ].time;
-			if(self->bot->timer.move > time) {
-				BotCleanMove( self );
-				self->bot->move.queue[ self->bot->move.read ].action = BOT_EMPTY_MOVE; //reset
-				self->bot->move.queue[ self->bot->move.read ].time = 0; //reset
-				self->bot->move.read++;
-				if(self->bot->move.read == BOT_MOVE_QUEUE) {
-					self->bot->move.read = 0;
-				}
-				self->bot->timer.move = 0;
-			} else {
+	if(self->bot->move.exec == qtrue && self->bot->move.read < BOT_MOVE_QUEUE) {
+		move = self->bot->move.queue[ self->bot->move.read ].action;
+		//if there is some action:
+		if( move > BOT_EMPTY_MOVE ) {
+			if(self->bot->timer.move == 0) {
+				BotControl( self, move );
 				self->bot->timer.move += msec;
+			} else {
+				time = self->bot->move.queue[ self->bot->move.read ].time;
+				if(self->bot->timer.move > time) {
+					BotCleanMove( self );
+					self->bot->move.read++;
+					self->bot->timer.move = 0;
+				} else {
+					self->bot->timer.move += msec;
+				}
 			}
+		} else { //we hit the end of the movement
+			self->bot->timer.move = 0;
+			BotClearQueue( self );
 		}
-	} else { //else reset to zero
-		self->bot->timer.move = 0;
 	}
 }
 /**
@@ -90,32 +91,17 @@ void BotDoMove( gentity_t *self, int msec ) {
  * @param move
  */
 void BotAddMove( gentity_t *self, botMove move, int time ) {
-	int prev;
-	//Get the previous action on queue
-	prev = self->bot->move.write - 1;
-	if(prev < 0) prev = BOT_MOVE_QUEUE;
-	if(self->bot->move.queue[ prev ].time == BOT_MOVE_NO_TIME_LIMIT && self->bot->move.queue[ prev ].action == move) {
-		//As it is a repeating-non-stop action, we ignore it.
-	} else {
-		if(self->bot->move.queue[ self->bot->move.write ].action == BOT_EMPTY_MOVE) {
-			self->bot->move.queue[ self->bot->move.write ].action = move;
-			self->bot->move.queue[ self->bot->move.write ].time = time;
-			self->bot->move.write++;
-			if(self->bot->move.write == BOT_MOVE_QUEUE) {
-				self->bot->move.write = 0;
-			}
+	if(self->bot->move.exec == qfalse) {
+		if(self->bot->move.write == BOT_MOVE_QUEUE) {
+			G_Printf("%s: Movement dropped (%d) with time (%d)! Please set BOT_MOVE_QUEUE to a higher value.\n",self->client->pers.netname ,move,time);
 		} else {
-			/* 
-			 * Queue is not large enough or sometimes we are adding elements to the queue in a faster
-			 * pace than we read them. Other reason is that we are adding a high time value to the queue, which
-			 * fill the queue quickly. For example:
-			 * if we add this: BotAddMove( self, BOT_MOVE_FWD, 10000 ); 
-			 * Bots will move forward for 10 seconds. Meanwhile, other processes may be adding more movements to
-			 * the queue reaching the limit. To prevent locking the queue, you can split the action in smaller parts.
-			 */
-			//G_Printf("%s: Movement dropped (%d) with time (%d)! Please set BOT_MOVE_QUEUE to a higher value or fix times --see BotAddMove()--.\n",self->client->pers.netname ,move,time);
+			if(self->bot->move.queue[ self->bot->move.write ].action == BOT_EMPTY_MOVE) {
+				self->bot->move.queue[ self->bot->move.write ].action = move;
+				self->bot->move.queue[ self->bot->move.write ].time = time;
+				self->bot->move.write++;
+			}
 		}
-	}
+	} //else: drop it
 }
 /**
  * When time expires, return to previous condition
@@ -164,7 +150,7 @@ void BotCleanMove( gentity_t *self ) {
  * @param self
  */
 void BotControl( gentity_t *self, botMove move ) {
-	G_BotDebug( BOT_VERB_DETAIL, BOT_DEBUG_CONTROL, "Movement: %d\n", move);
+	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_CONTROL, "Movement: %d\n", move);
 	switch(move) {
 		case BOT_WAIT: 
 			/*this is a dummy movement. Is used to preserve previous momentum. 
@@ -259,6 +245,7 @@ void BotClearQueue( gentity_t *self )
 	}
 	self->bot->move.write = 0;
 	self->bot->move.read = 0;
+	self->bot->move.exec = qfalse;
 }
 
 
@@ -268,7 +255,7 @@ void BotClearQueue( gentity_t *self )
  * to use custome timed actions use BotAddMove instead.
  */
 void BotRun( gentity_t *self )		{ BotControl( self, BOT_RUN ); }
-void BotJump( gentity_t *self )		{ BotAddMove( self, BOT_JUMP, 500 ); }
+void BotJump( gentity_t *self )		{ BotAddMove( self, BOT_JUMP, 500 ); BotStartMove( self ); }
 void BotStop( gentity_t *self )		{ BotControl( self, BOT_STOP ); }
 void BotMoveRight( gentity_t *self ){ BotControl( self, BOT_MOVE_RIGHT ); }
 void BotMoveLeft( gentity_t *self )	{ BotControl( self, BOT_MOVE_LEFT ); }
@@ -289,25 +276,25 @@ void BotMidAttack ( gentity_t *self ){ BotControl( self, BOT_MID_ATTACK ); }
 void BotLookUp( gentity_t *self, int degrees )	 {
 	int d;
 	for(d = 0; d < (degrees / BOT_TURN_VAL); d++) {	
-		BotAddMove( self, BOT_LOOK_UP, 10 ); 
+		//BotAddMove( self, BOT_LOOK_UP, 10 ); 
 	}
 }
 void BotLookDown( gentity_t *self, int degrees ) { 
 	int d;
 	for(d = 0; d < (degrees / BOT_TURN_VAL); d++) {	
-		BotAddMove( self, BOT_LOOK_DOWN, 10 ); 
+		//BotAddMove( self, BOT_LOOK_DOWN, 10 ); 
 	}
 }
 void BotLookLeft( gentity_t *self, int degrees ) { 
 	int d;
 	for(d = 0; d < (degrees / BOT_TURN_VAL); d++) {	
-		BotAddMove( self, BOT_LOOK_LEFT, 10 ); 
+		//BotAddMove( self, BOT_LOOK_LEFT, 10 ); 
 	}
 }
 void BotLookRight( gentity_t *self, int degrees ){ 
 	int d;
 	for(d = 0; d < (degrees / BOT_TURN_VAL); d++) {	
-		BotAddMove( self, BOT_LOOK_RIGHT, 10 ); 
+		//BotAddMove( self, BOT_LOOK_RIGHT, 10 ); 
 	}
 }
 /**
@@ -333,6 +320,7 @@ void BotTurn( gentity_t *self, int pitch, int yaw ){
 void Bot_Pounce( gentity_t *self, int angle )	{ 
 	BotLookUp( self, angle ); 
 	BotAddMove( self, BOT_POUNCE, LEVEL3_POUNCE_TIME_UPG ); 
+	BotStartMove( self );
 }
 
 //########### HUMAN SPECIFIC ################
@@ -341,6 +329,7 @@ void Bot_Pounce( gentity_t *self, int angle )	{
 //void BotFlyDown( gentity_t *self )	{ BotAddMove( self, BOT_RUN ); }
 void Bot_FullLuci( gentity_t *self )	{ 
 	BotAddMove( self, BOT_FULL_LUCI, LCANNON_CHARGE_TIME_MAX - 500 ); 
+	BotStartMove( self );
 }
 //########### COMMON ################
 /**
@@ -359,5 +348,6 @@ void Bot_Strafe( gentity_t *self ) {
 		BotAddMove( self, BOT_MOVE_LEFT, length );
 		BotAddMove( self, BOT_MOVE_RIGHT, length );
 	}
+	BotStartMove( self );
 }
 

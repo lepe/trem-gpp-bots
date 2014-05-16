@@ -111,8 +111,6 @@ void G_BotAdd( char *name, team_t team, int skill, int ignore ) {
 	ent->bot->profile.skill = skill < 1 ? 1 : skill;
 	
 	ent->r.svFlags |= SVF_BOT;
-    //LEPE: used in ant algorithm
-    G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_GENERAL + BOT_DEBUG_PATH, "Setting crumbs to 0\n");
 	// register user information
 	userinfo[0] = '\0';
 	Info_SetValueForKey( userinfo, "name", name );
@@ -131,7 +129,7 @@ void G_BotAdd( char *name, team_t team, int skill, int ignore ) {
 		return;
 	}
 	ClientBegin( clientNum );
-    G_BotDebug(BOT_VERB_IMPORTANT, BOT_DEBUG_GENERAL, "Bot Added: %s\n", name_s);
+    G_BotDebug(ent, BOT_VERB_IMPORTANT, BOT_DEBUG_GENERAL, "Bot Added\n");
 	G_ChangeTeam( ent, team );
 	BotInit( ent );
     if(team == TEAM_HUMANS) {
@@ -155,7 +153,7 @@ void G_BotDel( int clientNum ) {
 		trap_Print( va("'^7%s^7' is not a bot\n", ent->client->pers.netname) );
 		return;
 	}
-    G_BotDebug(BOT_VERB_IMPORTANT, BOT_DEBUG_GENERAL, "Bot deleted: %s\n", ent->client->pers.netname);
+    G_BotDebug(ent, BOT_VERB_IMPORTANT, BOT_DEBUG_GENERAL, "Bot deleted\n");
 	ent->inuse = qfalse;
 	//BG_Free(ent->bot->path.crumb); 
 	BG_Free(ent->bot);
@@ -242,6 +240,7 @@ void G_BotCmd( int clientNum, char *command, int value, int value2 ) {
 	  if(g_bot_manual.integer) {
 		  if(value > BOT_EMPTY_MOVE && value <= BOT_STOP) {
 		  	BotAddMove( ent, (botMove)value, value2 );
+			BotStartMove( ent );
 		  } else {
 			  switch(value) {
 				  case 50: BotLookUp( ent , value2 ); break;

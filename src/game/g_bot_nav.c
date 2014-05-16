@@ -43,16 +43,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 void BotTargetPath( gentity_t *self )
 {
-	G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(0) Current NAV state: %d\n", self->bot->path.state);
+	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(0) Current NAV state: %d\n", self->bot->path.state);
 	//check if we lost track of the path we were targeting. If we did, find new one
 	if((self->bot->path.lastpathid >= 0 && level.time - self->bot->timer.foundPath > level.paths[self->bot->path.lastpathid].timeout) ||
 		level.time - self->bot->timer.foundPath > 10000)
 	{
 		{
 			if(g_bot_manual_nav.integer) {
-				G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(1) NAV State would have changed to: %d\n", FINDNEWPATH);
+				G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(1) NAV State would have changed to: %d\n", FINDNEWPATH);
 			} else {					
-				G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(1) NAV State changed to: %d\n", FINDNEWPATH);
+				G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(1) NAV State changed to: %d\n", FINDNEWPATH);
 				self->bot->path.state = FINDNEWPATH;
 			}
 		}
@@ -61,23 +61,23 @@ void BotTargetPath( gentity_t *self )
 	if(distanceToTargetNode(self) < 70) 
 	{
 		if(g_bot_manual_nav.integer) {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(3) NAV State would have changed to: %d\n", FINDNEXTPATH);
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(3) NAV State would have changed to: %d\n", FINDNEXTPATH);
 		} else {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(3) NAV State changed to: %d\n", FINDNEXTPATH);
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(3) NAV State changed to: %d\n", FINDNEXTPATH);
 			self->bot->path.state = FINDNEXTPATH;
 		}
 	}
 	//If we haven't move enough, check if we are blocked
-	if(level.time - self->bot->timer.foundPath > 2000 && VectorLength( self->client->ps.velocity ) < 50.0f && (float)Distance( self->client->oldOrigin, self->r.currentOrigin ) < 10 ) //2.3
+	if(level.time - self->bot->timer.foundPath > 2000 && VectorLength( self->client->ps.velocity ) < 10.0f && (float)Distance( self->client->oldOrigin, self->r.currentOrigin ) < 5 ) //2.3
 	{
 		if(g_bot_manual_nav.integer) {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(4) NAV State would have changed to: %d\n", BLOCKED);
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(4) NAV State would have changed to: %d\n", BLOCKED);
 		} else {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(4) NAV State changed to: %d\n", BLOCKED);
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(4) NAV State changed to: %d\n", BLOCKED);
 	    	self->bot->path.state = BLOCKED;
 		}
 	} else {
-		//G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "NOT BLOCKED %d: \n",self->bot->path.state);
+		//G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "NOT BLOCKED %d: \n",self->bot->path.state);
 		//we are not blocked, so don't keep trying
 		//self->bot->path.blocked_try = 0; 
 	}
@@ -116,24 +116,24 @@ void BotFindNewPath( gentity_t *self )
 	}
 	if(pathfound == qtrue)
 	{
-		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "New Path found\n");
+		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "New Path found\n");
 		self->bot->path.targetPath = closestpath;
 		self->bot->timer.foundPath = level.time;
 		if(g_bot_manual_nav.integer) {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(5) NAV State would have changed to: %d\n", TARGETPATH);
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(5) NAV State would have changed to: %d\n", TARGETPATH);
 		} else {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(5) NAV State changed to: %d\n", TARGETPATH);
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(5) NAV State changed to: %d\n", TARGETPATH);
 			self->bot->path.state = TARGETPATH;
 		}
 	}
 	else
 	{
-		G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "New Path NOT found\n");
+		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "New Path NOT found\n");
 		//TODO: for now is treated as BLOCKED but should be LOST
 		if(g_bot_manual_nav.integer) {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(6) NAV State would have changed to: %d\n", BLOCKED);
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(6) NAV State would have changed to: %d\n", BLOCKED);
 		} else {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(6) NAV State hanged to: %d\n", BLOCKED);
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(6) NAV State hanged to: %d\n", BLOCKED);
 			self->bot->path.state = BLOCKED;
 		}
 	}
@@ -157,8 +157,8 @@ void BotFindNextPath( gentity_t *self )
 	int possiblepaths[5];
     qboolean known = qfalse;
 
-    G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Last Path Id: %d\n",self->bot->path.lastpathid);
-    G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Target Path: %d\n",self->bot->path.targetPath);
+    G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Last Path Id: %d\n",self->bot->path.lastpathid);
+    G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Target Path: %d\n",self->bot->path.targetPath);
 	possiblepaths[0] = possiblepaths[1] = possiblepaths[2] = possiblepaths[3] = possiblepaths[4] = 0;
 	for(i = 0; i < 5; i++)
 	{
@@ -176,13 +176,13 @@ void BotFindNextPath( gentity_t *self )
 			possiblenextpath++;
 		}
 	}
-    G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Path Options: %i, %i, %i, %i, %i\n",possiblepaths[0],possiblepaths[1],possiblepaths[2],possiblepaths[3],possiblepaths[4]);
+    G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Path Options: %i, %i, %i, %i, %i\n",possiblepaths[0],possiblepaths[1],possiblepaths[2],possiblepaths[3],possiblepaths[4]);
 	if(possiblenextpath == 0)
 	{	
 		if(g_bot_manual_nav.integer) {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(7) NAV State would have changed to: %d\n", FINDNEWPATH);
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(7) NAV State would have changed to: %d\n", FINDNEWPATH);
 		} else {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(7) NAV State changed to: %d\n", FINDNEWPATH);
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(7) NAV State changed to: %d\n", FINDNEWPATH);
 			self->bot->path.state = FINDNEWPATH;
 		}
 		return;
@@ -190,9 +190,9 @@ void BotFindNextPath( gentity_t *self )
 	else
 	{
 		if(g_bot_manual_nav.integer) {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(8) NAV State would have changed to: %d\n", TARGETPATH);
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(8) NAV State would have changed to: %d\n", TARGETPATH);
 		} else {
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(8) NAV State changed to: %d\n", TARGETPATH);
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(8) NAV State changed to: %d\n", TARGETPATH);
 			self->bot->path.state = TARGETPATH;
 		}
 		if(possiblenextpath == 1)
@@ -204,9 +204,9 @@ void BotFindNextPath( gentity_t *self )
 			if(g_bot_essence.integer == 1) {
 				//bots decide here which path to follow based on the strength of the essence, previous nodes and possible unexplored nodes
 				//-------------
-				G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH, "Possible Paths: %d .",possiblenextpath);
+				G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH, "Possible Paths: %d .",possiblenextpath);
 				for(i =0; i < possiblenextpath; i++) {
-					G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"[ %d :",possiblepaths[i]);
+					G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"[ %d :",possiblepaths[i]);
 					known = qfalse;
 					for(j=0; j < self->bot->path.numCrumb; j++) {
 						if(self->bot->path.crumb[j] == possiblepaths[i]) {
@@ -216,39 +216,39 @@ void BotFindNextPath( gentity_t *self )
 					} 
 					pathessence[i] = level.paths[possiblepaths[i]].essence;
 					essence = pathessence[i] > 50 ? GOOD_ESSENCE : (pathessence[i] < 50 ? BAD_ESSENCE : NO_ESSENCE);
-					G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"%d",pathessence[i]);
+					G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"%d",pathessence[i]);
 					if(known == qfalse && essence == GOOD_ESSENCE) {
-						G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 50");
+						G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 50");
 						pathrank[i] = 50;                    
 					} else if(known == qfalse && essence == NO_ESSENCE) {
-						G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 30");
+						G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 30");
 						pathrank[i] = 30;                    
 					} else if(known == qtrue && (essence == GOOD_ESSENCE || essence == NO_ESSENCE)) {
-						G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 15");
+						G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 15");
 						pathrank[i] = 15;                    
 					} else if(known == qfalse) { //bad essence implied
-						G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 5");
+						G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 5");
 						pathrank[i] = 5;                    
 					} else { //known && bad essence implied
-						G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 1");
+						G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 1");
 						pathrank[i] = 1;                    
 					}
 					totalessence += pathessence[i] * pathrank[i];
-					G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"] TOTAL: %d\n",totalessence);
+					G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"] TOTAL: %d\n",totalessence);
 				}
 				self->bot->path.lastJoint = self->bot->path.targetPath; //when was the last time we had to choose a path (used to create negative essence)
 				randnum = G_Rand();
 				for(i =0; i < possiblenextpath; i++) {
 					accumessence += ((pathessence[i] * pathrank[i]) * 100) / totalessence;
 					if(randnum <= accumessence) {
-						G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"SELECTED : %d\n",possiblepaths[i]);
+						G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"SELECTED : %d\n",possiblepaths[i]);
 						nextpath = i;
 						break;
 					}
 				}
 			} else {
 				nextpath = G_Rand_Range(0,possiblenextpath-1);
-						G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"RANDOMLY SELECTED : %d\n",possiblepaths[i]);
+						G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"RANDOMLY SELECTED : %d\n",possiblepaths[i]);
 			}
 		}
 		//LEPE: set next crumb
@@ -268,12 +268,12 @@ void BotFindNextPath( gentity_t *self )
  * @param self
  */
 void BotBlocked( gentity_t *self ) {
-	if (G_Rand() < 10) BotGesture( self );
+	//if (G_Rand() < 10) BotGesture( self );
 	if(!g_bot_manual_nav.integer) {
 		if(Distance( self->bot->path.blocked_origin, self->r.currentOrigin ) > 50) {
 			self->bot->path.state = TARGETPATH;
 			self->bot->path.blocked_try = 0;
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_COMMON + BOT_DEBUG_NAVSTATE, "Blocked: Path state (TARGETPATH): %d\n", TARGETPATH);
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_COMMON + BOT_DEBUG_NAVSTATE, "Blocked: Path state (TARGETPATH): %d\n", TARGETPATH);
 		}
 	}
 }
@@ -337,7 +337,7 @@ void increasePathEssence( gentity_t *self ) {
 		if(level.paths[ self->bot->path.crumb[i] ].essence < 50) level.paths[ self->bot->path.crumb[i] ].essence = 50;
 		if(level.paths[ self->bot->path.crumb[i] ].essence < 100) {
 			level.paths[ self->bot->path.crumb[i] ].essence ++ ; //for now just increment in 1...
-			G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"Increasing: %i of total: %i (value: %i)\n",self->bot->path.crumb[i], self->bot->path.numCrumb, level.paths[ self->bot->path.crumb[i] ].essence);
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"Increasing: %i of total: %i (value: %i)\n",self->bot->path.crumb[i], self->bot->path.numCrumb, level.paths[ self->bot->path.crumb[i] ].essence);
 		}
 	}
 }
@@ -355,7 +355,7 @@ void setCrumb( gentity_t *self, int closestpath )
     qboolean regret = qfalse; //regret last decision: mark as negative essence
     for(i = 0; i < self->bot->path.numCrumb; i++) {
         if(self->bot->path.crumb[i] == closestpath) {
-            G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"Returning to: %i to node: %i\n",self->bot->path.numCrumb,closestpath);
+            G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"Returning to: %i to node: %i\n",self->bot->path.numCrumb,closestpath);
             nc = i;
         } else if(nc > 0) {
             if(self->bot->path.crumb[i] == self->bot->path.lastJoint) {
@@ -363,14 +363,14 @@ void setCrumb( gentity_t *self, int closestpath )
             } 
         }
         if(regret == qtrue) {
-           G_BotDebug(BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"Regreting: %i\n",self->bot->path.crumb[i]);
+           G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"Regreting: %i\n",self->bot->path.crumb[i]);
            level.paths[self->bot->path.crumb[i]].essence = 1; 
         }
     }
     if(nc > 0) {
         self->bot->path.numCrumb = nc;
     }
-    G_BotDebug(BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"Setting crumb : %i to node: %i\n",self->bot->path.numCrumb,closestpath);
+    G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"Setting crumb : %i to node: %i\n",self->bot->path.numCrumb,closestpath);
     self->bot->path.crumb[ self->bot->path.numCrumb ] = closestpath;
 	if(self->bot->path.numCrumb < level.numPaths) self->bot->path.numCrumb++;
     return;
