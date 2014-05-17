@@ -168,7 +168,7 @@ struct gentity_s
   int               last_move_time;
 
   int               health;
-  int               lastHealth; // currently only used for overmind
+  int               lastHealth; // currently only used for overmind & bots
 
   qboolean          takedamage;
 

@@ -85,9 +85,9 @@ int botGetAngleBetweenPlayer( gentity_t *self, gentity_t *player ) {
 qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch ) {
 	vec3_t dirToTarget, angleToTarget, highPoint, targetUp, targetStraight, realBase;
 
-	// Calculate the point on top of model (head) (well, 15% lower).
+	// Calculate the point on top of model (head) (well, 15% lower). 50% lower for humans
 	VectorCopy( target->s.pos.trBase, highPoint );
-	highPoint[2] += target->r.maxs[2] * 0.85;
+	highPoint[2] += target->r.maxs[2] * (self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ? 0.50 : 0.85);
 
 	// Make a vector from trBase -> highPoint
 	VectorSubtract( highPoint, target->s.pos.trBase, targetUp );
@@ -110,9 +110,11 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch ) {
 	// Grab the angles to use with delta_angles
 	vectoangles( dirToTarget, angleToTarget );
 	if(pitch) {
+		//self->bot->move.lookat[ PITCH ] = ANGLE2SHORT( angleToTarget[ PITCH ] );
 		self->client->ps.delta_angles[ PITCH ] = ANGLE2SHORT( angleToTarget[ PITCH ] );
 	}
 	self->client->ps.delta_angles[ YAW ] = ANGLE2SHORT( angleToTarget[ YAW ] );
+	//self->bot->move.lookat[ YAW ] = ANGLE2SHORT( angleToTarget[ YAW ] );
 	//self->client->ps.delta_angles[ ROLL ] = ANGLE2SHORT( angleToTarget[ ROLL ] );
 
     //LEPE: added if... Humans keep jumping when they are too close of a buildable
@@ -161,7 +163,7 @@ qboolean botFindClosestEnemy( gentity_t *self ) {
 		target = &g_entities[ entityList[ i ] ];
 		//Search for any enemy entity (player or structure)
 		if( (target->client && target->client->ps.stats[ STAT_TEAM ] != self->client->ps.stats[ STAT_TEAM ]) ||
-			(target->s.eType == ET_BUILDABLE && target->buildableTeam != self->client->ps.stats[ STAT_TEAM ]) ) 
+			((target->s.eType == ET_BUILDABLE && target->buildableTeam != self->client->ps.stats[ STAT_TEAM ]) && target->powered) ) 
 		{
 			distance = botGetDistanceBetweenPlayer(self, target);
 			if( distance < closerTargetDistance && G_Visible(self, target, CONTENTS_SOLID) ) {

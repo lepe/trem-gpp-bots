@@ -37,8 +37,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 //Adjust this value if move actions are being discarded
 #define BOT_MOVE_QUEUE		10
-#define BOT_TURN_VAL		30.0f
+#define BOT_TURN_VAL		25.0f
+#define BOT_TURN_SHORT		ANGLE2SHORT( BOT_TURN_VAL )
 #define BOT_TURN_ANGLE_DIV	(360.0f / (float)BOT_TURN_VAL)
+#define BOT_MOVE_PACE		10.0f
 #define BOT_DEBUG_ALL		-1
 
 //timers
@@ -122,13 +124,15 @@ typedef enum
 	BOT_LOOK_RIGHT,			//15
 	BOT_POUNCE,				//16
 	BOT_RESET_BUTTONS,		//17
-	BOT_MAIN_ATTACK,		//18
-	BOT_SEC_ATTACK,			//19
-	BOT_MID_ATTACK,			//20
-	BOT_FULL_LUCI,			//21
-	BOT_GESTURE,			//22
+	BOT_RESET_LEFT_RIGHT,	//18
+	BOT_RESET_FWD_BACK,		//19
+	BOT_MAIN_ATTACK,		//20
+	BOT_SEC_ATTACK,			//21
+	BOT_MID_ATTACK,			//22
+	BOT_FULL_LUCI,			//23
+	BOT_GESTURE,			//24
 		//<-- add movements here
-	BOT_STOP				//23
+	BOT_STOP				//25
 } botMove;
 
 typedef enum
@@ -209,6 +213,8 @@ typedef struct
 	  int read; //index used to know which queue slot to read from 
 	  int write; //index used to know which queue slot to write into
 	  qboolean exec; //used to start performing a movement
+	  vec3_t topoint; //move to that coordinate withoug aiming
+	  int lookat[2]; //move ain to that point
   } move;
   //TIMER: used to time actions (variables).
   struct {

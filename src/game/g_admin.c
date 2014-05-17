@@ -3368,15 +3368,24 @@ qboolean G_admin_bot( gentity_t *ent ) {
         } else if(!Q_stricmp(command,"del")) {
                 // del [name]
                 success = qfalse;
+				
+                trap_Argv( 3, team, sizeof( team ) );
 //               for( i = 0; i < MAX_NAMELOG_NAMES && namelog[ i ];i++ ) {
                  for( namelog = level.namelogs; namelog; namelog = namelog->next )
                         if( namelog->slot >= 0 ) {
                                 for( j = 0; j < MAX_NAMELOG_NAMES && namelog->name[ j ][ 0 ]; j++ ) {
                                         G_SanitiseString(namelog->name[ j ], name2_s, sizeof(name2_s) );
-                                        if( strstr( name2_s, name_s ) ) {
-                                                G_BotDel(namelog->slot);
-                                                success = qtrue;
-                                        }
+										if(!Q_stricmp(team,"except")) { 
+											if(!strstr( name2_s, name_s )) {
+													G_BotDel(namelog->slot);
+													success = qtrue;
+											}
+										} else {
+											if(strstr( name2_s, name_s )) {
+													G_BotDel(namelog->slot);
+													success = qtrue;
+											}
+										}
                                 }
                         }
                 }

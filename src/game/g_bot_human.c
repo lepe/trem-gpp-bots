@@ -119,23 +119,20 @@ void BotBeforeSpawnHuman( gentity_t *self )
  */
 void BotHumanThink( gentity_t *self )
 {
-	//If we have an enemy, forget about healing
+	//If we have an enemy and we are a builder, use blaster
 	if(self->bot->Enemy) {
 		//If we have an enemy, change the weapon
 		if(BG_InventoryContainsWeapon( WP_HBUILD, self->client->ps.stats )) G_ForceWeaponChange( self, WP_BLASTER );
-	} else {
-		//Suggest Heal if low HP
-		if(self->health <= 20) {
-			self->bot->think.state[ THINK_LEVEL_3 ] = HEAL;
-			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Heal as LEVEL3 in HumanThink\n");
-		} if(self->health <= 50) {
-			self->bot->think.state[ THINK_LEVEL_2 ] = HEAL;
-			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Heal as LEVEL2 in HumanThink\n");
-		} else if(self->health < 100) {
-			self->bot->think.state[ THINK_LEVEL_1 ] = HEAL;
-			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Heal as LEVEL1 in HumanThink\n");
-		}
-	}
+	} 
+	//If we are low in health and we are not healing and we have mkit, use it!
+	//TODO: remove hard value and set it to a variable
+	if((self->health < 40 || (self->health < 60 && (self->lastHealth > self->health))) 
+				&& !(self->client->ps.stats[ STAT_STATE ] & SS_HEALING_2X) 
+				&& BG_InventoryContainsUpgrade( UP_MEDKIT, self->client->ps.stats )) {
+		BG_ActivateUpgrade( UP_MEDKIT, self->client->ps.stats );
+		BotResetState( self, HEAL );
+	} 
+	
 	//Repair if has a ckit
 	if(BG_InventoryContainsWeapon( WP_HBUILD, self->client->ps.stats )) {
 		self->bot->Struct = botFindDamagedStructure( self , 300 );
@@ -169,12 +166,30 @@ void BotHumanThink( gentity_t *self )
 	}
 	///////////////////////// LEVEL 1 /////////////////////////
 	if(BotKeepThinking( self , THINK_LEVEL_1)) {
-		//TODO: if the target is not in our view range, set THINK_LEVEL_1 to UNDEFINED.
 	}
 	
 	///////////////////////// LEVEL 2 /////////////////////////
 	if(BotKeepThinking( self , THINK_LEVEL_2)) {
-
+	}
+	///////////////////////// LEVEL 3 /////////////////////////
+	if(BotKeepThinking( self , THINK_LEVEL_3)) {
+		//TODO: if the target is not in our view range, set THINK_LEVEL_1 to UNDEFINED.
+		if(!BG_InventoryContainsUpgrade( UP_MEDKIT, self->client->ps.stats )) {
+			self->bot->Struct = botFindClosestBuildable( self, 200, BA_H_MEDISTAT );
+			if(self->bot->Struct) {
+				//Suggest Heal if low HP
+				if(self->health <= 20) {
+					self->bot->think.state[ THINK_LEVEL_3 ] = HEAL;
+					G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Heal as LEVEL3 in HumanThink\n");
+				} else if(self->health <= 50) {
+					self->bot->think.state[ THINK_LEVEL_2 ] = HEAL;
+					G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Heal as LEVEL2 in HumanThink\n");
+				} else if(self->health < 90) {
+					self->bot->think.state[ THINK_LEVEL_1 ] = HEAL;
+					G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Heal as LEVEL1 in HumanThink\n");
+				}
+			}
+		}
 	}
 	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"HUMAN THINK: LVL1:%d, LVL2:%d, LVL3:%d, MAX:%d \n", 
 			self->bot->think.state[ THINK_LEVEL_1 ],
@@ -182,6 +197,7 @@ void BotHumanThink( gentity_t *self )
 			self->bot->think.state[ THINK_LEVEL_3 ],
 			self->bot->think.state[ THINK_LEVEL_MAX ]
 			);
+	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK,"Enemy:%p, Structure: %p\n", self->bot->Enemy, self->bot->Struct);
 }
 
 /**
@@ -714,21 +730,8 @@ void BotBuildHuman( gentity_t *self ) {
  * @param client
  */
 void BotHealHuman( gentity_t *self ) {
-	//Use medkit if low hp
-	if(BG_InventoryContainsUpgrade( UP_MEDKIT, self->client->ps.stats ))
-	{
-		if(self->health <= 40) { //TODO: remove hardcoded value
-			BG_ActivateUpgrade( UP_MEDKIT, self->client->ps.stats );
-			BotResetState( self, HEAL );
-		}
-	} else {
-		self->bot->Struct = botFindClosestBuildable( self, 200, BA_H_MEDISTAT );
-		//TODO: if there is no a MEDIPAD nearby, search for it (pathfinding)
-		//For now, just forget about it
-		if(!self->bot->Struct) {
-			BotResetState( self, HEAL );
-		}
-	}
+	//TODO: if there is no a MEDIPAD nearby, search for it (pathfinding)
+	//For now, just forget about it
 }
 
 /**

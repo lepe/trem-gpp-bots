@@ -114,6 +114,7 @@ void BotSpectator( gentity_t *self ){
     self->bot->Struct = NULL;
     self->bot->Friend = NULL;
     self->bot->Enemy  = NULL;
+	self->lastHealth = self->health;
 	G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_COMMON + BOT_DEBUG_THINK, "Bot is spectator\n");
 	//TODO: check what else we need to reset
 }
@@ -265,6 +266,7 @@ void BotAim( gentity_t *self )
 		case RETREAT:
 		case RUSH:
 		case PATROL:
+				BotControl(self , BOT_RESET_BUTTONS); //prevent wasting ammo
 				botAimAtPath(self);
 			break;
 		case ATTACK:
@@ -275,6 +277,7 @@ void BotAim( gentity_t *self )
 			break;
 		case FOLLOW:
 			if(self->bot->Friend) {
+				BotControl(self , BOT_RESET_BUTTONS); //prevent attacking friend
 				botAimAtTarget(self, self->bot->Friend, qtrue);
 			}
 			break;
@@ -287,6 +290,7 @@ void BotAim( gentity_t *self )
 		case IMPROVE:
 		case HEAL:
 			if(self->bot->Struct) {
+				BotControl(self , BOT_RESET_BUTTONS); //prevent destroying structure
 				botAimAtTarget(self, self->bot->Struct, qfalse);
 			}
 			break;
@@ -347,6 +351,7 @@ void G_BotGroupThink( void ) {
 void BotExplore( gentity_t *self ){
 	BotStand( self );
 	BotRun( self );
+	BotControl( self, BOT_RESET_LEFT_RIGHT);
 	BotControl( self, BOT_LOOK_CENTER );
 	//TODO: if bot gets stuck, decrease node essence.
 }

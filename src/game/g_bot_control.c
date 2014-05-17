@@ -227,6 +227,12 @@ void BotControl( gentity_t *self, botMove move ) {
 		case BOT_RESET_BUTTONS:
 			self->client->pers.cmd.buttons = 0;
 			break;
+		case BOT_RESET_LEFT_RIGHT:
+			self->client->pers.cmd.rightmove = 0;
+			break;
+		case BOT_RESET_FWD_BACK:
+			self->client->pers.cmd.forwardmove = 0;
+			break;
 		default:
 			G_Printf("Invalid Bot Movement: %d\n", move);
 			break;
@@ -248,6 +254,16 @@ void BotClearQueue( gentity_t *self )
 	self->bot->move.exec = qfalse;
 }
 
+/**
+ * Move to XY without using AIM. 
+ * This function is used to be able to move to other direction
+ * different to where we are aiming.
+ * @param self
+ */
+void BotMoveTo( gentity_t *self )
+{
+	
+}
 
 //------------------ PUBLIC FUNCTIONS -----------------
 /*

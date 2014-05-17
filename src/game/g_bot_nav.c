@@ -68,7 +68,7 @@ void BotTargetPath( gentity_t *self )
 		}
 	}
 	//If we haven't move enough, check if we are blocked
-	if(level.time - self->bot->timer.foundPath > 2000 && VectorLength( self->client->ps.velocity ) < 10.0f && (float)Distance( self->client->oldOrigin, self->r.currentOrigin ) < 5 ) //2.3
+	if(level.time - self->bot->timer.foundPath > 1000 && VectorLength( self->client->ps.velocity ) < 10.0f && (float)Distance( self->client->oldOrigin, self->r.currentOrigin ) < 50 ) //2.3
 	{
 		if(g_bot_manual_nav.integer) {
 			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(4) NAV State would have changed to: %d\n", BLOCKED);
@@ -322,6 +322,7 @@ qboolean botAimAtPath( gentity_t *self )
 		vectoangles( dirToTarget, angleToTarget );
 		//self->client->ps.delta_angles[ PITCH ] = ANGLE2SHORT( angleToTarget[ PITCH ] ); //this makes bots to move aim in Z angles
 		self->client->ps.delta_angles[ YAW ] = ANGLE2SHORT( angleToTarget[ YAW ] );
+		//self->bot->move.lookat[ YAW ] = ANGLE2SHORT( angleToTarget[ YAW ] );
 	}
 	return qtrue;
 }

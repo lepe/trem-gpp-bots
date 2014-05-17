@@ -1,5 +1,5 @@
 {
-  "[BotsCamp]"
+  "BotsCamp"
   {
     "Welcome to ^2acidtu.be ^7| ^2Bots^1Camp ^7[GPP-BOT] mod for Tremulous GPP. \n"
     "If you need help, feel free to ask around, and there are the category "
@@ -8,33 +8,7 @@
     "great ideas, comments, code patches and more. Please follow these links "
     "to join us! \n"
     "^2Forum: ^7forum.acidtu.be (It's a link)\n"
-    "^3GitHub: ^7github.com/lepe/trem-gpp-bots/\n"
-    "Credits are in the mod's .pk3 in a file named credits.txt.\n"
-  }
-  "Adding Bots"
-  {
-    "If there are no bots around, please join any team and the bots will "
-    "be added automatically.\n"
-    "Commands to add bots: (you need to be registrated)\n"
-  }
-  "Single Player missions"
-  {
-    "We have prepared several single player missions..."
-  }
-  "Coop missions"
-  {
-    "If more than one player is connected, you can start a co-op mission with the command:"
-  }
-  "Customizing your own bot"
-  {
-    "To customize your bot, open...."
-  }
-  "Bot's competition"
-  {
-    "Bots will be tested now and then against each other. Players may watch "
-    "those games but won't be able to join until they are finished.\n"
-    "In that way, bots will ranked. Current ranks can be seen here: (link)\n"
-    ""
+    "^3GitHub: ^7github.com/lepe/trem-gpp-bots/"
   }
   "Why Asia?"
   {
@@ -58,5 +32,33 @@
     "training server for beginners as well as to help fine tune the skills of more "
     "experienced players, and to allow for single player and coop tremulous games.\n"
     "\n                               *<{dGr8LookinSparky\n"
+  }
+  "IRC"
+  {
+    "Because ViruS is lonely on IRC, please give him a poke. He's feeling sad\n"
+    "##acidtube @ irc.freenode.org\n"
+    "If you do not have an IRC client simply visit http:/^7/forum.acidtu.be and\n
+    "chat in the box below."
+  }
+  "Credits"
+  {
+    "GPP-BOTS TEAM:\n"
+    "------------------------------------------\n"
+    "\n"
+    " GlobalWarming      (Lead programming)\n"
+    " dGr8LookinSparky\n"
+    " Igneel\n"
+    " Pikachu\n"
+    " ViruS\n"
+    "\n"
+    "ASSETS AND ART CONTRIBUITIONS\n"
+    "\n"
+    " Pikachu            GFX from cuboid\n"
+    " Redman             Camera shake\n"
+    " [Foca.tk]          Main intro logo\n"
+    " [game-icons.net]   Emoticons base\n"
+    "\n"
+    "For requests, comments or follow-ups:\n"
+    "http://forum.acidtu.be/"
   }
 }

@@ -800,6 +800,33 @@ void ClientTimerActions( gentity_t *ent, int msec )
 				if(state != ent->bot->path.state) {
 					G_BotDebug(ent, BOT_VERB_NORMAL, BOT_DEBUG_ACTIVE + BOT_DEBUG_NAVSTATE, "NAV State %d -> %d\n", state, ent->bot->path.state);
 				}
+				//Move to point gradually without aiming
+				if(Distance(ent->bot->move.topoint, ent->s.pos.trBase) > BOT_MOVE_PACE) {
+					//get the amount in X and Y and Z that we have to move to.
+					//it hast to be based in a fixed amount towards the goal.
+				}
+
+				//Adjust AIM gradually
+				/*
+				if(abs(ent->bot->move.lookat[ PITCH ] - ent->client->ps.delta_angles[ PITCH ]) > BOT_TURN_SHORT) {
+					if(ent->bot->move.lookat[ PITCH ] > ent->client->ps.delta_angles[ PITCH ]) {
+						ent->client->ps.delta_angles[ PITCH ] -= BOT_TURN_SHORT;
+					} else {
+						ent->client->ps.delta_angles[ PITCH ] += BOT_TURN_SHORT;
+					}
+					//we will move towards that coordinate at a fixed pace until we reach it.
+				} else {
+					ent->client->ps.delta_angles[ PITCH ] = ent->bot->move.lookat[ PITCH ];
+				}
+				if(abs(ent->bot->move.lookat[ YAW ] - ent->client->ps.delta_angles[ YAW ]) > BOT_TURN_SHORT) {
+					if(ent->bot->move.lookat[ YAW ] > ent->client->ps.delta_angles[ YAW ]) {
+						ent->client->ps.delta_angles[ YAW ] -= BOT_TURN_SHORT;
+					} else {
+						ent->client->ps.delta_angles[ YAW ] += BOT_TURN_SHORT;
+					}
+				} else {
+					ent->bot->move.lookat[ YAW ] = ent->client->ps.delta_angles[ YAW ];
+				}*/
 			}
 			//execute movements (uses a separate variable timer)
 			ent->bot->funcs.base.move( ent , msec );
@@ -818,6 +845,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
   while( client->time1000 >= 1000 )
   {
     client->time1000 -= 1000;
+	//for bots analysis //LEPE
+	ent->lastHealth = ent->health;
     //client is poisoned
     if( client->ps.stats[ STAT_STATE ] & SS_POISONED )
     {
