@@ -751,7 +751,6 @@ void ClientTimerActions( gentity_t *ent, int msec )
 				//in case nothing is set, just stand there
 				if(ent->bot->state == UNDEFINED) ent->bot->state = IDLE;
 				
-				G_BotDebug(ent, BOT_VERB_DETAIL, BOT_DEBUG_ACTIVE + BOT_DEBUG_STATE, "Current State: %d\n", state);
 				if(state != ent->bot->state) {
 					G_BotDebug(ent, BOT_VERB_NORMAL, BOT_DEBUG_ACTIVE + BOT_DEBUG_STATE, "State %d -> %d\n", state, ent->bot->state);
 				}
@@ -801,11 +800,47 @@ void ClientTimerActions( gentity_t *ent, int msec )
 					G_BotDebug(ent, BOT_VERB_NORMAL, BOT_DEBUG_ACTIVE + BOT_DEBUG_NAVSTATE, "NAV State %d -> %d\n", state, ent->bot->path.state);
 				}
 				//Move to point gradually without aiming
-				if(Distance(ent->bot->move.topoint, ent->s.pos.trBase) > BOT_MOVE_PACE) {
-					//get the amount in X and Y and Z that we have to move to.
-					//it hast to be based in a fixed amount towards the goal.
+				/*
+				if(ent->bot->move.topoint) {
+					if(Distance(ent->bot->move.topoint, ent->s.pos.trBase) > BOT_MOVE_PACE) {
+						vec3_t dirToTarget;
+						float angle;
+						
+						VectorSubtract(ent->bot->move.topoint, ent->s.pos.trBase, dirToTarget);
+						angle = abs(SHORT2ANGLE(ent->client->ps.delta_angles[ YAW ] - dirToTarget[ YAW ]));
+						G_Printf("distance: %f0, angle : %f0\n",Distance(ent->bot->move.topoint, ent->s.pos.trBase), angle);
+						if (angle == 0 || angle == 360) {
+							BotMoveFwd( ent );
+							BotControl( ent , BOT_RESET_LEFT_RIGHT);
+						} else if(angle > 0 && angle < 90) {
+							BotMoveFwd( ent );
+							BotMoveRight( ent );
+						} else if(angle == 90) {
+							BotMoveRight( ent );
+							BotControl( ent , BOT_RESET_FWD_BACK);
+						} else if(angle > 90 && angle < 180) {
+							BotMoveBack( ent );
+							BotMoveRight( ent );
+						} else if(angle == 180) {
+							BotMoveBack( ent );
+							BotControl( ent , BOT_RESET_LEFT_RIGHT);
+						} else if(angle > 180 && angle < 270) {
+							BotMoveBack( ent );
+							BotMoveLeft( ent );
+						} else if(angle == 270) {
+							BotMoveLeft( ent );
+							BotControl( ent , BOT_RESET_FWD_BACK);
+						} else if(angle > 270 && angle < 360) {
+							BotMoveFwd( ent );
+							BotMoveLeft( ent );
+						} else {
+							G_Printf("Error in angle %d\n",angle);
+						}
+						//get the amount in X and Y and Z that we have to move to.
+						//it hast to be based in a fixed amount towards the goal.
+					}
 				}
-
+				 */
 				//Adjust AIM gradually
 				/*
 				if(abs(ent->bot->move.lookat[ PITCH ] - ent->client->ps.delta_angles[ PITCH ]) > BOT_TURN_SHORT) {

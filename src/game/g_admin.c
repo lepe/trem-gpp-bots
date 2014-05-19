@@ -3500,6 +3500,33 @@ qboolean G_admin_botdbg( gentity_t *ent )
 		} else if( !Q_stricmp( type_s, "say" ) ) { 		flag = BOT_DEBUG_SAY;
 		} else if( !Q_stricmp( type_s, "nav" ) ) {  	flag = BOT_DEBUG_NAV;
 		} else if( !Q_stricmp( type_s, "all" ) ) {  	flag = BOT_DEBUG_ALL;
+		} else if( !Q_stricmp( type_s, "read" ) ) {  	
+			if( !Q_stricmp( verb_s, "state") ) {
+				ADMP(va("[READ] State: %d\n", botent->bot->state));
+			} else if( !Q_stricmp( verb_s, "navstate") ) {
+				ADMP(va("[READ] NavState: %d\n", botent->bot->path.state));
+			} else if( !Q_stricmp( verb_s, "enemy") ) {
+				ADMP(va("[READ] Enemy: %s, %s\n", botent->bot->Enemy->classname, botent->bot->Enemy->client->pers.netname));
+			} else if( !Q_stricmp( verb_s, "struct") ) {
+				ADMP(va("[READ] Struct: %s\n", botent->bot->Struct->classname));
+			} else if( !Q_stricmp( verb_s, "friend") ) {
+				ADMP(va("[READ] Friend: %s\n", botent->bot->Friend->client->pers.netname));
+			} else if( !Q_stricmp( verb_s, "xyz") ) {
+				ADMP(va("[READ] XYZ: %f2,%f2,%f2\n", botent->s.pos.trBase[0],botent->s.pos.trBase[1],botent->s.pos.trBase[2]));
+			} else if( !Q_stricmp( verb_s, "angles") ) {
+				ADMP(va("[READ] Angles: Pitch %f2, Yaw %f2\n", SHORT2ANGLE(botent->client->ps.delta_angles[ PITCH ]), 
+															 SHORT2ANGLE(botent->client->ps.delta_angles[ YAW ])));
+			} else if( !Q_stricmp( verb_s, "think") ) {
+				ADMP( va("THINK: LVL1:%d, LVL2:%d, LVL3:%d, MAX:%d \n",  
+						botent->bot->think.state[ THINK_LEVEL_1 ],
+						botent->bot->think.state[ THINK_LEVEL_2 ],
+						botent->bot->think.state[ THINK_LEVEL_3 ],
+						botent->bot->think.state[ THINK_LEVEL_MAX ])
+						);
+			} else if( !Q_stricmp( verb_s, "targetnode") ) {
+				ADMP(va("[READ] Target Node: %d\n", botent->bot->path.targetNode));
+			}
+			return qtrue;
 		} else {
 			ADMP( "^1Unknown debug type\n");
 			return qfalse;

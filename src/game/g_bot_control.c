@@ -150,6 +150,8 @@ void BotCleanMove( gentity_t *self ) {
  * @param self
  */
 void BotControl( gentity_t *self, botMove move ) {
+	//If we are executing the queue and the movement is does not comes from the queue, do not do it.
+	if(self->bot->move.exec && move != self->bot->move.queue[ self->bot->move.read ].action) return;
 	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_CONTROL, "Movement: %d\n", move);
 	switch(move) {
 		case BOT_WAIT: 

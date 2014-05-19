@@ -194,7 +194,6 @@ typedef struct
 	  botNavState	state;
 	  qboolean		nextNode;
 	  qboolean		pathChosen;
-	  int			targetPath;
 	  int			targetNode;
 	  int			lastpathid;
 	  int		    crumb[1000]; //path node history

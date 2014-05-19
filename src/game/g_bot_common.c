@@ -105,7 +105,6 @@ void BotSpectator( gentity_t *self ){
 	self->bot->path.state = FINDNEWPATH;
 	self->bot->path.pathChosen = qfalse;
 	self->bot->path.nextNode = qfalse;
-	self->bot->path.targetPath = 0;
 	self->bot->path.targetNode = 0;
 	self->bot->path.lastpathid = 0;
 	self->bot->path.numCrumb   = 0;

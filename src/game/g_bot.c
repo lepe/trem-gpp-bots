@@ -60,9 +60,9 @@ void G_BotAdd( char *name, team_t team, int skill, int ignore ) {
 		G_DecolorString(name, name_s, MAX_NAME_LENGTH);
 		if (! (Com_StringContains(name_s, "[BOT]", 0))) {
 			if(team == TEAM_HUMANS) {
-				strcat(name_tmp_s, "^1[BOT]");
-			} else if(team == TEAM_ALIENS) {
 				strcat(name_tmp_s, "^4[BOT]");
+			} else if(team == TEAM_ALIENS) {
+				strcat(name_tmp_s, "^1[BOT]");
 			}
 			strcat(name_tmp_s, name);
 			strcpy(name, name_tmp_s);
@@ -251,32 +251,21 @@ void G_BotCmd( int clientNum, char *command, int value, int value2 ) {
 				  case 61: Bot_Pounce( ent, value2 ); break;
 				  case 62: Bot_FullLuci( ent ); break;
 				  default:
-		  	 		trap_SendServerCommand(-1, "print \"unknown move value\n\"");
+		  	 		ADMP("unknown move value\n");
 					break;
 			  } 
 		  }
 	  }
 	  
-  } else if( !Q_stricmp( command, "rawud" ) ) { //LEPE: up / down
-	  
+  } else if( !Q_stricmp( command, "moveto" ) ) { 
 	  if(g_bot_manual.integer) {
-	  	  ent->client->pers.cmd.upmove = value;
-	  }
-  } else if( !Q_stricmp( command, "rawlr" ) ) { //LEPE: left / right
-	  
-	  if(g_bot_manual.integer) {
-	  	  ent->client->pers.cmd.rightmove = value;
-	  }
-  } else if( !Q_stricmp( command, "rawfb" ) ) { //LEPE: fwd / back
-	  
-	  if(g_bot_manual.integer) {
-	  	  ent->client->pers.cmd.forwardmove = value;
+	  	  VectorCopy(level.paths[value].coord, ent->bot->move.topoint); 
+	  	  G_Printf("MoveTo %d\n",value); 
+		  ADMP(va("Moving to node %d\n", value));
 	  }
 	  
   } else {
-	
-    trap_SendServerCommand(-1, "print \"unknown command\n\"");
-    
+    ADMP("unknown command\n");
   }
   return;
 }

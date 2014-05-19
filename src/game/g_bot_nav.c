@@ -117,7 +117,7 @@ void BotFindNewPath( gentity_t *self )
 	if(pathfound == qtrue)
 	{
 		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "New Path found\n");
-		self->bot->path.targetPath = closestpath;
+		self->bot->path.targetNode = closestpath;
 		self->bot->timer.foundPath = level.time;
 		if(g_bot_manual_nav.integer) {
 			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(5) NAV State would have changed to: %d\n", TARGETPATH);
@@ -158,21 +158,21 @@ void BotFindNextPath( gentity_t *self )
     qboolean known = qfalse;
 
     G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Last Path Id: %d\n",self->bot->path.lastpathid);
-    G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Target Path: %d\n",self->bot->path.targetPath);
+    G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Target Path: %d\n",self->bot->path.targetNode);
 	possiblepaths[0] = possiblepaths[1] = possiblepaths[2] = possiblepaths[3] = possiblepaths[4] = 0;
 	for(i = 0; i < 5; i++)
 	{
-		if(level.paths[self->bot->path.targetPath].nextid[i] < level.numPaths &&
-			level.paths[self->bot->path.targetPath].nextid[i] >= 0)
+		if(level.paths[self->bot->path.targetNode].nextid[i] < level.numPaths &&
+			level.paths[self->bot->path.targetNode].nextid[i] >= 0)
 		{
 			if(self->bot->path.lastpathid >= 0)
 			{
-				if(self->bot->path.lastpathid == level.paths[self->bot->path.targetPath].nextid[i])
+				if(self->bot->path.lastpathid == level.paths[self->bot->path.targetNode].nextid[i])
 				{
 					continue;
 				}
 			}
-			possiblepaths[possiblenextpath] = level.paths[self->bot->path.targetPath].nextid[i];
+			possiblepaths[possiblenextpath] = level.paths[self->bot->path.targetNode].nextid[i];
 			possiblenextpath++;
 		}
 	}
@@ -236,7 +236,7 @@ void BotFindNextPath( gentity_t *self )
 					totalessence += pathessence[i] * pathrank[i];
 					G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"] TOTAL: %d\n",totalessence);
 				}
-				self->bot->path.lastJoint = self->bot->path.targetPath; //when was the last time we had to choose a path (used to create negative essence)
+				self->bot->path.lastJoint = self->bot->path.targetNode; //when was the last time we had to choose a path (used to create negative essence)
 				randnum = G_Rand();
 				for(i =0; i < possiblenextpath; i++) {
 					accumessence += ((pathessence[i] * pathrank[i]) * 100) / totalessence;
@@ -253,8 +253,8 @@ void BotFindNextPath( gentity_t *self )
 		}
 		//LEPE: set next crumb
 		setCrumb( self, possiblepaths[nextpath] );
-		self->bot->path.lastpathid = self->bot->path.targetPath;
-		self->bot->path.targetPath = possiblepaths[nextpath];
+		self->bot->path.lastpathid = self->bot->path.targetNode;
+		self->bot->path.targetNode = possiblepaths[nextpath];
 		self->bot->timer.foundPath = level.time;
 		return;
 	}
@@ -294,9 +294,9 @@ void BotLost( gentity_t *self ) {
 int distanceToTargetNode( gentity_t *self )
 {
 	int distance,Ax,Ay,Az,Bx,By,Bz = 0;
-	Ax = level.paths[self->bot->path.targetPath].coord[0];
-	Ay = level.paths[self->bot->path.targetPath].coord[1];
-	Az = level.paths[self->bot->path.targetPath].coord[2];
+	Ax = level.paths[self->bot->path.targetNode].coord[0];
+	Ay = level.paths[self->bot->path.targetNode].coord[1];
+	Az = level.paths[self->bot->path.targetNode].coord[2];
 	Bx = self->s.pos.trBase[0];
 	By = self->s.pos.trBase[1];
 	Bz = self->s.pos.trBase[2];
@@ -317,11 +317,13 @@ qboolean botAimAtPath( gentity_t *self )
 	// 	BG_FindViewheightForClass(  self->client->ps.stats[ STAT_CLASS ], &vh, NULL );
 		top[2]=BG_ClassConfig( self->client->ps.stats[ STAT_CLASS ] )->viewheight;
 		VectorAdd( self->s.pos.trBase, top, top);
-		VectorSubtract( level.paths[self->bot->path.targetPath].coord, top, dirToTarget );
+		VectorSubtract( level.paths[self->bot->path.targetNode].coord, top, dirToTarget );
 		VectorNormalize( dirToTarget );
 		vectoangles( dirToTarget, angleToTarget );
 		//self->client->ps.delta_angles[ PITCH ] = ANGLE2SHORT( angleToTarget[ PITCH ] ); //this makes bots to move aim in Z angles
 		self->client->ps.delta_angles[ YAW ] = ANGLE2SHORT( angleToTarget[ YAW ] );
+		//don't use lookat on aiming path
+		//self->bot->move.lookat[ PITCH ] = self->client->ps.delta_angles[ PITCH ];
 		//self->bot->move.lookat[ YAW ] = ANGLE2SHORT( angleToTarget[ YAW ] );
 	}
 	return qtrue;
