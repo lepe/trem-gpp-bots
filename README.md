@@ -15,13 +15,15 @@ v.2.0
 * Paths are not limited in size
 * Paths now use -1 to represent NULL nodes
 * bots can join on password protected servers
+* bots have their own skin
 * bots ping was added
 * all alien bots now attack based on their own capabilities (range constants)
 * Introduced (but not fully implemented): profiles, range behavior, group thinking, some bot states as RUSH,PATROL,etc
-* new debug system which allow administrators to debug specific parts of the code (botdbg TAG VERBOSITY)
+* new debug system which allow administrators to debug specific parts of the code (botdbg BOTNAME TAG VERBOSITY or botdbg BOTNAME read INFO)
 * "dnodes" does not depend on users anymore
 * bots can be controlled manually (botcmd BOT move ...)
 * bots states can be controlled manually (botcmd BOT state/nav )
+* "listplayer" shows score
 * Fully charged lucis at tyrants and structures
 * Basilisks and Dretches attack improved
 * Humans use medipads when are low in HP
@@ -30,6 +32,7 @@ v.2.0
 * Blocked-State code for both, aliens and humans recoded
 * Bots are able to follow and create leaderships in groups (need to be fixed)
 * Bots do something on maps without nodes (nothing great yet)
+* Bots can walk and aim at two different directions
 * Targets are chosen on proximity (before was on entity order)
 * Human bots now have basic repair capabilities
 * Human bots try to keep a distance when attacking structures (except saw and flame weapons)

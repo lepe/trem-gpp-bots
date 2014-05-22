@@ -101,6 +101,7 @@ void BotBeforeSpawnHuman( gentity_t *self )
     G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_HUMAN + BOT_DEBUG_THINK, "Bot is about to spawn\n");
 	self->client->pers.classSelection = PCL_HUMAN;
 	self->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
+	//check in reference to RC or a node
 	if(G_Rand() < 10) { //G_TimeTilSuddenDeath() > 0 && 
 		self->client->pers.humanItemSelection = WP_HBUILD; 
 	} else {
@@ -135,7 +136,7 @@ void BotHumanThink( gentity_t *self )
 	
 	//Repair if has a ckit
 	if(BG_InventoryContainsWeapon( WP_HBUILD, self->client->ps.stats )) {
-		self->bot->Struct = botFindDamagedStructure( self , 300 );
+		self->bot->Struct = botFindDamagedStructure( self , 300, 100 );
 		if(self->bot->Struct) {
 			self->bot->think.state[ THINK_LEVEL_2 ] = REPAIR;
 			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Repair as LEVEL2 in HumanThink\n");
@@ -160,8 +161,10 @@ void BotHumanThink( gentity_t *self )
 	}
 
 	if(!self->bot->Enemy && self->bot->state != HEAL) { 
-		if(botFindClosestFriend( self )) {
+		if(G_Rand() < 30) {
+			if(botFindClosestFriend( self )) {
 			//self->bot->think.state[ THINK_LEVEL_1 ] = FOLLOW;
+			}
 		}
 	}
 	///////////////////////// LEVEL 1 /////////////////////////
@@ -173,6 +176,9 @@ void BotHumanThink( gentity_t *self )
 	}
 	///////////////////////// LEVEL 3 /////////////////////////
 	if(BotKeepThinking( self , THINK_LEVEL_3)) {
+		if(self->client->pers.classSelection > PCL_HUMAN_BSUIT && botGetHealthPct( self ) < 30) {
+			self->bot->think.state[ THINK_LEVEL_3 ] = RETREAT;
+		}
 		//TODO: if the target is not in our view range, set THINK_LEVEL_1 to UNDEFINED.
 		if(!BG_InventoryContainsUpgrade( UP_MEDKIT, self->client->ps.stats )) {
 			self->bot->Struct = botFindClosestBuildable( self, 200, BA_H_MEDISTAT );
@@ -224,26 +230,23 @@ void BotNavigateHuman( gentity_t *self ){
 void BotBlockedHuman( gentity_t *self ){
 	int try = self->bot->path.blocked_try;
 	qboolean low_stamina = self->client->ps.stats[ STAT_STAMINA ] < 100;
-	qboolean rand = G_Rand() < 50;
 	/* If we have low stamina, we can't keep jumping, so we reset it
 	 * to help the bot to remove block */
 	if(low_stamina) self->client->ps.stats[ STAT_STAMINA ] = 1000;
 
-	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_NAVSTATE, "[ %d ] Trying to unblock. Rand: %d\n", try, rand );
+	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_NAVSTATE, "Trying to unblock. Try: %d\n", try);
 	if(try <= 0) {
 		BotMoveFwd( self );
 		VectorCopy(self->r.currentOrigin, self->bot->path.blocked_origin);
 		if(!low_stamina) BotJump( self );
-	} else if(try < BOT_TIMER_NAV_SECOND) {
-		if(rand) BotControl( self, BOT_LOOK_RIGHT );
 	} else if(try == BOT_TIMER_NAV_SECOND) {
-		if(!low_stamina) BotJump( self );
-	} else if(try > BOT_TIMER_NAV_SECOND * 2) {
-		if(rand) BotControl( self, BOT_LOOK_LEFT );
-	}
-	if(try >= BOT_TIMER_NAV_SECOND * 4) {
+		BotControl( self, BOT_LOOK_RANDOM );
+	} 
+	if(try > BOT_TIMER_NAV_SECOND) {
 		self->bot->path.blocked_try = 0; 
 		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_NAVSTATE, "Reset blocked_try to 0\n", self->client->pers.netname );
+		//If there is a friend nearby, try to follow him
+		botFindClosestFriend( self );
 	} else {
 		//we set next try 
 		self->bot->path.blocked_try++;
@@ -266,6 +269,10 @@ void BotBuy( gentity_t *self )
 	//int maxAmmo, maxClips;
     int prob = 0; //probability to buy item //LEPE
 	int clientNum = self->client - level.clients;
+	if(self->bot->Struct->s.modelindex != BA_H_ARMOURY) {
+		self->bot->Struct = NULL;
+		return;
+	}
 	//Do not buy if you are not close enough
 	if(!G_BuildableRange( self->client->ps.origin, 100, BA_H_ARMOURY )){ return; }
 	//Clear going to ARM
@@ -348,7 +355,7 @@ void BotBuy( gentity_t *self )
 	}
 
 	/******************************* CHECK FOR DAMAGED BUILDINGS **************************/
-	self->bot->Struct = botFindDamagedStructure( self , 300 );
+	self->bot->Struct = botFindDamagedStructure( self , 300, 50 );
 	if(self->bot->Struct) {
 		weapon = WP_HBUILD;
 		boughtweap = qtrue;
@@ -389,7 +396,7 @@ void BotBuy( gentity_t *self )
 		G_AddCreditToClient( self->client, -(short)BG_Upgrade( upgrade )->price, qfalse );
 	}
 	prob = self->bot->set.helmet[g_humanStage.integer];
-	if(g_humanStage.integer == 1 && (G_Rand() < prob))
+	if(g_humanStage.integer > 0 && (G_Rand() < prob))
 	{
 		upgrade = UP_HELMET;
 		if(!BG_InventoryContainsUpgrade( upgrade, self->client->ps.stats ) && 
@@ -417,7 +424,7 @@ void BotBuy( gentity_t *self )
 		}
 	}
 	prob = self->bot->set.prifle[g_humanStage.integer];
-	if((G_Rand() < prob) && g_humanStage.integer == 1 && boughtweap == qfalse && g_bot_prifle.integer > 0)
+	if((G_Rand() < prob) && g_humanStage.integer > 0 && boughtweap == qfalse && g_bot_prifle.integer > 0)
 	{
 		weapon = WP_PULSE_RIFLE;
 		if( !BG_InventoryContainsWeapon( weapon, self->client->ps.stats ) &&
@@ -443,7 +450,7 @@ void BotBuy( gentity_t *self )
 		}
 	}
 	prob = self->bot->set.flamer[g_humanStage.integer];
-	if((G_Rand() < prob) && g_humanStage.integer == 1 && boughtweap == qfalse && g_bot_flamer.integer > 0) 
+	if((G_Rand() < prob) && g_humanStage.integer > 0 && boughtweap == qfalse && g_bot_flamer.integer > 0) 
 	{
 		weapon = WP_FLAMER;
 		if( !BG_InventoryContainsWeapon( weapon, self->client->ps.stats ) &&
@@ -609,7 +616,8 @@ void BotAttackHuman( gentity_t *self )
 				self->client->ps.weapon != WP_PAIN_SAW && 
 				self->client->ps.weapon != WP_FLAMER)
 			{
-				BotMoveBack( self );
+				BotAddMove( self, BOT_MOVE_BACK, BOT_TIMER_ACTION);
+				BotStartMove( self, BOT_MOVE_FWD);
 				Bot_Strafe( self );
 			}
 			else
@@ -623,14 +631,20 @@ void BotAttackHuman( gentity_t *self )
 			if(self->client->ps.weapon == WP_PAIN_SAW || self->client->ps.weapon == WP_FLAMER)
 			{
 				BotStand( self );
-				BotMoveFwd( self );
+				if(self->client->ps.weapon == WP_FLAMER && distance < FLAMER_RADIUS) {
+					BotControl( self, BOT_RESET_FWD_BACK);
+				} else {
+					BotMoveFwd( self );
+				}
 			}
 			else
 			{
-				if(distance < 200) {
+				if((self->bot->Enemy->s.modelindex == BA_A_ACIDTUBE && distance < ACIDTUBE_RANGE) ||
+				   (self->bot->Enemy->s.modelindex == BA_A_HIVE && distance < HIVE_SENSE_RANGE) || 
+					(distance < 100)) {
 					BotStand( self );
-					BotAddMove( self, BOT_MOVE_BACK, 500);
-					BotStartMove( self );
+					BotAddMove( self, BOT_MOVE_BACK, BOT_TIMER_ACTION);
+					BotStartMove( self, BOT_MOVE_FWD);
 				} else {
 					BotStop( self );
 					BotCrouch( self );

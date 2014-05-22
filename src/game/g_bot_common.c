@@ -71,7 +71,7 @@ void BotInit( gentity_t *self ) {
 	self->bot->funcs.base.status[ATTACK]	= BotAttack;
 	//self->bot->funcs.base.status[DEFEND]	= BotDefend;
 	self->bot->funcs.base.status[FOLLOW]	= BotFollow;
-	//self->bot->funcs.base.status[RETREAT]	= BotRetreat;
+	self->bot->funcs.base.status[RETREAT]	= BotRetreat;
 	//self->bot->funcs.base.status[EVADE]		= BotEvade;
 	self->bot->funcs.base.status[HEAL]		= BotHeal;
 	////self->bot->funcs.base.status[REPAIR] <-- implemented in human
@@ -86,7 +86,7 @@ void BotInit( gentity_t *self ) {
 	self->bot->funcs.base.nav[FINDNEXTPATH] = BotFindNextPath;
 	self->bot->funcs.base.nav[FINDNEWPATH]  = BotFindNewPath;
 	self->bot->funcs.base.nav[BLOCKED]  	= BotBlocked;
-	self->bot->funcs.base.nav[LOST]  	    = BotLost;
+	self->bot->funcs.base.nav[LOST]  	    = BotLost; 
 }
 
 /**
@@ -113,6 +113,7 @@ void BotSpectator( gentity_t *self ){
     self->bot->Struct = NULL;
     self->bot->Friend = NULL;
     self->bot->Enemy  = NULL;
+	VectorClear(self->bot->move.topoint);
 	self->lastHealth = self->health;
 	G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_COMMON + BOT_DEBUG_THINK, "Bot is spectator\n");
 	//TODO: check what else we need to reset
@@ -143,14 +144,23 @@ void BotThink( gentity_t *self )
 	if(BotKeepThinking( self , THINK_LEVEL_1)) return;
 	
 	if(botFindClosestEnemy( self )) {
-		self->bot->think.state[ THINK_LEVEL_3 ] = ATTACK;
+		if(botGetDistanceBetweenPlayer( self , self->bot->Enemy ) < 100) {
+			self->bot->think.state[ THINK_LEVEL_MAX ] = ATTACK;
+		} else {
+			self->bot->think.state[ THINK_LEVEL_2 ] = ATTACK;
+		}
 		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_COMMON, "Enemy Found: %p. Attack LEVEL_3\n", self->bot->Enemy);
 	} else {
 		BotResetState( self, ATTACK );
-		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_COMMON, "Enemy not found. Reset ATTACK\n");
+		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_COMMON, "Enemy not found...\n");
 	}
 	
 	switch(self->bot->state) {
+		case RETREAT:
+			if(self->bot->path.numCrumb == 0) {
+				BotResetState( self, RETREAT);
+			}
+			break;
 		case ATTACK:
 			//TODO: this first IF condition should be inside ATTACK function as we need to
 			//keep record that it was able to kill it. Depending on target type, it should
@@ -164,8 +174,6 @@ void BotThink( gentity_t *self )
 			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_COMMON, "Enemy: %p\n",self->bot->Enemy);
 			
 			if(self->bot->Enemy){
-				//Prevent firing to friends
-				self->bot->Friend = NULL;
 				if(self->bot->Enemy->health <= 0) {
 					self->bot->Enemy = NULL;
 					self->client->pers.cmd.buttons = 0;
@@ -201,6 +209,13 @@ void BotThink( gentity_t *self )
 				self->bot->Friend = NULL;
 				//Say: traitor! I will burn you house down and eat all your plants!
 			}
+			//If your friend is blocked, forget it (maybe he will follow you)
+			if(self->bot->Friend->bot) {
+				if(self->bot->Friend->bot->path.state == BLOCKED) {
+					self->bot->Friend = NULL;
+				}
+			}
+				
 			if(self->bot->Friend) {
 				if(self->bot->Friend->health <= 0) {
 					//TODO: report to CHAT function
@@ -225,7 +240,7 @@ void BotThink( gentity_t *self )
 			break;
 		case HEAL: 
 			//wait until you are 100% 
-			if(self->health == 100) 
+			if(botGetHealthPct( self ) == 100) 
 			{
 				if(self->bot->Struct) {
 					self->bot->Struct = NULL;
@@ -270,14 +285,24 @@ void BotAim( gentity_t *self )
 			break;
 		case ATTACK:
 		case DEFEND:
+			if(self->bot->Friend) {
+				VectorCopy(self->bot->Friend->s.pos.trBase , self->bot->move.topoint); //move towards your Friend
+				//The enemies or my friends are my enemies!
+				if(self->bot->Friend->bot && self->bot->Friend->bot->Enemy) {
+					self->bot->Enemy = self->bot->Friend->bot->Enemy;
+				}
+			}
 			if(self->bot->Enemy) {
 				botAimAtTarget(self, self->bot->Enemy, qtrue);
+			}
+			if(self->bot->Struct) {
+				//VectorCopy(self->bot->Struct->s.pos.trBase , self->bot->move.topoint); //move towards the structure
 			}
 			break;
 		case FOLLOW:
 			if(self->bot->Friend) {
-				BotControl(self , BOT_RESET_BUTTONS); //prevent attacking friend
-				botAimAtTarget(self, self->bot->Friend, qtrue);
+				BotControl(self , BOT_RESET_BUTTONS); //prevself attacking friend
+				botAimAtTarget(self, self->bot->Friend, qfalse);
 			}
 			break;
 		case REPAIR:
@@ -385,7 +410,12 @@ void BotFollow( gentity_t *self ){
  * Bot will retreat to its origin.
  * @param self
  */
-void BotRetreat( gentity_t *self ){}
+void BotRetreat( gentity_t *self ){
+	BotStand( self );
+	BotRun( self );
+	BotControl( self, BOT_RESET_LEFT_RIGHT);
+	BotControl( self, BOT_LOOK_CENTER );
+}
 /**
  * Bot will try to evade enemy but will try to get as close as possible
  * @param self

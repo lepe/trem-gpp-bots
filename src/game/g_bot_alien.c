@@ -47,6 +47,7 @@ void BotInitAlien( gentity_t *self ) {
 	self->bot->funcs.team.status[HEAL]		= BotHealAlien;
 	self->bot->funcs.team.status[BUILD]		= BotBuildAlien;
 	self->bot->funcs.team.status[IMPROVE]	= BotEvolve;
+	self->bot->funcs.team.status[RETREAT]	= BotRetreatAlien;
 	//--- nav state functions
 	self->bot->funcs.team.nav[TARGETPATH]	= BotNavigateAlien;
 	self->bot->funcs.team.nav[BLOCKED]		= BotBlockedAlien;
@@ -111,11 +112,16 @@ void BotAlienThink( gentity_t *self )
 		self->bot->think.state[ THINK_LEVEL_1 ] = IMPROVE;
 	}
 	
+	///////////////////////// LEVEL 3 /////////////////////////
  	if(BotKeepThinking( self, THINK_LEVEL_3 )) { 
 		if(!self->bot->Enemy) { 
-			if(botFindClosestFriend( self )) {
-				//self->bot->think.state[ THINK_LEVEL_3 ] = FOLLOW;
-			}
+			botFindClosestFriend( self );
+		}
+	}
+	///////////////////////// LEVEL MAX /////////////////////////
+ 	if(BotKeepThinking( self, THINK_LEVEL_MAX )) { 
+		if(self->client->pers.classSelection > PCL_ALIEN_LEVEL1_UPG && botGetHealthPct( self ) < 30) {
+			self->bot->think.state[ THINK_LEVEL_3 ] = RETREAT;
 		}
 	}
 	
@@ -161,7 +167,6 @@ void BotBlockedAlien( gentity_t *self )
 {
 	int try = self->bot->path.blocked_try;
 	qboolean canwallwalk = ( BG_ClassHasAbility( self->client->ps.stats[ STAT_CLASS ], SCA_WALLCLIMBER ) );
-	qboolean rand = G_Rand() < 50;
 	
 	if(canwallwalk) BotWallWalk( self ); //if possible
 
@@ -171,16 +176,18 @@ void BotBlockedAlien( gentity_t *self )
 		BotJump( self );
 		VectorCopy(self->r.currentOrigin, self->bot->path.blocked_origin);
 	} else if(try < BOT_TIMER_NAV_SECOND) {
-		if(rand) BotControl( self, BOT_LOOK_RIGHT );
 		if(!canwallwalk || try % BOT_TIMER_NAV_SECOND == 0) BotJump( self ); 
+	} else if(try == BOT_TIMER_NAV_SECOND) {
+		BotControl( self, BOT_LOOK_RANDOM );
 	} else if(try > BOT_TIMER_NAV_SECOND) {
-		if(rand) BotControl( self, BOT_LOOK_LEFT );
 		if(!canwallwalk || try % BOT_TIMER_NAV_SECOND == 0) BotJump( self );
 	}
 	
 	if(try >= BOT_TIMER_NAV_SECOND * 4) {
 		self->bot->path.blocked_try = 0; 
 		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_ALIEN + BOT_DEBUG_NAVSTATE, "Reset blocked_try to 0\n" );
+		//If there is a friend nearby, try to follow him
+		botFindClosestFriend( self );
 	} else {
 		//we set next try 
 		self->bot->path.blocked_try++;
@@ -593,15 +600,23 @@ void BotHealAlien( gentity_t *self ) {
 		self->bot->timer.improve = level.time;
 		self->bot->Struct = botFindClosestBuildable( self, 500, BA_A_BOOSTER );
 		//Heal by basilisk
-		if(!self->bot->Struct && self->health <= 40) {
+		if(!self->bot->Struct && botGetHealthPct( self ) <= 40) {
 			self->bot->Friend = botFindClosestBasilisk( self, 400 );
-			if(self->bot->Friend) {
-				self->bot->state = FOLLOW;
-			}
 		}
 	}
 }
-
+/**
+ * Go back
+ * @param self
+ */
+void BotRetreatAlien( gentity_t *self )
+{
+	//wait until you are 100% 
+	if(botGetHealthPct( self ) > 90) 
+	{
+		BotResetState( self, RETREAT );
+	} 
+}
 /*
 ================
 Based on botFindClosestBuildable

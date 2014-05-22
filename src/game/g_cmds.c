@@ -1378,7 +1378,7 @@ void Cmd_CallVote_f( gentity_t *ent )
         "set g_nextMap \"%s\"", arg );
       Com_sprintf( level.voteDisplayString[ team ],
         sizeof( level.voteDisplayString[ team ] ),
-        "Set the next map to '%s'", arg );
+        "Set the ^1next^7 map to '%s'", arg );
     }
     else if( !Q_stricmp( vote, "draw" ) )
     {

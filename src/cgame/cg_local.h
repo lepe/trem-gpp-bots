@@ -1258,6 +1258,11 @@ typedef struct
   qhandle_t jetpackModel;
   qhandle_t jetpackFlashModel;
   qhandle_t battpackModel;
+  
+  //bot light armour
+  qhandle_t BotlarmourHeadSkin;
+  qhandle_t BotlarmourLegsSkin;
+  qhandle_t BotlarmourTorsoSkin;
 
   sfxHandle_t repeaterUseSound;
 

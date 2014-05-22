@@ -50,20 +50,21 @@ void BotTargetPath( gentity_t *self )
 	{
 		{
 			if(g_bot_manual_nav.integer) {
-				G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(1) NAV State would have changed to: %d\n", FINDNEWPATH);
+				G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(1) NAV State would have changed to: %d\n", FINDNEWPATH);
 			} else {					
-				G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(1) NAV State changed to: %d\n", FINDNEWPATH);
+				G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(1) NAV State changed to: %d\n", FINDNEWPATH);
 				self->bot->path.state = FINDNEWPATH;
 			}
 		}
 	}
-	//G_Printf("Target: %d, Distance %d\n",self->bot->path.targetPath, distanceToTargetNode(self));
+	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "Last path id %d, FoundTime: %d\n", self->bot->path.lastpathid, level.time - self->bot->timer.foundPath);
+	//G_Printf("Target: %d, Distance %d\n",self->bot->path.targetNode, distanceToTargetNode(self));
 	if(distanceToTargetNode(self) < 70) 
 	{
 		if(g_bot_manual_nav.integer) {
-			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(3) NAV State would have changed to: %d\n", FINDNEXTPATH);
+			G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(3) NAV State would have changed to: %d\n", FINDNEXTPATH);
 		} else {
-			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(3) NAV State changed to: %d\n", FINDNEXTPATH);
+			G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(3) NAV State changed to: %d\n", FINDNEXTPATH);
 			self->bot->path.state = FINDNEXTPATH;
 		}
 	}
@@ -71,9 +72,9 @@ void BotTargetPath( gentity_t *self )
 	if(level.time - self->bot->timer.foundPath > 1000 && VectorLength( self->client->ps.velocity ) < 10.0f && (float)Distance( self->client->oldOrigin, self->r.currentOrigin ) < 50 ) //2.3
 	{
 		if(g_bot_manual_nav.integer) {
-			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(4) NAV State would have changed to: %d\n", BLOCKED);
+			G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(4) NAV State would have changed to: %d\n", BLOCKED);
 		} else {
-			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(4) NAV State changed to: %d\n", BLOCKED);
+			G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(4) NAV State changed to: %d\n", BLOCKED);
 	    	self->bot->path.state = BLOCKED;
 		}
 	} else {
@@ -129,12 +130,11 @@ void BotFindNewPath( gentity_t *self )
 	else
 	{
 		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "New Path NOT found\n");
-		//TODO: for now is treated as BLOCKED but should be LOST
 		if(g_bot_manual_nav.integer) {
-			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(6) NAV State would have changed to: %d\n", BLOCKED);
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(6) NAV State would have changed to: %d\n", LOST);
 		} else {
-			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(6) NAV State hanged to: %d\n", BLOCKED);
-			self->bot->path.state = BLOCKED;
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(6) NAV State hanged to: %d\n", LOST);
+			self->bot->path.state = LOST;
 		}
 	}
 	return;
@@ -152,57 +152,67 @@ void BotFindNextPath( gentity_t *self )
 	int pathrank[5];
     int essence = NO_ESSENCE;
     int randnum = 0;
-	int i,j,nextpath = 0;
+	int i,j,indexpath,nextpath = 0;
 	int possiblenextpath = 0;
 	int possiblepaths[5];
     qboolean known = qfalse;
 
-    G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Last Path Id: %d\n",self->bot->path.lastpathid);
-    G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Target Path: %d\n",self->bot->path.targetNode);
 	possiblepaths[0] = possiblepaths[1] = possiblepaths[2] = possiblepaths[3] = possiblepaths[4] = 0;
-	for(i = 0; i < 5; i++)
-	{
-		if(level.paths[self->bot->path.targetNode].nextid[i] < level.numPaths &&
-			level.paths[self->bot->path.targetNode].nextid[i] >= 0)
+
+	if(self->bot->state == RETREAT && self->bot->path.numCrumb > 1) {
+		self->bot->path.numCrumb--;
+		if(self->bot->path.crumb[ self->bot->path.numCrumb ] == self->bot->path.targetNode) {
+			self->bot->path.numCrumb--;
+		}
+		self->bot->path.lastJoint = self->bot->path.targetNode;
+		nextpath = self->bot->path.crumb[ self->bot->path.numCrumb ];
+		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Returning to: %i\n",nextpath);
+		self->bot->path.state = TARGETPATH;
+	} else {
+		for(i = 0; i < 5; i++)
 		{
-			if(self->bot->path.lastpathid >= 0)
+			if(level.paths[self->bot->path.targetNode].nextid[i] < level.numPaths &&
+				level.paths[self->bot->path.targetNode].nextid[i] >= 0)
 			{
-				if(self->bot->path.lastpathid == level.paths[self->bot->path.targetNode].nextid[i])
+				if(self->bot->path.lastpathid >= 0)
 				{
-					continue;
+					if(self->bot->path.lastpathid == level.paths[self->bot->path.targetNode].nextid[i])
+					{
+						continue;
+					}
 				}
+				possiblepaths[possiblenextpath] = level.paths[self->bot->path.targetNode].nextid[i];
+				possiblenextpath++;
 			}
-			possiblepaths[possiblenextpath] = level.paths[self->bot->path.targetNode].nextid[i];
-			possiblenextpath++;
 		}
-	}
-    G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Path Options: %i, %i, %i, %i, %i\n",possiblepaths[0],possiblepaths[1],possiblepaths[2],possiblepaths[3],possiblepaths[4]);
-	if(possiblenextpath == 0)
-	{	
-		if(g_bot_manual_nav.integer) {
-			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(7) NAV State would have changed to: %d\n", FINDNEWPATH);
-		} else {
-			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(7) NAV State changed to: %d\n", FINDNEWPATH);
-			self->bot->path.state = FINDNEWPATH;
+		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Path Options: %i, %i, %i, %i, %i\n",possiblepaths[0],possiblepaths[1],possiblepaths[2],possiblepaths[3],possiblepaths[4]);
+		//If there are no possible next paths, set it to find a new path (normally it should not be like that)
+		if(possiblenextpath == 0)
+		{	
+			if(g_bot_manual_nav.integer) {
+				G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(7) NAV State would have changed to: %d\n", FINDNEWPATH);
+			} else {
+				G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(7) NAV State changed to: %d\n", FINDNEWPATH);
+				self->bot->path.state = FINDNEWPATH;
+			}
+			return;
 		}
-		return;
-	}
-	else
-	{
+		//If we have available paths, set TARGETPATH
 		if(g_bot_manual_nav.integer) {
 			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(8) NAV State would have changed to: %d\n", TARGETPATH);
 		} else {
 			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(8) NAV State changed to: %d\n", TARGETPATH);
 			self->bot->path.state = TARGETPATH;
 		}
+		//If there is only one choice, select it.
 		if(possiblenextpath == 1)
 		{
-			nextpath = 0;
+			indexpath = 0;
 		}
-		else
+		else //more than one choice...
 		{
+			//bots decide here which path to follow based on the strength of the essence, previous nodes and possible unexplored nodes
 			if(g_bot_essence.integer == 1) {
-				//bots decide here which path to follow based on the strength of the essence, previous nodes and possible unexplored nodes
 				//-------------
 				G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH, "Possible Paths: %d .",possiblenextpath);
 				for(i =0; i < possiblenextpath; i++) {
@@ -242,22 +252,24 @@ void BotFindNextPath( gentity_t *self )
 					accumessence += ((pathessence[i] * pathrank[i]) * 100) / totalessence;
 					if(randnum <= accumessence) {
 						G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"SELECTED : %d\n",possiblepaths[i]);
-						nextpath = i;
+						indexpath = i;
 						break;
 					}
 				}
-			} else {
-				nextpath = G_Rand_Range(0,possiblenextpath-1);
+			} else { //plain random
+				indexpath = G_Rand_Range(0,possiblenextpath-1);
 						G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"RANDOMLY SELECTED : %d\n",possiblepaths[i]);
 			}
 		}
-		//LEPE: set next crumb
-		setCrumb( self, possiblepaths[nextpath] );
-		self->bot->path.lastpathid = self->bot->path.targetNode;
-		self->bot->path.targetNode = possiblepaths[nextpath];
-		self->bot->timer.foundPath = level.time;
-		return;
+		nextpath = possiblepaths[indexpath];
+		//We set a crumb of our path
+		setCrumb( self, nextpath ); 
 	}
+	self->bot->path.lastpathid = self->bot->path.targetNode;
+	self->bot->path.targetNode = nextpath;
+	self->bot->timer.foundPath = level.time;
+	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Last Path Id: %d\n",self->bot->path.lastpathid);
+	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE,"Target Node: %d\n",self->bot->path.targetNode);
 	return;
 }
 
@@ -283,7 +295,17 @@ void BotBlocked( gentity_t *self ) {
  * @param self
  */
 void BotLost( gentity_t *self ) {
-	//nothing yet
+	BotMoveFwd( self );
+	//If we haven't move enough, check if we are blocked
+	if(VectorLength( self->client->ps.velocity ) < 10.0f && (float)Distance( self->client->oldOrigin, self->r.currentOrigin ) < 20 ) 
+	{
+		if(g_bot_manual_nav.integer) {
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(4) NAV State would have changed to: %d\n", BLOCKED);
+		} else {
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(4) NAV State changed to: %d\n", BLOCKED);
+	    	self->bot->path.state = BLOCKED;
+		}
+	}
 }
 
 /**

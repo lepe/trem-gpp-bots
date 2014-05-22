@@ -941,7 +941,7 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   {
     Com_sprintf( buffer, MAX_QPATH, "%s/%s%s",  BG_ClassConfig( client->pers.classSelection )->modelName,
                                               BG_ClassConfig( client->pers.classSelection )->skinName,
-											  hasbotinname == qtrue ? "_bot" : "");
+											  g_bot_skins.integer && hasbotinname == qtrue ? "_bot" : "");
 
     //model segmentation
     Com_sprintf( filename, sizeof( filename ), "models/players/%s/animation.cfg",

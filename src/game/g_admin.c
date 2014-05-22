@@ -746,7 +746,7 @@ static void admin_log_abort( void )
 static void admin_log_end( const qboolean ok )
 {
   if( adminLog[ 0 ] )
-    G_LogPrintf( "AdminExec: %s: %s\n", ok ? "ok" : "fail", adminLog );
+    if(!ok) G_LogPrintf( "AdminExec Failed: %s\n", adminLog );
   admin_log_abort( );
 }
 
@@ -2286,7 +2286,7 @@ qboolean G_admin_listplayers( gentity_t *ent )
         colorlen += 2;
     }
 
-    ADMBP( va( "%2i ^%c%c^7 %-2i^2%c^7 %*s^7 ^1%c%c^7 %s^7 %s%s%s\n",
+    ADMBP( va( "%2i ^%c%c^7 %-2i^2%c^7 %*s^7 ^1%c%c^7 %5i %s^7 %s%s%s\n",
               i,
               c,
               t,
@@ -2296,6 +2296,7 @@ qboolean G_admin_listplayers( gentity_t *ent )
               lname,
               muted,
               denied,
+			  p->ps.persistant[ PERS_SCORE ], //LEPE: player's score
               p->pers.netname,
               ( registeredname ) ? "(a.k.a. " : "",
               ( registeredname ) ? registeredname : "",
@@ -3525,6 +3526,11 @@ qboolean G_admin_botdbg( gentity_t *ent )
 						);
 			} else if( !Q_stricmp( verb_s, "targetnode") ) {
 				ADMP(va("[READ] Target Node: %d\n", botent->bot->path.targetNode));
+			} else if( !Q_stricmp( verb_s, "health") ) {
+				ADMP(va("[READ] Health % : %d\n", botGetHealthPct( botent )));
+			} else {
+				ADMP( "^1Unknown read type\n");
+				return qfalse;
 			}
 			return qtrue;
 		} else {
