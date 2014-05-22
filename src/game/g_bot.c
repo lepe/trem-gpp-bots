@@ -240,13 +240,14 @@ void G_BotCmd( int clientNum, char *command, int value, int value2 ) {
 	  if(g_bot_manual.integer) {
 		  if(value > BOT_EMPTY_MOVE && value <= BOT_STOP) {
 		  	BotAddMove( ent, (botMove)value, value2 );
-			BotStartMove( ent );
+			BotStartMove( ent, BOT_EMPTY_MOVE );
 		  } else {
 			  switch(value) {
-				  case 50: BotLookUp( ent , value2 ); break;
-				  case 51: BotLookDown( ent , value2 ); break;
-				  case 52: BotLookLeft( ent , value2 ); break;
-				  case 53: BotLookRight( ent , value2 ); break;
+				  case 50: BotControl( ent , BOT_LOOK_UP); break;
+				  case 51: BotControl( ent , BOT_LOOK_DOWN); break;
+				  case 52: BotControl( ent , BOT_LOOK_LEFT); break;
+				  case 53: BotControl( ent , BOT_LOOK_RIGHT); break;
+				  case 54: BotControl( ent , BOT_LOOK_RANDOM); break;
 				  case 60: Bot_Strafe( ent ); break;
 				  case 61: Bot_Pounce( ent, value2 ); break;
 				  case 62: Bot_FullLuci( ent ); break;

@@ -8,7 +8,7 @@ MOD=gpp-bot
 # can be relative or absolute
 WEB_DIR=web
 # Set package version
-VERSION="2.0.4";
+VERSION="2.0.6";
 
 #if [1], it will copy the resulting PK3 to
 #user's directory to speed testing
@@ -76,6 +76,7 @@ cd $ROOT_PWD
 if [[ "$WEB_DIR" != "" ]]; then
     cd $WEB_DIR;
     rm $MOD-vms-*.pk3
+    rm $DEPLOY_DIR/$MOD-vms-*.pk3
     ln -s $DEPLOY_DIR/$PK3VM .
 fi
 cd $ROOT_PWD

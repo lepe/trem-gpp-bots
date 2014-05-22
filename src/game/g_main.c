@@ -173,6 +173,9 @@ vmCvar_t  g_bot_essence;
 vmCvar_t  g_bot_tagname;
 vmCvar_t  g_bot_manual;
 vmCvar_t  g_bot_manual_nav;
+vmCvar_t  g_bot_move_and_aim;
+vmCvar_t  g_bot_step_aim;
+vmCvar_t  g_bot_skins;
 //Debug for console:
 vmCvar_t  g_bot_debug_verbosity;
 vmCvar_t  g_bot_debug_type;
@@ -246,6 +249,9 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_bot_tagname, "g_bot_tagname", "1", 0, 0, qfalse },
   { &g_bot_manual, "g_bot_manual", "0", 0, 0, qfalse },
   { &g_bot_manual_nav, "g_bot_manual_nav", "0", 0, 0, qfalse },
+  { &g_bot_move_and_aim, "g_bot_move_and_aim", "0", 0, 0, qfalse },
+  { &g_bot_step_aim, "g_bot_step_aim", "0", 0, 0, qfalse },
+  { &g_bot_skins, "g_bot_skins", "0", 0, 0, qfalse },
   
   { &g_needpass, "g_needpass", "0", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse },
   { &g_dedicated, "dedicated", "0", 0, 0, qfalse  },

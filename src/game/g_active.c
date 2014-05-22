@@ -800,15 +800,19 @@ void ClientTimerActions( gentity_t *ent, int msec )
 					G_BotDebug(ent, BOT_VERB_NORMAL, BOT_DEBUG_ACTIVE + BOT_DEBUG_NAVSTATE, "NAV State %d -> %d\n", state, ent->bot->path.state);
 				}
 				//Move to point gradually without aiming
-				/*
-				if(ent->bot->move.topoint) {
+				if(g_bot_move_and_aim.integer && VectorLength(ent->bot->move.topoint) > 0) {
 					if(Distance(ent->bot->move.topoint, ent->s.pos.trBase) > BOT_MOVE_PACE) {
-						vec3_t dirToTarget;
+						vec3_t dirToTarget, angles;
 						float angle;
-						
+						//Make a vector from trBase -> topoint  
 						VectorSubtract(ent->bot->move.topoint, ent->s.pos.trBase, dirToTarget);
-						angle = abs(SHORT2ANGLE(ent->client->ps.delta_angles[ YAW ] - dirToTarget[ YAW ]));
-						G_Printf("distance: %f0, angle : %f0\n",Distance(ent->bot->move.topoint, ent->s.pos.trBase), angle);
+						// Get the absolute angle of the new vector
+						vectoangles( dirToTarget, angles);
+						// Get the angle relative to bot's view
+						angle = SHORT2ANGLE(ent->client->ps.delta_angles[ YAW ]) - angles[ YAW ];
+						// Convert angle to positive value
+						if(angle < 0) angle += 360;
+						// Move the bot:
 						if (angle == 0 || angle == 360) {
 							BotMoveFwd( ent );
 							BotControl( ent , BOT_RESET_LEFT_RIGHT);
@@ -833,35 +837,37 @@ void ClientTimerActions( gentity_t *ent, int msec )
 						} else if(angle > 270 && angle < 360) {
 							BotMoveFwd( ent );
 							BotMoveLeft( ent );
-						} else {
-							G_Printf("Error in angle %d\n",angle);
 						}
 						//get the amount in X and Y and Z that we have to move to.
 						//it hast to be based in a fixed amount towards the goal.
+					} else {
+						BotStop( ent );
+						BotCrouch( ent );
+						VectorClear(ent->bot->move.topoint);
 					}
 				}
-				 */
 				//Adjust AIM gradually
-				/*
-				if(abs(ent->bot->move.lookat[ PITCH ] - ent->client->ps.delta_angles[ PITCH ]) > BOT_TURN_SHORT) {
-					if(ent->bot->move.lookat[ PITCH ] > ent->client->ps.delta_angles[ PITCH ]) {
-						ent->client->ps.delta_angles[ PITCH ] -= BOT_TURN_SHORT;
+				if(g_bot_step_aim.integer) {
+					if(abs(ent->bot->move.lookat[ PITCH ] - ent->client->ps.delta_angles[ PITCH ]) > BOT_TURN_SHORT) {
+						if(ent->bot->move.lookat[ PITCH ] > ent->client->ps.delta_angles[ PITCH ]) {
+							ent->client->ps.delta_angles[ PITCH ] -= BOT_TURN_SHORT;
+						} else {
+							ent->client->ps.delta_angles[ PITCH ] += BOT_TURN_SHORT;
+						}
+						//we will move towards that coordinate at a fixed pace until we reach it.
 					} else {
-						ent->client->ps.delta_angles[ PITCH ] += BOT_TURN_SHORT;
+						ent->client->ps.delta_angles[ PITCH ] = ent->bot->move.lookat[ PITCH ];
 					}
-					//we will move towards that coordinate at a fixed pace until we reach it.
-				} else {
-					ent->client->ps.delta_angles[ PITCH ] = ent->bot->move.lookat[ PITCH ];
+					if(abs(ent->bot->move.lookat[ YAW ] - ent->client->ps.delta_angles[ YAW ]) > BOT_TURN_SHORT) {
+						if(ent->bot->move.lookat[ YAW ] > ent->client->ps.delta_angles[ YAW ]) {
+							ent->client->ps.delta_angles[ YAW ] -= BOT_TURN_SHORT;
+						} else {
+							ent->client->ps.delta_angles[ YAW ] += BOT_TURN_SHORT;
+						}
+					} else {
+						ent->bot->move.lookat[ YAW ] = ent->client->ps.delta_angles[ YAW ];
+					}
 				}
-				if(abs(ent->bot->move.lookat[ YAW ] - ent->client->ps.delta_angles[ YAW ]) > BOT_TURN_SHORT) {
-					if(ent->bot->move.lookat[ YAW ] > ent->client->ps.delta_angles[ YAW ]) {
-						ent->client->ps.delta_angles[ YAW ] -= BOT_TURN_SHORT;
-					} else {
-						ent->client->ps.delta_angles[ YAW ] += BOT_TURN_SHORT;
-					}
-				} else {
-					ent->bot->move.lookat[ YAW ] = ent->client->ps.delta_angles[ YAW ];
-				}*/
 			}
 			//execute movements (uses a separate variable timer)
 			ent->bot->funcs.base.move( ent , msec );

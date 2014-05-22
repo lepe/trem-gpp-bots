@@ -127,9 +127,6 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch ) {
         else if(angleToTarget[0] < -6.0 && angleToTarget[0] > -180) { // up
 			if(!G_Visible(self, target, CONTENTS_SOLID)) BotJump( self );
         }
-        else { // don't do anything
-			BotStand( self );
-        }
 	}
 	return qtrue;
 }
@@ -230,6 +227,7 @@ qboolean botFindClosestFriend( gentity_t *self ) {
 			}
 		}
 	}
+	self->bot->Friend = NULL; 
 	return qfalse;
 }
 
@@ -282,7 +280,7 @@ gentity_t *botFindClosestBuildable( gentity_t *self, float r, buildable_t builda
 	@param r [float] range to check
  	@return gentity_t
  */
-gentity_t *botFindDamagedStructure( gentity_t *self, float r ) 
+gentity_t *botFindDamagedStructure( gentity_t *self, float r, int damage ) 
 {
   int       entityList[ MAX_GENTITIES ];
   vec3_t    range;
@@ -309,9 +307,25 @@ gentity_t *botFindDamagedStructure( gentity_t *self, float r )
 	if(!G_Visible(self, ent, CONTENTS_SOLID))
   	  continue;
 	
-    if( ent->health < BG_Buildable( ent->s.modelindex )->health && !( ent->s.eFlags & EF_DEAD ) && ent->spawned )
+    if( botGetHealthPct( ent ) < damage && !( ent->s.eFlags & EF_DEAD ) && ent->spawned )
       return ent;
   }
 
   return NULL;
+}
+
+/**
+ * This function return health as a percentage either for players or buildings
+ * @param self
+ * @return 
+ */
+int botGetHealthPct( gentity_t *ent ) 
+{
+	int health_pct;
+	if(ent->s.eType == ET_BUILDABLE) {
+		health_pct = (float)((float)ent->health / (float)BG_Buildable( ent->s.modelindex )->health) * 100;
+ 	} else {
+		health_pct = (float)((float)ent->health / (float)BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health) * 100;
+	}
+	return health_pct;
 }

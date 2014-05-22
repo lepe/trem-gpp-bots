@@ -37,7 +37,7 @@
   {
     "Because ViruS is lonely on IRC, please give him a poke. He's feeling sad\n"
     "##acidtube @ irc.freenode.org\n"
-    "If you do not have an IRC client simply visit http:/^7/forum.acidtu.be and\n
+    "If you do not have an IRC client simply visit http:/^7/forum.acidtu.be and\n"
     "chat in the box below."
   }
   "Credits"

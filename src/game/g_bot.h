@@ -37,10 +37,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 //Adjust this value if move actions are being discarded
 #define BOT_MOVE_QUEUE		10
-#define BOT_TURN_VAL		25.0f
+#define BOT_TURN_VAL		45.0f
 #define BOT_TURN_SHORT		ANGLE2SHORT( BOT_TURN_VAL )
 #define BOT_TURN_ANGLE_DIV	(360.0f / (float)BOT_TURN_VAL)
-#define BOT_MOVE_PACE		10.0f
+#define BOT_MOVE_PACE		100.0f
 #define BOT_DEBUG_ALL		-1
 
 //timers
@@ -57,7 +57,7 @@ extern const int BOT_TIMER[];
  */
 typedef struct
 {
-	vec3_t	coord;
+	vec3_t coord;
 	int	nextid[5];
 	int	random;
 	int	timeout;
@@ -118,21 +118,20 @@ typedef enum
 	BOT_MOVE_FWD,			//9
 	BOT_MOVE_BACK,			//10
 	BOT_LOOK_CENTER,		//11
-	BOT_LOOK_UP,			//12
-	BOT_LOOK_DOWN,			//13
-	BOT_LOOK_LEFT,			//14
-	BOT_LOOK_RIGHT,			//15
-	BOT_POUNCE,				//16
+	BOT_LOOK_RANDOM,		//12
+	BOT_LOOK_UP,			//13
+	BOT_LOOK_DOWN,			//14
+	BOT_LOOK_LEFT,			//15
+	BOT_LOOK_RIGHT,			//16
 	BOT_RESET_BUTTONS,		//17
 	BOT_RESET_LEFT_RIGHT,	//18
 	BOT_RESET_FWD_BACK,		//19
 	BOT_MAIN_ATTACK,		//20
 	BOT_SEC_ATTACK,			//21
 	BOT_MID_ATTACK,			//22
-	BOT_FULL_LUCI,			//23
-	BOT_GESTURE,			//24
+	BOT_GESTURE,			//23
 		//<-- add movements here
-	BOT_STOP				//25
+	BOT_STOP				//24
 } botMove;
 
 typedef enum
@@ -209,11 +208,12 @@ typedef struct
 		  botMove action;
 		  int time; // time to wait until next action (in ms)
 	  } queue[BOT_MOVE_QUEUE];
+	  botMove blockedAction;
 	  int read; //index used to know which queue slot to read from 
 	  int write; //index used to know which queue slot to write into
 	  qboolean exec; //used to start performing a movement
-	  vec3_t topoint; //move to that coordinate withoug aiming
-	  int lookat[2]; //move ain to that point
+	  vec3_t topoint; //move to that coordinate without aiming
+	  int lookat[2]; //move aim to that point : disabled until we find a way to make it smooth (requires g_bot_step_aim = 1)
   } move;
   //TIMER: used to time actions (variables).
   struct {
@@ -318,15 +318,16 @@ int G_Rand( void ); //LEPE
 int G_Rand_Range( int start, int end ); //LEPE
 int botGetDistanceBetweenPlayer( gentity_t *self, gentity_t *player );
 int botGetAngleBetweenPlayer( gentity_t *self, gentity_t *player );
+int botGetHealthPct( gentity_t *self );
 qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch);
 qboolean botFindClosestEnemy( gentity_t *self );
 qboolean botFindClosestFriend( gentity_t *self );
 gentity_t *botFindClosestBuildable( gentity_t *self, float r, buildable_t buildable );
-gentity_t *botFindDamagedStructure( gentity_t *self, float r );
+gentity_t *botFindDamagedStructure( gentity_t *self, float r, int damage );
 
 // g_bot_control.c
 void BotControl( gentity_t *self, botMove move );
-void BotStartMove( gentity_t *self );
+void BotStartMove( gentity_t *self, botMove block );
 void BotDoMove( gentity_t *self, int msec ); 
 void BotAddMove( gentity_t *self, botMove move, int time ); 
 void BotCleanMove( gentity_t *self );
@@ -345,11 +346,13 @@ void BotGesture ( gentity_t *self );
 void BotMainAttack ( gentity_t *self );
 void BotSecAttack ( gentity_t *self );
 void BotMidAttack ( gentity_t *self );
+/*
 void BotLookUp( gentity_t *self, int deg );
 void BotLookDown( gentity_t *self, int deg );
 void BotLookLeft( gentity_t *self, int deg );
 void BotLookRight( gentity_t *self, int deg );
 void BotTurn( gentity_t *self, int pitch, int yaw );
+ */
 /* Combos */
 void Bot_Strafe( gentity_t *self );
 void Bot_Pounce( gentity_t *self, int angle );
@@ -391,6 +394,7 @@ void BotEvolve( gentity_t *self );
 void BotIdleAlien( gentity_t *self );
 void BotBuildAlien( gentity_t *self );
 void BotHealAlien( gentity_t *self );
+void BotRetreatAlien( gentity_t *self );
 void BotAttackAlien( gentity_t *self ); 
 void BotTargetAlien( gentity_t *self ); 
 void BotNavigateAlien( gentity_t *self ); 
