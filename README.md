@@ -32,7 +32,8 @@ v.2.0
 * Blocked-State code for both, aliens and humans recoded
 * Bots are able to follow and create leaderships in groups (need to be fixed)
 * Bots do something on maps without nodes (nothing great yet)
-* Bots can walk and aim at two different directions
+* Bots can walk and aim at two different directions (experimental: off)
+* Bots aim is not instant (experimental: off)
 * Targets are chosen on proximity (before was on entity order)
 * Human bots now have basic repair capabilities
 * Human bots try to keep a distance when attacking structures (except saw and flame weapons)

@@ -7,8 +7,8 @@
     "We are always looking for people that can help us improve this mod through "
     "great ideas, comments, code patches and more. Please follow these links "
     "to join us! \n"
-    "^2Forum: ^7forum.acidtu.be (It's a link)\n"
-    "^3GitHub: ^7github.com/lepe/trem-gpp-bots/"
+    "^2Forum: ^7http://forum.acidtu.be\n"
+    "^3GitHub: ^7http://github.com/lepe/trem-gpp-bots/"
   }
   "Why Asia?"
   {
