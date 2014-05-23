@@ -227,7 +227,7 @@ qboolean botFindClosestFriend( gentity_t *self ) {
 					return qtrue;
 				} else { //its a player... follow him
 					self->bot->Friend = leader;
-					return true;
+					return qtrue;
 				}
 			}
 		}
