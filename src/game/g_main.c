@@ -251,7 +251,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_bot_manual_nav, "g_bot_manual_nav", "0", 0, 0, qfalse },
   { &g_bot_move_and_aim, "g_bot_move_and_aim", "0", 0, 0, qfalse },
   { &g_bot_step_aim, "g_bot_step_aim", "0", 0, 0, qfalse },
-  { &g_bot_skins, "g_bot_skins", "0", 0, 0, qfalse },
+  { &g_bot_skins, "g_bot_skins", "0", CVAR_SYSTEMINFO, 0, qfalse },
   
   { &g_needpass, "g_needpass", "0", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse },
   { &g_dedicated, "dedicated", "0", 0, 0, qfalse  },

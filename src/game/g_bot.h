@@ -109,29 +109,30 @@ typedef enum
 	BOT_EMPTY_MOVE, 		//0
 	BOT_WAIT,				//1
 	BOT_RUN,				//2
-	BOT_JUMP,				//3
-	BOT_CROUCH,				//4
-	BOT_WALLWALK,			//5
-	BOT_STAND,				//6
-	BOT_MOVE_LEFT,			//7
-	BOT_MOVE_RIGHT,			//8
-	BOT_MOVE_FWD,			//9
-	BOT_MOVE_BACK,			//10
-	BOT_LOOK_CENTER,		//11
-	BOT_LOOK_RANDOM,		//12
-	BOT_LOOK_UP,			//13
-	BOT_LOOK_DOWN,			//14
-	BOT_LOOK_LEFT,			//15
-	BOT_LOOK_RIGHT,			//16
-	BOT_RESET_BUTTONS,		//17
-	BOT_RESET_LEFT_RIGHT,	//18
-	BOT_RESET_FWD_BACK,		//19
-	BOT_MAIN_ATTACK,		//20
-	BOT_SEC_ATTACK,			//21
-	BOT_MID_ATTACK,			//22
-	BOT_GESTURE,			//23
+	BOT_WALK,				//3
+	BOT_JUMP,				//4
+	BOT_CROUCH,				//5
+	BOT_WALLWALK,			//6
+	BOT_STAND,				//7
+	BOT_MOVE_LEFT,			//8
+	BOT_MOVE_RIGHT,			//9
+	BOT_MOVE_FWD,			//10
+	BOT_MOVE_BACK,			//11
+	BOT_LOOK_CENTER,		//12
+	BOT_LOOK_RANDOM,		//13
+	BOT_LOOK_UP,			//14
+	BOT_LOOK_DOWN,			//15
+	BOT_LOOK_LEFT,			//16
+	BOT_LOOK_RIGHT,			//17
+	BOT_RESET_BUTTONS,		//18
+	BOT_RESET_LEFT_RIGHT,	//19
+	BOT_RESET_FWD_BACK,		//20
+	BOT_MAIN_ATTACK,		//21
+	BOT_SEC_ATTACK,			//22
+	BOT_MID_ATTACK,			//23
+	BOT_GESTURE,			//24
 		//<-- add movements here
-	BOT_STOP				//24
+	BOT_STOP				//25
 } botMove;
 
 typedef enum
@@ -333,6 +334,7 @@ void BotAddMove( gentity_t *self, botMove move, int time );
 void BotCleanMove( gentity_t *self );
 void BotClearQueue( gentity_t *self );
 void BotRun( gentity_t *self );
+void BotWalk( gentity_t *self );
 void BotJump( gentity_t *self );
 void BotStop( gentity_t *self );
 void BotMoveRight( gentity_t *self );

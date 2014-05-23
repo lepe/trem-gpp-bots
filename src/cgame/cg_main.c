@@ -311,7 +311,6 @@ static cvarTable_t cvarTable[ ] =
   { &cg_disableCommandDialogs, "cg_disableCommandDialogs", "0", CVAR_ARCHIVE },
   { &cg_disableScannerPlane, "cg_disableScannerPlane", "0", CVAR_ARCHIVE },
   { &cg_tutorial, "cg_tutorial", "1", CVAR_ARCHIVE },
-  { &cg_botsskin, "cg_botsskin", "0", CVAR_ARCHIVE },
   { &cg_hudFiles, "cg_hudFiles", "ui/hud.txt", CVAR_ARCHIVE},
   { &cg_hudFilesEnable, "cg_hudFilesEnable", "0", CVAR_ARCHIVE},
   { NULL, "cg_alienConfig", "", CVAR_ARCHIVE },
@@ -351,6 +350,7 @@ static cvarTable_t cvarTable[ ] =
   { &cg_timescale, "timescale", "1", 0},
   { &cg_smoothClients, "cg_smoothClients", "0", CVAR_USERINFO | CVAR_ARCHIVE},
   { &cg_cameraMode, "com_cameraMode", "0", CVAR_CHEAT},
+  { &cg_botsskin, "g_bot_skins", "0", 0 },// communicated by systeminfo
 
   { &pmove_fixed, "pmove_fixed", "0", 0},
   { &pmove_msec, "pmove_msec", "8", 0},

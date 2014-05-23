@@ -19,6 +19,8 @@ DEPLOY_DIR=$GAME_DIR/$MOD
 DEBUG_DIR=debug-linux-x86_64
 RELEASE_DIR=release-linux-x86_64
 DEBUG_BIN=tremded.x86_64
+
+VM_PK3_DIR=assets-vm
 #-----------------------------------------
 ROOT_PWD=$(pwd);
 if [ ! -d $DEPLOY_DIR ]; then
@@ -48,14 +50,14 @@ fi
 
 PK3VM=$MOD-vms-$VERSION.pk3
 
-if [ ! -d deploy/ ]; then
-    echo "Directory created: $ROOT_PWD/deploy/"
-    mkdir deploy
+if [ ! -d $VM_PK3_DIR ]; then
+    echo "Directory created: $ROOT_PWD/$VM_PK3_DIR/"
+    mkdir $VM_PK3_DIR
 fi
 
 cp $BUILD_DIR/vm/*.qvm $DEPLOY_DIR/vm/
-cp $BUILD_DIR/vm/cgame.qvm deploy/vm/
-cp $BUILD_DIR/vm/ui.qvm deploy/vm/
+cp $BUILD_DIR/vm/cgame.qvm $VM_PK3_DIR/vm/
+cp $BUILD_DIR/vm/ui.qvm $VM_PK3_DIR/vm/
 
 #SO libraries
 if [[ "$1" == "debug" ]]; then
@@ -63,7 +65,7 @@ if [[ "$1" == "debug" ]]; then
     cp $BUILD_DIR/*.so $DEPLOY_DIR/
 fi
 
-cd deploy/
+cd $VM_PK3_DIR
 zip -r $PK3VM .
 if [[ $COPYTOUSER == 1 ]]; then
     #copy to local version to speed-up testing
@@ -88,6 +90,6 @@ if [ ! -d $GAME_DIR/$MOD ]; then
     mkdir $GEAME_DIR/$MOD;
 fi
 if [ ! -d $GAME_DIR/$MOD/bots ]; then
-    cp -R gpp-bot/* $GAME_DIR/$MOD/
+    cp -R $MOD/* $GAME_DIR/$MOD/
 fi
 exit 0

@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define BOT_FWD_FULL_VAL  	127
 #define BOT_FWD_VAL  		100
+#define BOT_WALK_VAL  		64
 #define BOT_BCK_VAL  		-100
 #define BOT_RIGHT_VAL 		100
 #define BOT_LEFT_VAL 		-100
@@ -165,6 +166,9 @@ void BotControl( gentity_t *self, botMove move ) {
 		case BOT_RUN: 				
 			self->client->pers.cmd.forwardmove = BOT_FWD_FULL_VAL;
 			break;
+		case BOT_WALK: //silent walk
+			self->client->pers.cmd.forwardmove = BOT_WALK_VAL;
+			break;
 		case BOT_JUMP: 				
 			self->client->pers.cmd.upmove = BOT_JUMP_VAL;
 			break;
@@ -256,23 +260,13 @@ void BotClearQueue( gentity_t *self )
 	self->bot->move.exec = qfalse;
 }
 
-/**
- * Move to XY without using AIM. 
- * This function is used to be able to move to other direction
- * different to where we are aiming.
- * @param self
- */
-void BotMoveTo( gentity_t *self )
-{
-	
-}
-
 //------------------ PUBLIC FUNCTIONS -----------------
 /*
  * These functions serve as shurtcut for: BotAddMove() 
  * to use custome timed actions use BotAddMove instead.
  */
 void BotRun( gentity_t *self )		{ BotControl( self, BOT_RUN ); }
+void BotWalk( gentity_t *self )		{ BotControl( self, BOT_WALK ); }
 void BotJump( gentity_t *self )		{ BotAddMove( self, BOT_JUMP, 500 ); BotStartMove( self, BOT_EMPTY_MOVE ); }
 void BotStop( gentity_t *self )		{ BotControl( self, BOT_STOP ); }
 void BotMoveRight( gentity_t *self ){ BotControl( self, BOT_MOVE_RIGHT ); }

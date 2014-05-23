@@ -484,10 +484,10 @@ void BotAttackAlien( gentity_t *self )
 			{
 				if (distance <= LEVEL1_CLAW_RANGE) {
 					BotMainAttack( self );
+					BotWalk( self );
 				}
 				if (distance <= LEVEL1_GRAB_RANGE) {
-					BotStop( self );
-					BotMoveFwd( self );
+					BotWalk( self );
 					anglediff = botGetAngleBetweenPlayer( self, self->bot->Enemy );
 					if(anglediff > 90 && anglediff <= 180) {
 						BotMoveLeft( self );
@@ -509,7 +509,7 @@ void BotAttackAlien( gentity_t *self )
 				}
 				if (distance <= LEVEL1_GRAB_U_RANGE) {
 					BotStop( self );
-					BotMoveFwd( self );
+					BotWalk( self );
 					anglediff = botGetAngleBetweenPlayer( self, self->bot->Enemy );
 					if(anglediff > 90 && anglediff <= 180) {
 						BotMoveLeft( self );

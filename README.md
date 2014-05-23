@@ -8,6 +8,8 @@ CHANGE LOG
 v.2.0
 * GPP-Bot mod was created based in pbot (most of the pbot code was removed, recoded or translated, and divided in several files and functions)
 * practically everything about bots, is controlled throught bot-> struct
+* bots have their own skins (activated by: g_bot_skins command)
+* enhanced weapons animations
 * bot thinking process now happens in levels at different times
 * bots control functions to simplify code, like: BotJump()
 * bot States were added
