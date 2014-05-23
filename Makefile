@@ -32,11 +32,11 @@ endif
 #build the 'tremded' server binary
 #Turn this to empty the first time and everytime /src/server/* is modified
 ifndef BUILD_SERVER
-  BUILD_SERVER     =0
+  BUILD_SERVER     =1
 endif
 #build the game shared libraries
 ifndef BUILD_GAME_SO
-  BUILD_GAME_SO    =0
+  BUILD_GAME_SO    =1
 endif
 #build the game qvms
 ifndef BUILD_GAME_QVM
@@ -1098,7 +1098,7 @@ TOOLS_OPTIMIZE = -g -O2 -Wall -fno-strict-aliasing
 TOOLS_CFLAGS += $(TOOLS_OPTIMIZE) \
                 -DTEMPDIR=\"$(TEMPDIR)\" -DSYSTEM=\"\" \
                 -I$(Q3LCCSRCDIR) \
-                -I$(LBURGDIR)
+                -I$(LBURGDIR) 
 TOOLS_LIBS =
 TOOLS_LDFLAGS =
 

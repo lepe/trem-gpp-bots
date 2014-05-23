@@ -214,16 +214,21 @@ qboolean botFindClosestFriend( gentity_t *self ) {
 			if( botGetDistanceBetweenPlayer(self, target) < 500 ) {
 				//Do not follow if its following
 				leader = target;
-				while(leader->bot->Friend && max < 20) {
-					leader = leader->bot->Friend;
-					max++;
-				}
-				if(leader != self) {
+				if(leader->bot) {
+					while(leader->bot->Friend && max < 20) {
+						leader = leader->bot->Friend;
+						max++;
+					}
+					if(leader != self) {
+						self->bot->Friend = leader;
+						leader->bot->Friend = NULL; //be sure he is not following anyone
+						G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_UTIL,"following %s\n", leader->client->pers.netname);
+					}
+					return qtrue;
+				} else { //its a player... follow him
 					self->bot->Friend = leader;
-					leader->bot->Friend = NULL; //be sure he is not following anyone
-					G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_UTIL,"following %s\n", leader->client->pers.netname);
+					return true;
 				}
-				return qtrue;
 			}
 		}
 	}

@@ -6,9 +6,12 @@ if [[ "$1" == "--help" ]]; then
     exit 0;
 fi;
 if [[ "$1" == "debug" ]]; then
+    #be sure there is nothing in there (sometimes make clean is not enough)
+    rm -rf build/debug*
     sed -i 's/BUILD_SERVER     =0/BUILD_SERVER     =1/' Makefile
     sed -i 's/BUILD_GAME_SO    =0/BUILD_GAME_SO    =1/' Makefile
-    CFLAGS="" make debug
+    #add: V=1 CFLAGS="" ... to show quake tools execution commands
+    CFLAGS="" CC=clang make debug
 else
     CLNG=$(which clang);
     sed -i 's/BUILD_SERVER     =1/BUILD_SERVER     =0/' Makefile

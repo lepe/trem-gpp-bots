@@ -3527,7 +3527,7 @@ qboolean G_admin_botdbg( gentity_t *ent )
 			} else if( !Q_stricmp( verb_s, "targetnode") ) {
 				ADMP(va("[READ] Target Node: %d\n", botent->bot->path.targetNode));
 			} else if( !Q_stricmp( verb_s, "health") ) {
-				ADMP(va("[READ] Health % : %d\n", botGetHealthPct( botent )));
+				ADMP(va("[READ] Health PCT : %d\n", botGetHealthPct( botent )));
 			} else {
 				ADMP( "^1Unknown read type\n");
 				return qfalse;

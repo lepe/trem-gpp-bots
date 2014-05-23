@@ -204,13 +204,8 @@ void BotFindNextPath( gentity_t *self )
 			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(8) NAV State changed to: %d\n", TARGETPATH);
 			self->bot->path.state = TARGETPATH;
 		}
-		//If there is only one choice, select it.
-		if(possiblenextpath == 1)
-		{
-			indexpath = 0;
-		}
-		else //more than one choice...
-		{
+		indexpath = 0;
+		if(possiblenextpath > 1) {
 			//bots decide here which path to follow based on the strength of the essence, previous nodes and possible unexplored nodes
 			if(g_bot_essence.integer == 1) {
 				//-------------

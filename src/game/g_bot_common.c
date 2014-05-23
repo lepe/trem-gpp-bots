@@ -167,9 +167,11 @@ void BotThink( gentity_t *self )
 			//decide what state should be next.
 
 			//In case your enemy became your friend, don't shoot at him/her!
-			if(self->client->pers.teamSelection == self->bot->Enemy->client->pers.teamSelection) {
-				self->bot->Enemy = NULL;
-				//Say: I know I was too much for you. You came to the right side
+			if(self->bot->Enemy) {
+				if(self->client->pers.teamSelection == self->bot->Enemy->client->pers.teamSelection) {
+					self->bot->Enemy = NULL;
+					//Say: I know I was too much for you. You came to the right side
+				}
 			}
 			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_COMMON, "Enemy: %p\n",self->bot->Enemy);
 			

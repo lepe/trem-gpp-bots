@@ -43,6 +43,7 @@ void BotInitAlien( gentity_t *self ) {
 	self->bot->funcs.team.target			= BotTargetAlien;
 	self->bot->funcs.team.think				= BotAlienThink;
 	//--- state functions
+	self->bot->funcs.team.status[IDLE]		= BotIdleAlien;
 	self->bot->funcs.team.status[ATTACK]	= BotAttackAlien;
 	self->bot->funcs.team.status[HEAL]		= BotHealAlien;
 	self->bot->funcs.team.status[BUILD]		= BotBuildAlien;
@@ -570,7 +571,13 @@ void BotAttackAlien( gentity_t *self )
 		BotControl( self, BOT_RESET_BUTTONS );
 	}
 }
+/**
+ * Things that happen when doing nothing
+ * @param self
+ */
+void BotIdleAlien( gentity_t *self ) {
 
+}
 /**
  * Think the best target to attack
  * this function may change the bot->Enemy

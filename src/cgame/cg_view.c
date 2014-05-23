@@ -581,7 +581,7 @@ void CG_OffsetFirstPersonView( void )
   // camera shake effect
   else if( cg.snap->ps.stats[ STAT_SHAKE ] > 0 )
   {
-    float fac, mag;
+    float fac;
 
     fac = (float) cg.snap->ps.stats[ STAT_SHAKE ] *
           cg_cameraShakeMagnitude.value * 0.15f;

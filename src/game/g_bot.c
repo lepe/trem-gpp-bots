@@ -155,8 +155,11 @@ void G_BotDel( int clientNum ) {
 	}
     G_BotDebug(ent, BOT_VERB_IMPORTANT, BOT_DEBUG_GENERAL, "Bot deleted\n");
 	ent->inuse = qfalse;
+	ent->r.svFlags = 0;
 	//BG_Free(ent->bot->path.crumb); 
-	BG_Free(ent->bot);
+	if(ent->bot) {
+		BG_Free(ent->bot);
+	}
     //LEPE:
     if(ent->stageTeam == TEAM_HUMANS && level.humanBots > 0) {
         level.humanBots--;
@@ -172,11 +175,16 @@ void G_BotDelAll( void )
 {
 	int i;
 	gentity_t *bot;
+	//If there are no bots, don't try to remove them
+	if(level.humanBots + level.alienBots == 0) return;
+	
 	bot = &g_entities[ 0 ];
 	for( i = 0; i < level.maxclients; i++, bot++ )
 	{
-		if(bot->r.svFlags & SVF_BOT)  {
-			G_BotDel(i);
+		if(bot && bot->inuse == qtrue) {
+			if(bot->r.svFlags & SVF_BOT)  {
+				G_BotDel(i);
+			}
 		}
 	}
 }
