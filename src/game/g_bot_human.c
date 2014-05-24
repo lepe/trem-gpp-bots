@@ -124,6 +124,7 @@ void BotHumanThink( gentity_t *self )
 	if(self->bot->Enemy) {
 		//If we have an enemy, change the weapon
 		if(BG_InventoryContainsWeapon( WP_HBUILD, self->client->ps.stats )) G_ForceWeaponChange( self, WP_BLASTER );
+		self->bot->think.state[ THINK_LEVEL_2 ] = ATTACK;
 	} 
 	//If we are low in health and we are not healing and we have mkit, use it!
 	//TODO: remove hard value and set it to a variable
