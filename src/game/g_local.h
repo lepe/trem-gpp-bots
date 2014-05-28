@@ -698,8 +698,8 @@ typedef struct
   //Path related ---
   path				*paths;
   int				numPaths;
+  team_t			teampath;
   qboolean			drawpath;
-  gentity_t 		*drawent; //LEPE: added so we can keep nodes refreshing
   //Bots related ----
   int               alienBots;
   int               humanBots;

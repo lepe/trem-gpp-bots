@@ -219,7 +219,7 @@ void BotFindNextPath( gentity_t *self )
 							break;
 						}
 					} 
-					pathessence[i] = level.paths[possiblepaths[i]].essence;
+					pathessence[i] = level.paths[possiblepaths[i]].essence[ self->client->pers.teamSelection ];
 					essence = pathessence[i] > 50 ? GOOD_ESSENCE : (pathessence[i] < 50 ? BAD_ESSENCE : NO_ESSENCE);
 					G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"%d",pathessence[i]);
 					if(known == qfalse && essence == GOOD_ESSENCE) {
@@ -351,13 +351,13 @@ qboolean botAimAtPath( gentity_t *self )
  * It increases the path essence on event
  * @param self [gentity_t] a BOT
  */
-void increasePathEssence( gentity_t *self ) {
+void increasePathEssence( gentity_t *self, int essence ) {
 	int i;
 	for(i = 0; i < self->bot->path.numCrumb; i++) {
-		if(level.paths[ self->bot->path.crumb[i] ].essence < 50) level.paths[ self->bot->path.crumb[i] ].essence = 50;
-		if(level.paths[ self->bot->path.crumb[i] ].essence < 100) {
-			level.paths[ self->bot->path.crumb[i] ].essence ++ ; //for now just increment in 1...
-			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"Increasing: %i of total: %i (value: %i)\n",self->bot->path.crumb[i], self->bot->path.numCrumb, level.paths[ self->bot->path.crumb[i] ].essence);
+		if(level.paths[ self->bot->path.crumb[i] ].essence[ self->client->pers.teamSelection ] < 50) level.paths[ self->bot->path.crumb[i] ].essence[ self->client->pers.teamSelection ] = 50;
+		if(level.paths[ self->bot->path.crumb[i] ].essence[ self->client->pers.teamSelection ] < 100) {
+			level.paths[ self->bot->path.crumb[i] ].essence[ self->client->pers.teamSelection ] += essence ; //for now just increment in 1...
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"Increasing: %i of total: %i (value: %i)\n",self->bot->path.crumb[i], self->bot->path.numCrumb, level.paths[ self->bot->path.crumb[i] ].essence[ self->client->pers.teamSelection ]);
 		}
 	}
 }
@@ -384,7 +384,7 @@ void setCrumb( gentity_t *self, int closestpath )
         }
         if(regret == qtrue) {
            G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"Regreting: %i\n",self->bot->path.crumb[i]);
-           level.paths[self->bot->path.crumb[i]].essence = 1; 
+           level.paths[self->bot->path.crumb[i]].essence[ self->client->pers.teamSelection ] = 1; 
         }
     }
     if(nc > 0) {

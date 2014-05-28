@@ -61,10 +61,10 @@ void BotInit( gentity_t *self ) {
 	self->bot->timer.think[THINK_LEVEL_MAX] = BOT_TIMER_THINK_LEVEL_MAX_START_AT;
 	//Base functions
 	self->bot->funcs.base.spec				= BotSpectator;
-	//self->bot->funcs.base.target			= BotGetTarget;
 	self->bot->funcs.base.think 			= BotThink; 
 	self->bot->funcs.base.aim				= BotAim; 
 	self->bot->funcs.base.move				= BotDoMove; //in bot_control.c
+	self->bot->funcs.base.targetRank		= BotTargetRank; 
 	//----- common states ----
 	self->bot->funcs.base.status[IDLE]		= BotIdle;
 	self->bot->funcs.base.status[EXPLORE]	= BotExplore;
@@ -115,14 +115,83 @@ void BotSpectator( gentity_t *self ){
     self->bot->Enemy  = NULL;
 	VectorClear(self->bot->move.topoint);
 	self->lastHealth = self->health;
+	//Reset Enemy list
+	for(t = THINK_LEVEL_MAX; t >= THINK_LEVEL_MIN; t--) {
+		self->bot->think.target[t] = BOT_NO_ENEMY;
+	}
 	G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_COMMON + BOT_DEBUG_THINK, "Bot is spectator\n");
 	//TODO: check what else we need to reset
+}
+/**
+ * Return common rank
+ * @param self
+ * @param target
+ * @return 
+ */
+int BotTargetRank( gentity_t *self, gentity_t *target ) {
+	float distance;
+	float rank = 0;
+	float damage;
+	float damage_pct;
+	distance = botGetDistanceBetweenPlayer(self, target);
+	rank += 10000 / distance;
+	//--- Add some rand chance (not so high)
+	rank += G_Rand_Range(0, 10);
+	//If its attacking you
+	if(self->client->lasthurt_client == target->s.number) {
+		rank += 10;
+	}
+	if(target->client) {
+		damage = self->credits[ target->client->ps.clientNum ];
+		//How much it has damaged you
+		damage_pct = (damage / (float)BG_Class( self->client->ps.stats[ STAT_CLASS ] )->health) * 100;
+		if(damage_pct > 50) {
+			rank += 20;
+		} else if(damage_pct > 25) {
+			rank += 10;
+		}
+	}
+	//If target health is critical, increase its chances
+	if(target->health < 50) { //First Sound warning
+		rank += 25;
+	}
+	if(target->health < 25) { //Second Sound warning
+		rank += 50;
+	}
+	//The enemies or my friends are my enemies!
+	if(self->bot->Friend->bot && self->bot->Friend->bot->Enemy == target) {
+		rank += 30;
+	}
+	return rank;
 }
 /**
  * Decide which target to attack
  * @param self
  */
-void BotGetTarget( gentity_t *self ){}
+void BotFindTarget( gentity_t *self ){
+	int enemy;
+	
+	enemy = botFindEnemy( self, g_human_range.integer );
+	if(enemy > BOT_NO_ENEMY) {
+		self->bot->Enemy = &g_entities[ enemy ];
+		if(botGetDistanceBetweenPlayer( self , self->bot->Enemy ) < 100) {
+			self->bot->think.state[ THINK_LEVEL_MAX ] = ATTACK;
+		} else {
+			self->bot->think.state[ THINK_LEVEL_2 ] = ATTACK;
+		}
+		//G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_COMMON + BOT_DEBUG_TARGET, "Enemy Found: %s\n", target->client ? target->client->pers.netname : target->classname);
+	} else {
+		//If we don't find an enemy, try using radar
+		/*
+		enemy = botFindEnemy( self, ALIENSENSE_RANGE );
+		if(enemy > BOT_NO_ENEMY) {
+			self->bot->think.target[ THINK_LEVEL_2 ] = enemy;
+		} else {
+		}*/
+		BotResetState( self, ATTACK );
+		self->bot->Enemy = NULL;
+	}
+}
 
 /**
  * Main Think process 
@@ -139,20 +208,13 @@ void BotThink( gentity_t *self )
 	if(!g_bot_manual.integer) {
 		self->bot->think.state[ THINK_LEVEL_MIN ] = EXPLORE;
 	}
-
-	///////////////////////// LEVEL 1 /////////////////////////
-	if(BotKeepThinking( self , THINK_LEVEL_1)) return;
-	
-	if(botFindClosestEnemy( self )) {
-		if(botGetDistanceBetweenPlayer( self , self->bot->Enemy ) < 100) {
-			self->bot->think.state[ THINK_LEVEL_MAX ] = ATTACK;
-		} else {
-			self->bot->think.state[ THINK_LEVEL_2 ] = ATTACK;
-		}
-		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_COMMON, "Enemy Found: %p. Attack LEVEL_3\n", self->bot->Enemy);
+	//We search for any target. If found, we suggest ATTACK
+	if(!self->bot->Enemy) {
+		BotFindTarget( self );
 	} else {
-		BotResetState( self, ATTACK );
-		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_COMMON, "Enemy not found...\n");
+		if(BotKeepThinking( self , THINK_LEVEL_2)) {
+			BotFindTarget( self );
+		}
 	}
 	
 	switch(self->bot->state) {
@@ -168,7 +230,7 @@ void BotThink( gentity_t *self )
 
 			//In case your enemy became your friend, don't shoot at him/her!
 			if(self->bot->Enemy && self->bot->Enemy->client) {
-				if(self->client->pers.teamSelection == self->bot->Enemy->client->pers.teamSelection) {
+				if(OnSameTeam( self, self->bot->Enemy)) {
 					self->bot->Enemy = NULL;
 					//Say: I know I was too much for you. You came to the right side
 				}
@@ -207,7 +269,7 @@ void BotThink( gentity_t *self )
 			
 		case FOLLOW:
 			//In case your friend became your enemy, don't follow him/her!
-			if(self->client->pers.teamSelection == self->bot->Enemy->client->pers.teamSelection) {
+			if(OnSameTeam( self , self->bot->Enemy )) {
 				self->bot->Friend = NULL;
 				//Say: traitor! I will burn you house down and eat all your plants!
 			}
@@ -289,10 +351,6 @@ void BotAim( gentity_t *self )
 		case DEFEND:
 			if(self->bot->Friend) {
 				VectorCopy(self->bot->Friend->s.pos.trBase , self->bot->move.topoint); //move towards your Friend
-				//The enemies or my friends are my enemies!
-				if(self->bot->Friend->bot && self->bot->Friend->bot->Enemy) {
-					self->bot->Enemy = self->bot->Friend->bot->Enemy;
-				}
 			}
 			if(self->bot->Enemy) {
 				botAimAtTarget(self, self->bot->Enemy, qtrue);

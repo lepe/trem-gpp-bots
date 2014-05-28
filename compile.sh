@@ -7,7 +7,7 @@ if [[ "$1" == "--help" ]]; then
 fi;
 if [[ "$1" == "debug" ]]; then
     #be sure there is nothing in there (sometimes make clean is not enough)
-    rm -rf build/debug*
+    rm -rf build/debug*/base
     sed -i 's/BUILD_SERVER     =0/BUILD_SERVER     =1/' Makefile
     sed -i 's/BUILD_GAME_SO    =0/BUILD_GAME_SO    =1/' Makefile
     #add: V=1 CFLAGS="" ... to show quake tools execution commands

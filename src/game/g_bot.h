@@ -42,6 +42,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BOT_TURN_ANGLE_DIV	(360.0f / (float)BOT_TURN_VAL)
 #define BOT_MOVE_PACE		100.0f
 #define BOT_DEBUG_ALL		-1
+#define BOT_NO_ENEMY		-1
 
 //timers
 #define BOT_TIMER_AIM		50	//Just aim
@@ -50,6 +51,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BOT_TIMER_NAV_SECOND	1000 / BOT_TIMER_NAV	//used in Blocked code
 #define BOT_TIMER_THINK_LEVEL_3_START_AT	3000  //this shift timer ahead so it won't overlap MAX
 #define BOT_TIMER_THINK_LEVEL_MAX_START_AT	1000  //this shift timer ahead so it won't overlap LVL3
+#define BOT_HIT_TIME		1000
 extern const int BOT_TIMER[];
 
 /*
@@ -62,7 +64,7 @@ typedef struct
 	int	random;
 	int	timeout;
 	int	action;
-    int essence; //LEPE: used for ant colony algorithm
+    int essence[ NUM_TEAMS ]; //LEPE: used for ant colony algorithm
 } path;
 
 typedef enum
@@ -88,19 +90,20 @@ typedef enum
 	BOT_DEBUG_NAVSTATE 	= 1 << 2,	//Debug changes in Navigation States (inside EXPLORE state)
 	BOT_DEBUG_PATH		= 1 << 3,	//Debug nodes, essence, ant algorithm, etc
 	BOT_DEBUG_PROFILE	= 1 << 4,	//Debug how profile affected the outcome of something
+	BOT_DEBUG_TARGET	= 1 << 5,	//Debug how profile affected the outcome of something
 		//<-------- new "debug by functions" should be inserted here
 	//By files
-	BOT_DEBUG_GENERAL	= 1 << 5,	//Debug g_bot.c
-	BOT_DEBUG_MAIN		= 1 << 6,	//Debug g_main.c (bot related)
-	BOT_DEBUG_ADMIN		= 1 << 7,	//Debug g_admin.c (bot related)
-	BOT_DEBUG_ACTIVE	= 1 << 8,	//Debug g_active.c (bot related)
-	BOT_DEBUG_ALIEN		= 1 << 9,	//Debug g_bot_alien.c
-	BOT_DEBUG_HUMAN		= 1 << 10,	//Debug g_bot_human.c
-	BOT_DEBUG_CONTROL	= 1 << 11,	//Debug g_bot_control.c
-	BOT_DEBUG_UTIL		= 1 << 12,	//Debug g_bot_util.c
-	BOT_DEBUG_COMMON	= 1 << 13,	//Debug g_bot_common.c
-	BOT_DEBUG_SAY		= 1 << 14,	//Debug g_bot_say.c
-	BOT_DEBUG_NAV		= 1 << 15, 	//Debug g_bot_nav.c
+	BOT_DEBUG_GENERAL	= 1 << 6,	//Debug g_bot.c
+	BOT_DEBUG_MAIN		= 1 << 7,	//Debug g_main.c (bot related)
+	BOT_DEBUG_ADMIN		= 1 << 8,	//Debug g_admin.c (bot related)
+	BOT_DEBUG_ACTIVE	= 1 << 9,	//Debug g_active.c (bot related)
+	BOT_DEBUG_ALIEN		= 1 << 10,	//Debug g_bot_alien.c
+	BOT_DEBUG_HUMAN		= 1 << 11,	//Debug g_bot_human.c
+	BOT_DEBUG_CONTROL	= 1 << 12,	//Debug g_bot_control.c
+	BOT_DEBUG_UTIL		= 1 << 13,	//Debug g_bot_util.c
+	BOT_DEBUG_COMMON	= 1 << 14,	//Debug g_bot_common.c
+	BOT_DEBUG_SAY		= 1 << 15,	//Debug g_bot_say.c
+	BOT_DEBUG_NAV		= 1 << 16, 	//Debug g_bot_nav.c
 		//<-------- new "debug by file" should be inserted here. (No more than 30 or we are hitting the INT limit!)
 } botDebugType;
 
@@ -187,7 +190,7 @@ typedef struct
   //THINK: variables used to decide per thinking level
   struct {
 	  botState 		state[THINK_LEVEL_MAX + 1];
-	  gentity_t		*target[THINK_LEVEL_MAX + 1];
+	  int 			target[THINK_LEVEL_MAX + 1];
   } think;
   //PATH: variables and properties related to Navigation
   struct {
@@ -225,6 +228,7 @@ typedef struct
 	  int	action; 	//variable used to time every action loop (see BOT_TIMER_ACTION)
 	  int 	move; 		//used in g_bot_control.c for the movement queue
 	  int	foundPath; 	//on BotFindN***Path(): if a new/next path is found, we reset this timer
+	  int	hit;		//time to identify if we hit some target
   } timer;
   //PROFILE: bot personality
   struct {
@@ -281,7 +285,7 @@ typedef struct
 		void (*aim)( gentity_t *self );		
 		void (*think)( gentity_t *self );		
 		void (*spec)( gentity_t *self );
-		void (*target)( gentity_t *self ); 	//target prioritization
+		int  (*targetRank)( gentity_t *self, gentity_t *target ); 	//target prioritization
 		void (*status[IDLE + 1])( gentity_t *self ); //IDLE will always be the last element in enum
 		void (*nav[LOST + 1])( gentity_t *self ); //Navigation state
 	} base;
@@ -289,7 +293,8 @@ typedef struct
 	struct {
 		void (*think)( gentity_t *self );		
 		void (*spec)( gentity_t *self );
-		void (*target)( gentity_t *self ); 	//target prioritization
+		int  (*target)( gentity_t *self, botThinkLevel level ); 	//target prioritization
+		int  (*targetRank)( gentity_t *self, gentity_t *target, float rank ); 	//target prioritization
 		void (*status[IDLE + 1])( gentity_t *self ); //IDLE will always be the last element in enum
 		void (*nav[LOST + 1])( gentity_t *self ); //Navigation state
 	} team;
@@ -311,7 +316,7 @@ void BotBlocked( gentity_t *self );
 void BotLost( gentity_t *self );
 int distanceToTargetNode( gentity_t *self );
 qboolean botAimAtPath( gentity_t *self );
-void increasePathEssence( gentity_t *self );
+void increasePathEssence( gentity_t *self, int essence );
 void setCrumb( gentity_t *self, int closestpath );
 
 // g_bot_util.c
@@ -320,9 +325,11 @@ int G_Rand_Range( int start, int end ); //LEPE
 int botGetDistanceBetweenPlayer( gentity_t *self, gentity_t *player );
 int botGetAngleBetweenPlayer( gentity_t *self, gentity_t *player );
 int botGetHealthPct( gentity_t *self );
+int botFindEnemy( gentity_t *self, int maxRange );
 qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch);
-qboolean botFindClosestEnemy( gentity_t *self );
 qboolean botFindClosestFriend( gentity_t *self );
+qboolean botSameTeam( gentity_t *ent1, gentity_t *ent2 );
+qboolean BotHitTarget( gentity_t *self );
 gentity_t *botFindClosestBuildable( gentity_t *self, float r, buildable_t buildable );
 gentity_t *botFindDamagedStructure( gentity_t *self, float r, int damage );
 
@@ -385,8 +392,10 @@ void BotImprove( gentity_t *self );
 void BotIdle( gentity_t *self );
 void G_BotGroupThink( void ); //called directly from g_main.c
 void BotAim( gentity_t *self ); 
-qboolean BotKeepThinking( gentity_t *self, botThinkLevel level);
+void BotFindTarget( gentity_t *self );
 void BotResetState( gentity_t *self, botState state );
+int BotTargetRank( gentity_t *self, gentity_t *target );
+qboolean BotKeepThinking( gentity_t *self, botThinkLevel level);
 
 // g_bot_alien.c
 void BotInitAlien( gentity_t *self ); 
@@ -398,9 +407,10 @@ void BotBuildAlien( gentity_t *self );
 void BotHealAlien( gentity_t *self );
 void BotRetreatAlien( gentity_t *self );
 void BotAttackAlien( gentity_t *self ); 
-void BotTargetAlien( gentity_t *self ); 
 void BotNavigateAlien( gentity_t *self ); 
 void BotBlockedAlien( gentity_t *self ); 
+int BotTargetAlien( gentity_t *self, botThinkLevel level ); 
+int BotTargetRankAlien(gentity_t *self, gentity_t *target, float rank );
 gentity_t *botFindClosestBasilisk( gentity_t *self, float r );
 
 // g_bot_human.c
@@ -413,7 +423,8 @@ void BotIdleHuman( gentity_t *self );
 void BotBuildHuman( gentity_t *self );
 void BotHealHuman( gentity_t *self );
 void BotAttackHuman( gentity_t *self ); 
-void BotTargetHuman( gentity_t *self ); 
 void BotNavigateHuman( gentity_t *self ); 
 void BotBlockedHuman( gentity_t *self ); 
 void BotFollowHuman( gentity_t *self ); 
+int BotTargetHuman( gentity_t *self, botThinkLevel level ); 
+int BotTargetRankHuman(gentity_t *self, gentity_t *target, float rank );

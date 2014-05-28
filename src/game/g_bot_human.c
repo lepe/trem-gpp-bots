@@ -40,7 +40,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 void BotInitHuman( gentity_t *self ){
 	//Initialization of TEAM funtions
 	self->bot->funcs.team.spec				= BotBeforeSpawnHuman;
-	self->bot->funcs.team.target			= BotTargetHuman;
+	//self->bot->funcs.team.target			= BotTargetHuman;
+	self->bot->funcs.team.targetRank		= BotTargetRankHuman;
 	self->bot->funcs.team.think				= BotHumanThink;
 	self->bot->funcs.team.status[IDLE]		= BotIdleHuman;
 	self->bot->funcs.team.status[ATTACK]	= BotAttackHuman;
@@ -270,7 +271,7 @@ void BotBuy( gentity_t *self )
 	//int maxAmmo, maxClips;
     int prob = 0; //probability to buy item //LEPE
 	int clientNum = self->client - level.clients;
-	if(self->bot->Struct->s.modelindex != BA_H_ARMOURY) {
+	if(self->bot->Struct->s.modelindex != BA_H_ARMOURY || ! G_Visible(self, self->bot->Struct, CONTENTS_SOLID)) {
 		self->bot->Struct = NULL;
 		return;
 	}
@@ -583,24 +584,15 @@ void BotBuy( gentity_t *self )
 /**
  * Attack to target if its in range (see: g_bot_alien.c botAttackIfTargetInRange)
  * @param self [gentity_t] a BOT
+ * //TODO: if target is not visible, use pathfinding (when having helmet).
  */
 void BotAttackHuman( gentity_t *self )
 {
 	int tooCloseDistance = 200; 
-	int tempEntityIndex = -1;
 	int distance = botGetDistanceBetweenPlayer(self, self->bot->Enemy);
 	
     G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_UTIL + BOT_DEBUG_HUMAN, "Enemy: %p\n", self->bot->Enemy);
     G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_UTIL + BOT_DEBUG_HUMAN, "Distance: %d\n", distance);
-	//TODO: move this code to target prioritization
-	if(G_Rand() < 10 && distance > tooCloseDistance) { //LEPE: change target 10% of times. 
-		// try to find closest enemy
-		tempEntityIndex = botFindClosestEnemy(self);
-		if(tempEntityIndex >= 0) {
-			self->bot->Enemy = &g_entities[tempEntityIndex];
-			distance = botGetDistanceBetweenPlayer(self, self->bot->Enemy);
-		}
-	}
 	//Use nades
 	if(distance < tooCloseDistance && (self->bot->Enemy->s.eType == ET_BUILDABLE || self->bot->Enemy->s.eType == PCL_ALIEN_LEVEL4)) {	//LEPE: Nades on buildings or tyrants
 	    if(BG_InventoryContainsUpgrade(UP_GRENADE,self->client->ps.stats)) {
@@ -637,6 +629,12 @@ void BotAttackHuman( gentity_t *self )
 				} else {
 					BotMoveFwd( self );
 				}
+				//Only if we are close enought that we should hit it 
+				if(distance < FLAMER_RADIUS) {
+					if(!BotHitTarget( self )) {
+						
+					}
+				}
 			}
 			else
 			{
@@ -649,6 +647,9 @@ void BotAttackHuman( gentity_t *self )
 				} else {
 					BotStop( self );
 					BotCrouch( self );
+				}
+				if(!BotHitTarget( self )) {
+					
 				}
 			}
 		}
@@ -715,13 +716,231 @@ void BotIdleHuman( gentity_t *self ) {
 			G_ForceWeaponChange( self, WP_BLASTER );
 	}
 }
-
+/**
+ * Call botFindEnemy based on human range
+ * @param self
+ * @return 
+ *//*
+int BotTargetHuman( gentity_t *self, botThinkLevel level ) {
+	int range;
+	switch(level) {
+		case THINK_LEVEL_3: range = HELMET_RANGE;
+		case THINK_LEVEL_2: range = g_human_range.integer;
+		default: range = HELMET_RANGE;
+	}
+	return botFindEnemy( self, range );
+}*/
 /**
  * Think the best target to attack
- * this function may change the bot->Enemy
  * @param self
+ * //TODO: replace hardcoded values
  */
-void BotTargetHuman( gentity_t *self ) {
+int BotTargetRankHuman( gentity_t *self, gentity_t *target, float rank ) {
+	int sd;
+	int distance;
+	
+	//If we can't see it and we don't have a helmet, forget it
+	//TODO: record last known location, and if there is no other enemies around, go and explore it
+	//if(!(BG_InventoryContainsUpgrade( UP_HELMET, self->client->ps.stats) || 
+	if(!G_Visible(self, target, CONTENTS_SOLID)) {
+		return 0;
+	}
+	distance = botGetDistanceBetweenPlayer(self, target);
+	sd = G_TimeTilSuddenDeath() <= 0 ? 2 : 1;
+	if(target->s.eType == ET_BUILDABLE) {
+		if(self->health > 80) rank += 30;
+		switch(target->s.modelindex) {
+			case BA_A_OVERMIND: rank += (35 * sd); break;
+			case BA_A_SPAWN: 	rank += (30 * sd); break;
+			case BA_A_BOOSTER: 	rank += (25 * sd); break;
+			case BA_A_ACIDTUBE: rank += (20 * sd); break;
+			case BA_A_HIVE: 	rank += (20 * sd); break;
+			default: 			rank += (10 * sd); break;
+		}
+		switch(self->client->ps.weapon) {
+			case WP_PAIN_SAW:	rank += 50; break;
+			case WP_FLAMER:		rank += 45; break;
+			case WP_LUCIFER_CANNON: rank += 40; break;
+			case WP_PULSE_RIFLE:rank += 30; break;
+			case WP_LAS_GUN: 	rank += 20; break;
+			default:			break;
+		}
+		//If we have a nade, aim the bushes!
+		if(BG_InventoryContainsUpgrade(UP_GRENADE,self->client->ps.stats)) {
+			rank += 20;
+		}
+	} else if(target->client) {
+		switch(self->client->ps.weapon) {
+			case WP_BLASTER:	
+				switch(target->client->pers.classSelection) {
+					case PCL_ALIEN_BUILDER0:
+					case PCL_ALIEN_BUILDER0_UPG:
+					case PCL_ALIEN_LEVEL0:
+					case PCL_ALIEN_LEVEL1:
+					case PCL_ALIEN_LEVEL1_UPG:
+						rank += 30; break;
+					case PCL_ALIEN_LEVEL2:
+					case PCL_ALIEN_LEVEL2_UPG:
+					case PCL_ALIEN_LEVEL3:
+					case PCL_ALIEN_LEVEL3_UPG:
+					case PCL_ALIEN_LEVEL4:
+						rank -= 30; break; 
+					default: break;
+				}
+			break;
+			case WP_MACHINEGUN: 
+				switch(target->client->pers.classSelection) {
+					case PCL_ALIEN_BUILDER0:
+					case PCL_ALIEN_BUILDER0_UPG:
+					case PCL_ALIEN_LEVEL0:
+					case PCL_ALIEN_LEVEL1:
+					case PCL_ALIEN_LEVEL1_UPG:
+						rank += 30; break;
+					case PCL_ALIEN_LEVEL2:
+					case PCL_ALIEN_LEVEL2_UPG:
+						rank -= 10; break;
+					case PCL_ALIEN_LEVEL3:
+					case PCL_ALIEN_LEVEL3_UPG:
+					case PCL_ALIEN_LEVEL4:
+						rank += 10; break;
+					default: break;
+				}
+			break;
+			case WP_PAIN_SAW:
+				if(distance > 200) rank -= 40;
+				switch(target->client->pers.classSelection) {
+					case PCL_ALIEN_BUILDER0:
+					case PCL_ALIEN_BUILDER0_UPG:
+						rank += 10; break;
+					case PCL_ALIEN_LEVEL0:
+					case PCL_ALIEN_LEVEL1:
+					case PCL_ALIEN_LEVEL1_UPG:
+						break;
+					case PCL_ALIEN_LEVEL2:
+					case PCL_ALIEN_LEVEL2_UPG:
+						rank -= 30; break;
+					case PCL_ALIEN_LEVEL3:
+						break;
+					case PCL_ALIEN_LEVEL3_UPG:
+						rank -= 30; break;
+					case PCL_ALIEN_LEVEL4:
+					default: 
+						break;
+				}
+			break;
+			case WP_SHOTGUN:	
+				if(distance > 300) rank -= 40;
+				switch(target->client->pers.classSelection) {
+					case PCL_ALIEN_BUILDER0:
+					case PCL_ALIEN_BUILDER0_UPG:
+					case PCL_ALIEN_LEVEL0:
+					case PCL_ALIEN_LEVEL1:
+					case PCL_ALIEN_LEVEL1_UPG:
+						rank += 30; break;
+					case PCL_ALIEN_LEVEL2:
+					case PCL_ALIEN_LEVEL2_UPG:
+						rank += 10; break;
+					case PCL_ALIEN_LEVEL3:
+					case PCL_ALIEN_LEVEL3_UPG:
+					case PCL_ALIEN_LEVEL4:
+					default: 
+						break;
+				}
+			break;
+			case WP_LAS_GUN: 	
+				switch(target->client->pers.classSelection) {
+					case PCL_ALIEN_BUILDER0:
+					case PCL_ALIEN_BUILDER0_UPG:
+					case PCL_ALIEN_LEVEL0:
+					case PCL_ALIEN_LEVEL1:
+					case PCL_ALIEN_LEVEL1_UPG:
+						rank += 30; break;
+					case PCL_ALIEN_LEVEL2:
+					case PCL_ALIEN_LEVEL2_UPG:
+						break;
+					case PCL_ALIEN_LEVEL3:
+					case PCL_ALIEN_LEVEL3_UPG:
+					case PCL_ALIEN_LEVEL4:
+						rank += 10; break;
+					default: break;
+				}
+			break;
+			case WP_CHAINGUN: 	
+				switch(target->client->pers.classSelection) {
+					case PCL_ALIEN_BUILDER0:
+					case PCL_ALIEN_BUILDER0_UPG:
+					case PCL_ALIEN_LEVEL0:
+					case PCL_ALIEN_LEVEL1:
+					case PCL_ALIEN_LEVEL1_UPG:
+						break;
+					case PCL_ALIEN_LEVEL2:
+					case PCL_ALIEN_LEVEL2_UPG:
+					case PCL_ALIEN_LEVEL3:
+					case PCL_ALIEN_LEVEL3_UPG:
+					case PCL_ALIEN_LEVEL4:
+						rank += 30; break;
+					default: break;
+				}
+			break;
+			case WP_FLAMER:		
+				if(distance > 200) rank -= 40;
+				switch(target->client->pers.classSelection) {
+					case PCL_ALIEN_BUILDER0:
+					case PCL_ALIEN_BUILDER0_UPG:
+					case PCL_ALIEN_LEVEL0:
+					case PCL_ALIEN_LEVEL1:
+					case PCL_ALIEN_LEVEL1_UPG:
+						rank += 30; break;
+					case PCL_ALIEN_LEVEL2:
+					case PCL_ALIEN_LEVEL2_UPG:
+						rank += 10; break;
+					case PCL_ALIEN_LEVEL3:
+					case PCL_ALIEN_LEVEL3_UPG:
+					case PCL_ALIEN_LEVEL4:
+					default: 
+						break;
+				}
+			break;
+			case WP_PULSE_RIFLE:
+				switch(target->client->pers.classSelection) {
+					case PCL_ALIEN_BUILDER0:
+					case PCL_ALIEN_BUILDER0_UPG:
+					case PCL_ALIEN_LEVEL0:
+					case PCL_ALIEN_LEVEL1:
+					case PCL_ALIEN_LEVEL1_UPG:
+						break;
+					case PCL_ALIEN_LEVEL2:
+					case PCL_ALIEN_LEVEL2_UPG:
+						rank -= 10; break;
+					case PCL_ALIEN_LEVEL3:
+					case PCL_ALIEN_LEVEL3_UPG:
+					case PCL_ALIEN_LEVEL4:
+						rank += 30; break;
+					default: break;
+				}
+			break;
+			case WP_LUCIFER_CANNON: 
+				switch(target->client->pers.classSelection) {
+					case PCL_ALIEN_BUILDER0:
+					case PCL_ALIEN_BUILDER0_UPG:
+					case PCL_ALIEN_LEVEL0:
+					case PCL_ALIEN_LEVEL1:
+					case PCL_ALIEN_LEVEL1_UPG:
+						rank += 30; break;
+					case PCL_ALIEN_LEVEL2:
+					case PCL_ALIEN_LEVEL2_UPG:
+						rank -= 10; break;
+					case PCL_ALIEN_LEVEL3:
+					case PCL_ALIEN_LEVEL3_UPG:
+					case PCL_ALIEN_LEVEL4:
+						rank += 30; break;
+					default: break;
+				}
+			break;
+			default: break;
+		}
+	}
+	return (int)rank;
 }
 
 /**

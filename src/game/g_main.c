@@ -784,7 +784,8 @@ void G_PathLoad( void )
 			if(level.paths[level.numPaths].timeout <= 0){
 				level.paths[level.numPaths].timeout = 10000;
 			}
-			level.paths[level.numPaths].essence= 50; //LEPE: default value for ant algorithm (below 50 is negative)
+			level.paths[level.numPaths].essence[ TEAM_ALIENS ]= 50; //LEPE: default value for ant algorithm (below 50 is negative)
+			level.paths[level.numPaths].essence[ TEAM_HUMANS ]= 50; //LEPE: default value for ant algorithm (below 50 is negative)
 			level.numPaths ++;
 		}
 	path++;
@@ -806,9 +807,9 @@ gentity_t *spawnnode(long id )
   temp[0] = 0;temp[1] = 0;temp[2] = 0;
   //VectorNormalize (temp);
   //LEPE
-        if (level.paths[id].essence > 80) weapon = WP_LUCIFER_CANNON;
-   else if (level.paths[id].essence > 60) weapon = WP_BLASTER;
-   else if (level.paths[id].essence < 40) weapon = WP_GRENADE;
+        if (level.paths[id].essence[ level.teampath ] > 80) weapon = WP_LUCIFER_CANNON;
+   else if (level.paths[id].essence[ level.teampath ] > 60) weapon = WP_BLASTER;
+   else if (level.paths[id].essence[ level.teampath ] < 40) weapon = WP_GRENADE;
    else weapon = WP_PULSE_RIFLE;
 
   ent = G_Spawn();
@@ -881,10 +882,10 @@ void G_RedrawNodes( void )
         if(g_entities[i].flags & FL_PATH_NODE)
         {
             pid = g_entities[i].pathid; 
-            if(level.paths[pid].essence != 50) {
+            if(level.paths[pid].essence[ level.teampath ] != 50) {
                 //if(ent == NULL) ent = g_entities[i].parent; //recover parent entity before removing node
                 if(g_entities[i].nextthink - 2000 < level.time - 1000) { //do not create it again if was created less than a sec before
-                    G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Deleting entity: %i, to Update node %d with essence: %d\n", i, pid, level.paths[pid].essence);
+                    G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Deleting entity: %i, to Update node %d with essence: %d\n", i, pid, level.paths[pid].essence[ level.teampath ]);
                     G_FreeEntity(&g_entities[i]);
                     spawnnode(pid);
                 }
@@ -2770,20 +2771,32 @@ void G_RunFrame( int levelTime )
   if( level.essenceFadeTimer > 1000 ) {
         level.essenceFadeTimer = 0;
         for( i = 0; i < level.numPaths; i++ ) {
-            max = level.paths[i].essence > max ? level.paths[i].essence : max; 
-            min = level.paths[i].essence < min ? level.paths[i].essence : min; 
-            if(level.paths[i].essence > (50 + essence_mod)) {
-                G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Reducing Essence of path %i to %i\n", i, level.paths[i].essence);
-                level.paths[i].essence = level.paths[i].essence - essence_mod; //TODO: convert to sv_essence_rate or something like that
-            } else if(level.paths[i].essence < 50) { //for negative essence
-                level.paths[i].essence = level.paths[i].essence + essence_mod; 
+			//------------ ALIENS -------------
+            max = level.paths[i].essence[ TEAM_ALIENS ] > max ? level.paths[i].essence[ TEAM_ALIENS ] : max; 
+            min = level.paths[i].essence[ TEAM_ALIENS ] < min ? level.paths[i].essence[ TEAM_ALIENS ] : min; 
+            if(level.paths[i].essence[ TEAM_ALIENS ] > (50 + essence_mod)) {
+                G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Reducing ALIEN Essence of path %i to %i\n", i, level.paths[i].essence[ TEAM_ALIENS ]);
+                level.paths[i].essence[ TEAM_ALIENS ] = level.paths[i].essence[ TEAM_ALIENS ] - essence_mod; //TODO: convert to sv_essence_rate or something like that
+            } else if(level.paths[i].essence[ TEAM_ALIENS ] < 50) { //for negative essence
+                level.paths[i].essence[ TEAM_ALIENS ] = level.paths[i].essence[ TEAM_ALIENS ] + essence_mod; 
             } else {
-                level.paths[i].essence = 50;
+                level.paths[i].essence[ TEAM_ALIENS ] = 50;
+            }
+			//------------ HUMANS ----------------
+            max = level.paths[i].essence[ TEAM_HUMANS ] > max ? level.paths[i].essence[ TEAM_HUMANS ] : max; 
+            min = level.paths[i].essence[ TEAM_HUMANS ] < min ? level.paths[i].essence[ TEAM_HUMANS ] : min; 
+            if(level.paths[i].essence[ TEAM_HUMANS ] > (50 + essence_mod)) {
+                G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Reducing HUMAN Essence of path %i to %i\n", i, level.paths[i].essence[ TEAM_HUMANS ]);
+                level.paths[i].essence[ TEAM_HUMANS ] = level.paths[i].essence[ TEAM_HUMANS ] - essence_mod; //TODO: convert to sv_essence_rate or something like that
+            } else if(level.paths[i].essence[ TEAM_HUMANS ] < 50) { //for negative essence
+                level.paths[i].essence[ TEAM_HUMANS ] = level.paths[i].essence[ TEAM_HUMANS ] + essence_mod; 
+            } else {
+                level.paths[i].essence[ TEAM_HUMANS ] = 50;
             }
         }
-        G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Max essence: %i\n", max); 
-        G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Min essence: %i\n", min);
-        G_RedrawNodes( );
+		if(level.drawpath) {
+        	G_RedrawNodes( );
+		}
   }
   level.essenceFadeTimer += (levelTime - level.time);
   //LEPE: Perform GROUP logic

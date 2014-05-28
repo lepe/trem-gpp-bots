@@ -119,7 +119,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
     
     {"dnodes", G_drawnodes, qfalse, "drawnodes",
       "turn nodes on / off",
-      ""
+      "[ aliens | humans | off ]"
     },
 
     {"kick", G_admin_kick, qfalse, "kick",
@@ -3451,8 +3451,10 @@ qboolean G_admin_botdbg( gentity_t *ent )
 	char verb[ MAX_NAME_LENGTH ];
 	char verb_s[ MAX_NAME_LENGTH ];
   	gentity_t *botent;
+  	gentity_t *target;
 	qboolean turnoff = qfalse;
 	qboolean success = qfalse;
+	qboolean read	 = qfalse;
     namelog_t *namelog;
 
 	minargc = 1;
@@ -3470,73 +3472,103 @@ qboolean G_admin_botdbg( gentity_t *ent )
 	
 	turnoff  = !Q_stricmp( verb_s, "off" );
 	success = qfalse;
-	for( namelog = level.namelogs; namelog; namelog = namelog->next ) {
-			if( namelog->slot >= 0 ) {
-					for( j = 0; j < MAX_NAMELOG_NAMES && namelog->name[ j ][ 0 ]; j++ ) {
-							G_SanitiseString(namelog->name[ j ], name2_s, sizeof(name2_s) );
-							if( strstr( name2_s, name_s ) ) {
-									botent = &g_entities[namelog->slot];
-									botent->bot->debug = turnoff ? qfalse : qtrue;
-									success = qtrue;
-							}
-					}
-			}
+		   if( !Q_stricmp( type_s, "think" ) ) { 	flag = BOT_DEBUG_THINK;
+	} else if( !Q_stricmp( type_s, "state" ) ) { 	flag = BOT_DEBUG_STATE;
+	} else if( !Q_stricmp( type_s, "navstate" ) ) { flag = BOT_DEBUG_NAVSTATE;
+	} else if( !Q_stricmp( type_s, "path" ) ) { 	flag = BOT_DEBUG_PATH;
+	} else if( !Q_stricmp( type_s, "profile" ) ) { 	flag = BOT_DEBUG_PROFILE;
+	} else if( !Q_stricmp( type_s, "target" ) ) { 	flag = BOT_DEBUG_TARGET;
+	} else if( !Q_stricmp( type_s, "general" ) ) { 	flag = BOT_DEBUG_GENERAL;
+	} else if( !Q_stricmp( type_s, "main" ) ) { 	flag = BOT_DEBUG_MAIN;
+	} else if( !Q_stricmp( type_s, "admin" ) ) { 	flag = BOT_DEBUG_ADMIN;
+	} else if( !Q_stricmp( type_s, "active" ) ) { 	flag = BOT_DEBUG_ACTIVE;
+	} else if( !Q_stricmp( type_s, "alien" ) ) { 	flag = BOT_DEBUG_ALIEN;
+	} else if( !Q_stricmp( type_s, "human" ) ) { 	flag = BOT_DEBUG_HUMAN;
+	} else if( !Q_stricmp( type_s, "control" ) ) { 	flag = BOT_DEBUG_CONTROL;
+	} else if( !Q_stricmp( type_s, "util" ) ) { 	flag = BOT_DEBUG_UTIL;
+	} else if( !Q_stricmp( type_s, "common" ) ) { 	flag = BOT_DEBUG_COMMON;
+	} else if( !Q_stricmp( type_s, "say" ) ) { 		flag = BOT_DEBUG_SAY;
+	} else if( !Q_stricmp( type_s, "nav" ) ) {  	flag = BOT_DEBUG_NAV;
+	} else if( !Q_stricmp( type_s, "all" ) ) {  	flag = BOT_DEBUG_ALL;
+	} else if( !Q_stricmp( type_s, "read" ) ) {  	read = qtrue;
+	} else {
+		ADMP( "^1Unknown debug type\n");
+		return qfalse;
 	}
-	
-	if(success) {
-			   if( !Q_stricmp( type_s, "think" ) ) { 	flag = BOT_DEBUG_THINK;
-		} else if( !Q_stricmp( type_s, "state" ) ) { 	flag = BOT_DEBUG_STATE;
-		} else if( !Q_stricmp( type_s, "navstate" ) ) { flag = BOT_DEBUG_NAVSTATE;
-		} else if( !Q_stricmp( type_s, "path" ) ) { 	flag = BOT_DEBUG_PATH;
-		} else if( !Q_stricmp( type_s, "profile" ) ) { 	flag = BOT_DEBUG_PROFILE;
-		} else if( !Q_stricmp( type_s, "general" ) ) { 	flag = BOT_DEBUG_GENERAL;
-		} else if( !Q_stricmp( type_s, "main" ) ) { 	flag = BOT_DEBUG_MAIN;
-		} else if( !Q_stricmp( type_s, "admin" ) ) { 	flag = BOT_DEBUG_ADMIN;
-		} else if( !Q_stricmp( type_s, "active" ) ) { 	flag = BOT_DEBUG_ACTIVE;
-		} else if( !Q_stricmp( type_s, "alien" ) ) { 	flag = BOT_DEBUG_ALIEN;
-		} else if( !Q_stricmp( type_s, "human" ) ) { 	flag = BOT_DEBUG_HUMAN;
-		} else if( !Q_stricmp( type_s, "control" ) ) { 	flag = BOT_DEBUG_CONTROL;
-		} else if( !Q_stricmp( type_s, "util" ) ) { 	flag = BOT_DEBUG_UTIL;
-		} else if( !Q_stricmp( type_s, "common" ) ) { 	flag = BOT_DEBUG_COMMON;
-		} else if( !Q_stricmp( type_s, "say" ) ) { 		flag = BOT_DEBUG_SAY;
-		} else if( !Q_stricmp( type_s, "nav" ) ) {  	flag = BOT_DEBUG_NAV;
-		} else if( !Q_stricmp( type_s, "all" ) ) {  	flag = BOT_DEBUG_ALL;
-		} else if( !Q_stricmp( type_s, "read" ) ) {  	
-			if( !Q_stricmp( verb_s, "state") ) {
-				ADMP(va("[READ] State: %d\n", botent->bot->state));
-			} else if( !Q_stricmp( verb_s, "navstate") ) {
-				ADMP(va("[READ] NavState: %d\n", botent->bot->path.state));
-			} else if( !Q_stricmp( verb_s, "enemy") ) {
-				ADMP(va("[READ] Enemy: %s, %s\n", botent->bot->Enemy->classname, botent->bot->Enemy->client->pers.netname));
-			} else if( !Q_stricmp( verb_s, "struct") ) {
-				ADMP(va("[READ] Struct: %s\n", botent->bot->Struct->classname));
-			} else if( !Q_stricmp( verb_s, "friend") ) {
-				ADMP(va("[READ] Friend: %s\n", botent->bot->Friend->client->pers.netname));
-			} else if( !Q_stricmp( verb_s, "xyz") ) {
-				ADMP(va("[READ] XYZ: %f2,%f2,%f2\n", botent->s.pos.trBase[0],botent->s.pos.trBase[1],botent->s.pos.trBase[2]));
-			} else if( !Q_stricmp( verb_s, "angles") ) {
-				ADMP(va("[READ] Angles: Pitch %f2, Yaw %f2\n", SHORT2ANGLE(botent->client->ps.delta_angles[ PITCH ]), 
-															 SHORT2ANGLE(botent->client->ps.delta_angles[ YAW ])));
-			} else if( !Q_stricmp( verb_s, "think") ) {
-				ADMP( va("THINK: LVL1:%d, LVL2:%d, LVL3:%d, MAX:%d \n",  
-						botent->bot->think.state[ THINK_LEVEL_1 ],
-						botent->bot->think.state[ THINK_LEVEL_2 ],
-						botent->bot->think.state[ THINK_LEVEL_3 ],
-						botent->bot->think.state[ THINK_LEVEL_MAX ])
-						);
-			} else if( !Q_stricmp( verb_s, "targetnode") ) {
-				ADMP(va("[READ] Target Node: %d\n", botent->bot->path.targetNode));
-			} else if( !Q_stricmp( verb_s, "health") ) {
-				ADMP(va("[READ] Health PCT : %d\n", botGetHealthPct( botent )));
-			} else {
-				ADMP( "^1Unknown read type\n");
-				return qfalse;
+	for( namelog = level.namelogs; namelog; namelog = namelog->next ) {
+		if( namelog->slot >= 0 ) {
+			for( j = 0; j < MAX_NAMELOG_NAMES && namelog->name[ j ][ 0 ]; j++ ) {
+				G_SanitiseString(namelog->name[ j ], name2_s, sizeof(name2_s) );
+				if( strstr( name2_s, name_s ) ) {
+					botent = &g_entities[namelog->slot];
+					botent->bot->debug = turnoff ? qfalse : qtrue;
+					success = qtrue;
+					if(read) {  	
+						if( !Q_stricmp( verb_s, "state") ) {
+							ADMP(va("[%s] State: %d\n", name2_s, botent->bot->state));
+						} else if( !Q_stricmp( verb_s, "navstate") ) {
+							ADMP(va("[%s] NavState: %d\n", name2_s, botent->bot->path.state));
+						} else if( !Q_stricmp( verb_s, "enemy") ) {
+							if(botent->bot->Enemy) {
+								ADMP(va("[%s] Enemy: %s (Visible: %d)\n", 
+										name2_s, 
+										botent->bot->Enemy->client ? botent->bot->Enemy->client->pers.netname : botent->bot->Enemy->classname,
+										(int)G_Visible(botent, botent->bot->Enemy, CONTENTS_SOLID)
+										));
+							} else {
+								ADMP(va("[%s] Enemy: NONE\n", name2_s));
+							}
+						} else if( !Q_stricmp( verb_s, "struct") ) {
+							if(botent->bot->Struct) {
+								ADMP(va("[%s] Struct: %s (Visible: %d)\n", 
+										name2_s, 
+										botent->bot->Struct->classname,
+										(int)G_Visible(botent, botent->bot->Struct, CONTENTS_SOLID)
+										));
+							} else {
+								ADMP(va("[%s] Struct: NONE\n", name2_s));
+							}
+						} else if( !Q_stricmp( verb_s, "friend") ) {
+							if(botent->bot->Friend) {
+								ADMP(va("[%s] Friend: %s (Visible: %d)\n", 
+										name2_s, 
+										botent->bot->Friend->client->pers.netname,
+										(int)G_Visible(botent, botent->bot->Friend, CONTENTS_SOLID)
+										));
+							} else {
+								ADMP(va("[%s] Friend: NONE\n", name2_s));
+							}
+						} else if( !Q_stricmp( verb_s, "xyz") ) {
+							ADMP(va("[%s] XYZ: %f2,%f2,%f2\n", name2_s, botent->s.pos.trBase[0],botent->s.pos.trBase[1],botent->s.pos.trBase[2]));
+						} else if( !Q_stricmp( verb_s, "angles") ) {
+							ADMP(va("[%s] Angles: Pitch %f2, Yaw %f2\n", name2_s, SHORT2ANGLE(botent->client->ps.delta_angles[ PITCH ]), 
+																		 SHORT2ANGLE(botent->client->ps.delta_angles[ YAW ])));
+						} else if( !Q_stricmp( verb_s, "think") ) {
+							ADMP( va("[%s] THINK: LVL1:%d, LVL2:%d, LVL3:%d, MAX:%d \n",  name2_s, 
+									botent->bot->think.state[ THINK_LEVEL_1 ],
+									botent->bot->think.state[ THINK_LEVEL_2 ],
+									botent->bot->think.state[ THINK_LEVEL_3 ],
+									botent->bot->think.state[ THINK_LEVEL_MAX ])
+									);
+						} else if( !Q_stricmp( verb_s, "target") ) {
+							for(j = THINK_LEVEL_1; j < THINK_LEVEL_MAX; j++) {
+								target = &g_entities[ botent->bot->think.target[j] ];
+								ADMP( va("[%s] LVL[%d]: %s \n", name2_s, j, target->client ? target->client->pers.netname : target->classname) );
+							}
+						} else if( !Q_stricmp( verb_s, "targetnode") ) {
+							ADMP(va("[%s] Target Node: %d\n", name2_s, botent->bot->path.targetNode));
+						} else if( !Q_stricmp( verb_s, "health") ) {
+							ADMP(va("[%s] Health PCT : %d\n", name2_s, botGetHealthPct( botent )));
+						} else {
+							ADMP( "^1Unknown read type\n");
+							return qfalse;
+						}
+					}
+				}
 			}
-			return qtrue;
-		} else {
-			ADMP( "^1Unknown debug type\n");
-			return qfalse;
 		}
+	}
+	if(!read) {
 		if(turnoff) {
 			ADMP( "^3Disabling Debug\n" );
 			g_bot_debug_type.integer &= ~flag;
@@ -3574,15 +3606,44 @@ qboolean G_reloadnodes( gentity_t *ent )
 
 qboolean G_drawnodes( gentity_t *ent )
 {
-    if(level.drawpath == qtrue) {
-        ADMP( "^1Hiding Paths\n" );
-        G_EraseNodes();
-        level.drawpath = qfalse;
-    } else {
-        ADMP( "^2Drawing Paths\n" );
-    	G_DrawNodes();
-	    level.drawpath = qtrue;
-    }
+	char command[ MAX_ADMIN_CMD_LEN ];
+	team_t team = ent->client ? ent->client->pers.teamSelection : TEAM_NONE;
+	
+	trap_Argv( 1, command, sizeof( command ) );
+	if(team == TEAM_NONE) {
+		if(!Q_stricmp( command, "off" )) {
+			team = TEAM_NONE;
+		} else if(!Q_stricmp( command, "aliens" )) {
+			team = TEAM_ALIENS;
+		} else if(!Q_stricmp( command, "humans" )) {
+			team = TEAM_HUMANS;
+		} else {
+			ADMP( va( "^3%s: ^7usage: %s [aliens|humans|off]\n", command, command ) );
+			return qfalse;
+		}
+	} else if(!Q_stricmp( command, "off" )) {
+		team = TEAM_NONE;
+	}
+    level.teampath = team;
+	switch(team) {
+		case TEAM_NONE:
+			level.drawpath = qfalse;
+			ADMP( "^1Hiding Paths\n" );
+			G_EraseNodes();
+			break;
+		case TEAM_ALIENS:
+			G_EraseNodes();
+			level.drawpath == qtrue;
+			ADMP( "^2Drawing Paths for aliens\n" );
+			G_DrawNodes();
+			break;
+		case TEAM_HUMANS:
+			G_EraseNodes();
+			level.drawpath == qtrue;
+			ADMP( "^2Drawing Paths for humans\n" );
+			G_DrawNodes();
+			break;
+	}
     return qtrue;
 }
 

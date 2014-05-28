@@ -72,6 +72,7 @@ int botGetDistanceBetweenPlayer( gentity_t *self, gentity_t *player ) {
  * @return float (angle)
  */
 int botGetAngleBetweenPlayer( gentity_t *self, gentity_t *player ) {
+	if(!player->client) return 0;
 	return abs(SHORT2ANGLE(self->client->ps.delta_angles[ YAW ]) - SHORT2ANGLE(player->client->ps.delta_angles[ YAW ]));
 }
 
@@ -135,22 +136,20 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch ) {
  * Find closest enemy
  * @param self [gentity_t] a BOT
  * @return boolean (true if Enemy found)
- * //TODO: convert this function to use prioritization
  */
-qboolean botFindClosestEnemy( gentity_t *self ) {
-	int vectorRange = MGTURRET_RANGE * 3; //TODO: convert this to bot range
+int botFindEnemy( gentity_t *self, int maxRange ) {
 	int i;
 	int total_entities;
 	int entityList[ MAX_GENTITIES ];
-	int distance;
-	int closerTargetDistance = g_human_range.integer;
+	int rank, rankdbg;
+	int bestRank = 0;
+	int bestTarget;
 	qboolean targetFound = qfalse;
-	gentity_t *closerTarget;
 	vec3_t    range;
 	vec3_t    mins, maxs;
 	gentity_t *target;
 
-	VectorSet( range, vectorRange, vectorRange, vectorRange );
+	VectorSet( range, maxRange, maxRange, maxRange );
 	VectorAdd( self->client->ps.origin, range, maxs );
 	VectorSubtract( self->client->ps.origin, range, mins );
 
@@ -159,29 +158,44 @@ qboolean botFindClosestEnemy( gentity_t *self ) {
 	for( i = 0; i < total_entities; i++ ) {
 		target = &g_entities[ entityList[ i ] ];
 		//Search for any enemy entity (player or structure)
-		if( (target->client && target->client->ps.stats[ STAT_TEAM ] != self->client->ps.stats[ STAT_TEAM ]) ||
-			((target->s.eType == ET_BUILDABLE && target->buildableTeam != self->client->ps.stats[ STAT_TEAM ]) && target->powered) ) 
+		/*
+		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_UTIL + BOT_DEBUG_TARGET, "TESTS: %p %d %d %p %d %d\n",
+				target,
+				(int)target->inuse,
+				target->health,
+				target->client,
+				target->s.eType,
+				(int)botSameTeam(self, target)
+				);*/
+		if(target && target->inuse && target->health > 0 &&
+		  (target->client || target->s.eType == ET_BUILDABLE) &&! botSameTeam(self, target))
 		{
-			distance = botGetDistanceBetweenPlayer(self, target);
-			if( distance < closerTargetDistance && G_Visible(self, target, CONTENTS_SOLID) ) {
-				closerTargetDistance = distance;
-				closerTarget = target;
-				//G_Printf("Found target at distance: %d\n",distance);
+			//Perform common target calculations
+			rank = self->bot->funcs.base.targetRank(self, target);
+			rankdbg = rank;
+			//Perform team based calculations (we pass rank to use it as base value)
+			rank = self->bot->funcs.team.targetRank(self, target, rank);
+			if(rank) increasePathEssence( self , (int)((float)rank / 10.0f) );
+			if(rank > bestRank) {
+				G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_UTIL + BOT_DEBUG_TARGET, "%3i %4i %4i %5i %s\n",
+						entityList[ i ],
+						rankdbg,
+						rank,
+						botGetDistanceBetweenPlayer(self, target),
+						target->client ? target->client->pers.netname : target->classname
+						);
+				bestRank = rank;
 				targetFound = qtrue;
-				//if(!LevelThinking( self, THINK_LEVEL_1 )) return qtrue; //in case the bot is impulsive, will stop here
+				bestTarget = entityList[ i ];
 			}
 		}
 	}
 	if(targetFound) {
-		self->bot->Enemy = closerTarget;
+		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_UTIL + BOT_DEBUG_TARGET, "Best Target: %d\n", bestTarget);
+		return bestTarget;
 	} else {
-		self->bot->Enemy = NULL;
+		return BOT_NO_ENEMY;
 	}
-	//who is attacking you?
-	//who is closer?
-	//if(!LevelThinking( self, THINK_LEVEL_3 )) return qtrue; //in case the bot is cautious
-	//self->bot->funcs.Target( self );
-	return targetFound; 
 }
 /**
  * Find closest friend
@@ -333,4 +347,42 @@ int botGetHealthPct( gentity_t *ent )
 		health_pct = (float)((float)ent->health / (float)BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health) * 100;
 	}
 	return health_pct;
+}
+/**
+ * Similiar to OnSameTeam BUT it also include structures
+ * @param ent
+ * @param ent2
+ * @return 
+ */
+qboolean botSameTeam( gentity_t *ent1, gentity_t *ent2 )
+{
+	qboolean same = qfalse;
+	
+	if(ent1->client && ent2->client) {
+		same = (ent1->client->ps.stats[ STAT_TEAM ] == ent2->client->ps.stats[ STAT_TEAM ]);
+	} else if(ent1->client && ent2->s.eType == ET_BUILDABLE) {
+		same = (ent1->client->ps.stats[ STAT_TEAM ] == ent2->buildableTeam);
+	} else if(ent2->client && ent1->s.eType == ET_BUILDABLE) {
+		same = (ent2->client->ps.stats[ STAT_TEAM ] == ent1->buildableTeam);
+	} else if(ent1->s.eType == ET_BUILDABLE && ent2->s.eType == ET_BUILDABLE) {
+		same = (ent1->buildableTeam == ent1->buildableTeam);
+	}
+	
+	return same;
+}
+
+/**
+ * Check if bot is hitting a target
+ */
+qboolean BotHitTarget( gentity_t *self ) {
+	qboolean hit;
+	hit = (self->bot->Enemy->credits[ self->s.clientNum ] > 0);
+	if(hit) {
+		self->bot->timer.hit = level.time;
+	} else if(level.time - self->bot->timer.hit > BOT_HIT_TIME) {
+		hit = qfalse;
+	} else {
+		hit = qtrue;
+	}
+	return hit;
 }

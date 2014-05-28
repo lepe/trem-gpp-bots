@@ -40,7 +40,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 void BotInitAlien( gentity_t *self ) {
 	//Initialization of TEAM funtions
 	self->bot->funcs.team.spec				= BotBeforeSpawnAlien;
-	self->bot->funcs.team.target			= BotTargetAlien;
+	//self->bot->funcs.team.target			= BotTargetAlien;
+	self->bot->funcs.team.targetRank		= BotTargetRankAlien;
 	self->bot->funcs.team.think				= BotAlienThink;
 	//--- state functions
 	self->bot->funcs.team.status[IDLE]		= BotIdleAlien;
@@ -53,22 +54,22 @@ void BotInitAlien( gentity_t *self ) {
 	self->bot->funcs.team.nav[TARGETPATH]	= BotNavigateAlien;
 	self->bot->funcs.team.nav[BLOCKED]		= BotBlockedAlien;
 	//default % of evolving
-	self->bot->set.tyrant[S3] 		= 100;
-	self->bot->set.adv_goon[S3]		= 100;
-	self->bot->set.adv_goon[S2]		= 100;
-	self->bot->set.goon[S3] 		= 100;
-	self->bot->set.goon[S2] 		= 100;
-	self->bot->set.goon[S1] 		= 100;
-	self->bot->set.adv_marauder[S3]	= 100;
-	self->bot->set.adv_marauder[S2]	= 100;
-	self->bot->set.marauder[S3] 	= 100;
-	self->bot->set.marauder[S2] 	= 100;
-	self->bot->set.marauder[S1]		= 100;
-	self->bot->set.adv_basilisk[S3]	= 100;
-	self->bot->set.adv_basilisk[S2]	= 100;
-	self->bot->set.basilisk[S3] 	= 100;
-	self->bot->set.basilisk[S2] 	= 100;
-	self->bot->set.basilisk[S1] 	= 100;
+	self->bot->set.tyrant[S3] 		= 90;
+	self->bot->set.adv_goon[S3]		= 80;
+	self->bot->set.adv_goon[S2]		= 90;
+	self->bot->set.goon[S3] 		= 5;
+	self->bot->set.goon[S2] 		= 5;
+	self->bot->set.goon[S1] 		= 90;
+	self->bot->set.adv_marauder[S3]	= 70;
+	self->bot->set.adv_marauder[S2]	= 70;
+	self->bot->set.marauder[S3] 	= 5;
+	self->bot->set.marauder[S2] 	= 70;
+	self->bot->set.marauder[S1]		= 70;
+	self->bot->set.adv_basilisk[S3]	= 10;
+	self->bot->set.adv_basilisk[S2]	= 30;
+	self->bot->set.basilisk[S3] 	= 5;
+	self->bot->set.basilisk[S2] 	= 20;
+	self->bot->set.basilisk[S1] 	= 50;
 }
 /**
  * Decide if spawn as dretch or granger
@@ -429,27 +430,14 @@ void BotEvolve( gentity_t *self )
  */
 void BotAttackAlien( gentity_t *self )
 {
-	int closeDistance = LEVEL2_AREAZAP_RANGE; 
 	int veryCloseDistance = LEVEL4_CLAW_RANGE; 
-	int tempEntityIndex = -1;
 	int distance = botGetDistanceBetweenPlayer(self, self->bot->Enemy);
 	int anglediff = 0;
-	//TODO: move this code to target prioritization
-	//Use: g_utils.c : G_ClosestEnt(  ) to get the closest entities around ?
-	
-	if(distance > closeDistance) { //LEPE: if is far, search for a closer target
-		// try to find closest enemy
-		tempEntityIndex = botFindClosestEnemy(self);
-		if(tempEntityIndex >= 0) {
-			self->bot->Enemy = &g_entities[tempEntityIndex];
-			distance = botGetDistanceBetweenPlayer(self, self->bot->Enemy);
-		}
-	}
 	//If we are closer than what humans can reach to us
 	if(distance < g_human_range.integer)
 	{
 			BotWallWalk( self ); // enable wallwalk if possible
-			
+
 			BotRun( self );
 			//If we are not close enough and the target is a bot or a player, strafe
 			//TODO: we could apply bot difficulty here. Like, easy bots will not strafe
@@ -579,13 +567,180 @@ void BotIdleAlien( gentity_t *self ) {
 
 }
 /**
- * Think the best target to attack
- * this function may change the bot->Enemy
+ * Call botFindEnemy based on alien range
+ * return id of target
  * @param self
  */
-void BotTargetAlien( gentity_t *self ) {
-	//simple rank
-	//self->bot->Enemy = &target;	
+/*
+int BotTargetAlien( gentity_t *self, botThinkLevel level) {
+	int range;
+	switch(level) {
+		case THINK_LEVEL_3: range = ALIENSENSE_RANGE;
+		case THINK_LEVEL_2: range = g_human_range.integer;
+		default: range = ALIENSENSE_RANGE;
+	}
+	return botFindEnemy( self, range );
+}*/
+/**
+ * @param self
+ * //TODO: replace hardcoded values
+ */
+int BotTargetRankAlien(gentity_t *self, gentity_t *target, float rank ) {
+	int sd;
+	qboolean BS;
+	qboolean Armor;
+	qboolean Helmet;
+	qboolean Naked;
+
+	if(!G_Visible(self, target, CONTENTS_SOLID)) {
+		return 0;
+	}
+	sd = G_TimeTilSuddenDeath() <= 0 ? 2 : 1;
+	if(target->s.eType == ET_BUILDABLE) {
+		if(self->client->pers.classSelection > PCL_ALIEN_LEVEL0 || !target->powered) {
+			if(self->health >= 100) rank += 20;
+			else if(self->health >= 200) rank += 40;
+
+			switch(target->s.modelindex) {
+				case BA_H_REACTOR:  rank += (25 * sd); break;
+				case BA_H_SPAWN: 	rank += (20 * sd); break;
+				case BA_H_MEDISTAT:	rank += (15 * sd); break;
+				case BA_H_ARMOURY:  rank += (20 * sd); break;
+				case BA_H_REPEATER: rank += (25 * sd); break;
+				case BA_H_DCC: 		rank += (10 * sd); break;
+				default: 			rank += (5  * sd); break;
+			}
+			//Above Adv.Marauder, target more to structures
+			if(self->client->pers.classSelection > PCL_ALIEN_LEVEL2) {
+				rank += 40;
+			}
+		} else {
+			return 0;
+		}
+	} else if(target->client) {
+		BS = target->client->pers.classSelection == PCL_HUMAN_BSUIT;
+		Helmet = BG_InventoryContainsUpgrade( UP_HELMET, target->client->ps.stats );
+		Armor = BG_InventoryContainsUpgrade( UP_LIGHTARMOUR, target->client->ps.stats );
+		Naked = !(Armor || Helmet);
+		switch(self->client->pers.classSelection) {
+			case PCL_ALIEN_BUILDER0:	
+			case PCL_ALIEN_BUILDER0_UPG:
+				switch(target->client->ps.weapon) {
+					default: rank -= 30; break;
+				}
+			break;
+			case PCL_ALIEN_LEVEL0:
+				switch(target->client->ps.weapon) {
+					case WP_BLASTER:
+					case WP_MACHINEGUN:
+					case WP_PAIN_SAW:
+						rank += 30; break;
+					case WP_SHOTGUN:
+					case WP_LAS_GUN:
+					case WP_CHAINGUN:
+						break;
+					case WP_FLAMER:
+					case WP_PULSE_RIFLE:
+					case WP_LUCIFER_CANNON:
+						rank -= 30; break;
+					default: break;
+				}
+			break;
+			case PCL_ALIEN_LEVEL1:
+			case PCL_ALIEN_LEVEL1_UPG:
+				switch(target->client->ps.weapon) {
+					case WP_BLASTER:
+					case WP_MACHINEGUN:
+					case WP_PAIN_SAW:
+						rank += 30; break;
+					case WP_SHOTGUN:
+					case WP_LAS_GUN:
+						rank += 10; break;
+					case WP_CHAINGUN:
+					case WP_FLAMER:
+					case WP_PULSE_RIFLE:
+					case WP_LUCIFER_CANNON:
+					default:
+						break;
+				}
+				if(!BS) {
+					rank += 20;
+				}
+			break;
+			case PCL_ALIEN_LEVEL2:
+			case PCL_ALIEN_LEVEL2_UPG:
+				switch(target->client->ps.weapon) {
+					case WP_BLASTER:
+					case WP_MACHINEGUN:
+					case WP_PAIN_SAW:
+					case WP_LAS_GUN:
+					case WP_PULSE_RIFLE:
+					case WP_LUCIFER_CANNON:
+						rank += 30; break;
+					case WP_FLAMER:
+					case WP_SHOTGUN:
+					case WP_CHAINGUN:
+					default:
+						break;
+				}
+			break;
+			case PCL_ALIEN_LEVEL3:
+				switch(target->client->ps.weapon) {
+					case WP_BLASTER:
+					case WP_MACHINEGUN:
+					case WP_PAIN_SAW:
+					case WP_SHOTGUN:
+					case WP_LAS_GUN:
+					case WP_FLAMER:
+						rank += 30; break;
+					case WP_CHAINGUN:
+					case WP_PULSE_RIFLE:
+					case WP_LUCIFER_CANNON:
+						rank -= 20; break;
+					default: break;
+				}
+			break;
+			case PCL_ALIEN_LEVEL3_UPG:
+				switch(target->client->ps.weapon) {
+					case WP_BLASTER:
+					case WP_MACHINEGUN:
+					case WP_PAIN_SAW:
+					case WP_SHOTGUN:
+					case WP_LAS_GUN:
+					case WP_FLAMER:
+						rank += 30; break;
+					case WP_CHAINGUN:
+					case WP_PULSE_RIFLE:
+					case WP_LUCIFER_CANNON:
+						break;
+					default: break;
+				}
+			break;
+			case PCL_ALIEN_LEVEL4:
+				switch(target->client->ps.weapon) {
+					case WP_BLASTER:
+					case WP_MACHINEGUN:
+					case WP_PAIN_SAW:
+					case WP_SHOTGUN:
+					case WP_LAS_GUN:
+					case WP_FLAMER:
+						rank += 10; break;
+					case WP_CHAINGUN:
+					case WP_PULSE_RIFLE:
+					case WP_LUCIFER_CANNON:
+						rank += 30; break;
+					default: break;
+				}
+			break;
+			default: break;
+		}
+		if(BS) {
+			rank -= 10;
+		} else if(Naked) {
+			rank += 30;
+		}
+	}
+	return (int)rank;
 }
 
 /**
