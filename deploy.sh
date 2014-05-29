@@ -72,13 +72,13 @@ if [[ $COPYTOUSER == 1 ]]; then
     cp $PK3VM ~/.tremulous/$MOD/
 fi
 #move pk3 to deploy dir
+rm $DEPLOY_DIR/$MOD-vms-*.pk3
 mv $PK3VM $DEPLOY_DIR
 cd $ROOT_PWD
 
 if [[ "$WEB_DIR" != "" ]]; then
     cd $WEB_DIR;
     rm $MOD-vms-*.pk3
-    rm $DEPLOY_DIR/$MOD-vms-*.pk3
     ln -s $DEPLOY_DIR/$PK3VM .
 fi
 cd $ROOT_PWD
