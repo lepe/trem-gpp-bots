@@ -640,7 +640,7 @@ void BotAttackHuman( gentity_t *self )
 			{
 				if((self->bot->Enemy->s.modelindex == BA_A_ACIDTUBE && distance < ACIDTUBE_RANGE) ||
 				   (self->bot->Enemy->s.modelindex == BA_A_HIVE && distance < HIVE_SENSE_RANGE) || 
-					(distance < OVERMIND_ATTACK_RANGE)) {
+					(distance < OVERMIND_ATTACK_RANGE) && self->health < 50 && botGetHealthPct( self->bot->Enemy ) > 50) {
 					BotStand( self );
 					BotAddMove( self, BOT_MOVE_BACK, BOT_TIMER_ACTION);
 					BotStartMove( self, BOT_MOVE_FWD);
@@ -750,8 +750,8 @@ int BotTargetRankHuman( gentity_t *self, gentity_t *target, float rank ) {
 	if(target->s.eType == ET_BUILDABLE) {
 		if(self->health > 80) rank += 30;
 		switch(target->s.modelindex) {
-			case BA_A_OVERMIND: rank += (35 * sd); break;
-			case BA_A_SPAWN: 	rank += (30 * sd); break;
+			case BA_A_SPAWN: 	rank += (50 * sd); break;
+			case BA_A_OVERMIND: rank += (30 * sd); break;
 			case BA_A_BOOSTER: 	rank += (25 * sd); break;
 			case BA_A_ACIDTUBE: rank += (20 * sd); break;
 			case BA_A_HIVE: 	rank += (20 * sd); break;
