@@ -639,6 +639,7 @@ int BotTargetRankAlien(gentity_t *self, gentity_t *target, float rank ) {
 					case WP_LAS_GUN:
 					case WP_CHAINGUN:
 						break;
+					case WP_MASS_DRIVER: 
 					case WP_FLAMER:
 					case WP_PULSE_RIFLE:
 					case WP_LUCIFER_CANNON:
@@ -656,6 +657,8 @@ int BotTargetRankAlien(gentity_t *self, gentity_t *target, float rank ) {
 					case WP_SHOTGUN:
 					case WP_LAS_GUN:
 						rank += 10; break;
+					case WP_MASS_DRIVER: 
+						rank -= 10; break;
 					case WP_CHAINGUN:
 					case WP_FLAMER:
 					case WP_PULSE_RIFLE:
@@ -680,6 +683,7 @@ int BotTargetRankAlien(gentity_t *self, gentity_t *target, float rank ) {
 					case WP_FLAMER:
 					case WP_SHOTGUN:
 					case WP_CHAINGUN:
+					case WP_MASS_DRIVER: 
 					default:
 						break;
 				}
@@ -692,6 +696,7 @@ int BotTargetRankAlien(gentity_t *self, gentity_t *target, float rank ) {
 					case WP_SHOTGUN:
 					case WP_LAS_GUN:
 					case WP_FLAMER:
+					case WP_MASS_DRIVER: 
 						rank += 30; break;
 					case WP_CHAINGUN:
 					case WP_PULSE_RIFLE:
@@ -708,6 +713,7 @@ int BotTargetRankAlien(gentity_t *self, gentity_t *target, float rank ) {
 					case WP_SHOTGUN:
 					case WP_LAS_GUN:
 					case WP_FLAMER:
+					case WP_MASS_DRIVER: 
 						rank += 30; break;
 					case WP_CHAINGUN:
 					case WP_PULSE_RIFLE:
@@ -724,6 +730,7 @@ int BotTargetRankAlien(gentity_t *self, gentity_t *target, float rank ) {
 					case WP_SHOTGUN:
 					case WP_LAS_GUN:
 					case WP_FLAMER:
+					case WP_MASS_DRIVER: 
 						rank += 10; break;
 					case WP_CHAINGUN:
 					case WP_PULSE_RIFLE:

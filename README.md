@@ -20,7 +20,6 @@ v.2.0
 * bots have their own skin
 * bots ping was added
 * all alien bots now attack based on their own capabilities (range constants)
-* Introduced (but not fully implemented): profiles, range behavior, group thinking, some bot states as RUSH,PATROL,etc
 * new debug system which allow administrators to debug specific parts of the code (botdbg BOTNAME TAG VERBOSITY or botdbg BOTNAME read INFO)
 * "dnodes" does not depend on users anymore
 * bots can be controlled manually (botcmd BOT move ...)
@@ -42,6 +41,9 @@ v.2.0
 * teams are not locked anymore and 2 bots by team are deployed by default
 * [BOT] tag in names is reserved only for bots
 * bots/start.cfg is executed on map load
+* Essence is now divided by team. dnodes have new parameters: [aliens|humans|off]
+* Bots will use target prioritization to choose between enemies
+* Introduced (but not fully implemented): profiles, range behavior, group thinking, hit detection, some bot states as RUSH,PATROL,etc
 
 v.16
 * goons pounce and rants rush to move faster, maras jump more.

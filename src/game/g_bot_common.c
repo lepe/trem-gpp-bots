@@ -134,7 +134,7 @@ int BotTargetRank( gentity_t *self, gentity_t *target ) {
 	float damage;
 	float damage_pct;
 	distance = botGetDistanceBetweenPlayer(self, target);
-	rank += 10000 / distance;
+	rank += 3000 / distance;
 	//--- Add some rand chance (not so high)
 	rank += G_Rand_Range(0, 10);
 	//If its attacking you

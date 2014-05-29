@@ -8,7 +8,7 @@ MOD=gpp-bot
 # can be relative or absolute
 WEB_DIR=web
 # Set package version
-VERSION="2.0.8";
+VERSION="2.0.11";
 
 #if [1], it will copy the resulting PK3 to
 #user's directory to speed testing

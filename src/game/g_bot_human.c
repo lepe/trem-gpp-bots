@@ -865,6 +865,24 @@ int BotTargetRankHuman( gentity_t *self, gentity_t *target, float rank ) {
 					default: break;
 				}
 			break;
+			case WP_MASS_DRIVER: 
+				switch(target->client->pers.classSelection) {
+					case PCL_ALIEN_BUILDER0:
+					case PCL_ALIEN_BUILDER0_UPG:
+					case PCL_ALIEN_LEVEL0:
+					case PCL_ALIEN_LEVEL1:
+					case PCL_ALIEN_LEVEL1_UPG:
+						rank += 30; break;
+					case PCL_ALIEN_LEVEL2:
+					case PCL_ALIEN_LEVEL2_UPG:
+						rank += 20; break;
+					case PCL_ALIEN_LEVEL3:
+					case PCL_ALIEN_LEVEL3_UPG:
+					case PCL_ALIEN_LEVEL4:
+						rank -= 10; break;
+					default: break;
+				}
+			break;
 			case WP_CHAINGUN: 	
 				switch(target->client->pers.classSelection) {
 					case PCL_ALIEN_BUILDER0:
