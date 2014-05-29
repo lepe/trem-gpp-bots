@@ -3626,6 +3626,7 @@ qboolean G_drawnodes( gentity_t *ent )
 	}
     level.teampath = team;
 	switch(team) {
+		default:
 		case TEAM_NONE:
 			level.drawpath = qfalse;
 			ADMP( "^1Hiding Paths\n" );
@@ -3633,13 +3634,13 @@ qboolean G_drawnodes( gentity_t *ent )
 			break;
 		case TEAM_ALIENS:
 			G_EraseNodes();
-			level.drawpath == qtrue;
+			level.drawpath = qtrue;
 			ADMP( "^2Drawing Paths for aliens\n" );
 			G_DrawNodes();
 			break;
 		case TEAM_HUMANS:
 			G_EraseNodes();
-			level.drawpath == qtrue;
+			level.drawpath = qtrue;
 			ADMP( "^2Drawing Paths for humans\n" );
 			G_DrawNodes();
 			break;

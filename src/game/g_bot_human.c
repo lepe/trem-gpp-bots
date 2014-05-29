@@ -638,9 +638,9 @@ void BotAttackHuman( gentity_t *self )
 			}
 			else
 			{
-				if((self->bot->Enemy->s.modelindex == BA_A_ACIDTUBE && distance < ACIDTUBE_RANGE) ||
+				if(((self->bot->Enemy->s.modelindex == BA_A_ACIDTUBE && distance < ACIDTUBE_RANGE) ||
 				   (self->bot->Enemy->s.modelindex == BA_A_HIVE && distance < HIVE_SENSE_RANGE) || 
-					(distance < OVERMIND_ATTACK_RANGE) && self->health < 50 && botGetHealthPct( self->bot->Enemy ) > 50) {
+					(distance < OVERMIND_ATTACK_RANGE)) && self->health < 50 && botGetHealthPct( self->bot->Enemy ) > 50) {
 					BotStand( self );
 					BotAddMove( self, BOT_MOVE_BACK, BOT_TIMER_ACTION);
 					BotStartMove( self, BOT_MOVE_FWD);

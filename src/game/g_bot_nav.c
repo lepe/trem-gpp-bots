@@ -90,32 +90,9 @@ void BotTargetPath( gentity_t *self )
  */
 void BotFindNewPath( gentity_t *self )
 {
-	trace_t trace;
-	int i,distance,Ax,Ay,Az,Bx,By,Bz = 0;
-	int closestpath = 0;
-	int closestpathdistance = 2000;
-	qboolean pathfound = qfalse;
+	int closestpath = botFindClosestNode( self );
 	self->bot->path.lastpathid = -1;
-	for(i = 0; i < level.numPaths; i++) //find a nearby node
-	{
-		trap_Trace( &trace, self->s.pos.trBase, NULL, NULL, level.paths[i].coord, self->s.number, MASK_SHOT );
-		if( trace.fraction < 1.0 )
-		{continue;}
-		Ax = level.paths[i].coord[0];
-		Ay = level.paths[i].coord[1];
-		Az = level.paths[i].coord[2];
-		Bx = self->s.pos.trBase[0];
-		By = self->s.pos.trBase[1];
-		Bz = self->s.pos.trBase[2];
-		distance = sqrt((Ax - Bx)*(Ax - Bx) + (Ay - By)*(Ay - By) + (Az - Bz)*(Az - Bz));
-        if(distance < closestpathdistance)
-        {
-            closestpath = i;
-            closestpathdistance = distance;
-            pathfound = qtrue;
-        }
-	}
-	if(pathfound == qtrue)
+	if(closestpath >= 0)
 	{
 		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "New Path found\n");
 		self->bot->path.targetNode = closestpath;
@@ -351,13 +328,30 @@ qboolean botAimAtPath( gentity_t *self )
  * It increases the path essence on event
  * @param self [gentity_t] a BOT
  */
-void increasePathEssence( gentity_t *self, int essence ) {
-	int i;
+void increasePathEssence( gentity_t *self, gentity_t *target, int essence ) {
+	int i, target_close_node, origin_node, path[ BOT_FIND_PATH_MAX ];
 	for(i = 0; i < self->bot->path.numCrumb; i++) {
 		if(level.paths[ self->bot->path.crumb[i] ].essence[ self->client->pers.teamSelection ] < 50) level.paths[ self->bot->path.crumb[i] ].essence[ self->client->pers.teamSelection ] = 50;
 		if(level.paths[ self->bot->path.crumb[i] ].essence[ self->client->pers.teamSelection ] < 100) {
 			level.paths[ self->bot->path.crumb[i] ].essence[ self->client->pers.teamSelection ] += essence ; //for now just increment in 1...
 			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"Increasing: %i of total: %i (value: %i)\n",self->bot->path.crumb[i], self->bot->path.numCrumb, level.paths[ self->bot->path.crumb[i] ].essence[ self->client->pers.teamSelection ]);
+		}
+	}
+	if(target->s.eType == ET_BUILDABLE) {
+		//find the best route to get into the target
+		target_close_node = botFindClosestNode( target );
+		origin_node = self->bot->path.targetNode;
+		path[ 0 ] = origin_node;
+		//reset possible path to -1
+		for(i = 1; i < BOT_FIND_PATH_MAX; i++) {
+			path[ i ] = -1;
+		}
+		//We start with [1] as [0] is origin
+		if(botFindPath( path, target_close_node, 1 )) {
+			//if we found a path to the target, propagate essence to that point
+			for(i = 1; i < BOT_FIND_PATH_MAX; i++) {
+				level.paths[ path[i] ].essence[ self->client->pers.teamSelection ] += essence;
+			}
 		}
 	}
 }

@@ -131,6 +131,80 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch ) {
 	}
 	return qtrue;
 }
+/**
+ * Locate the closest node to an entity
+ * @param self [gentity_t]
+ * @return int (node id)
+ */
+int botFindClosestNode( gentity_t *self ) {
+	trace_t trace;
+	int i,distance,Ax,Ay,Az,Bx,By,Bz = 0;
+	int closestpath = -1;
+	int closestpathdistance = 2000;
+	for(i = 0; i < level.numPaths; i++) //find a nearby node
+	{
+		trap_Trace( &trace, self->s.pos.trBase, NULL, NULL, level.paths[i].coord, self->s.number, MASK_SHOT );
+		if( trace.fraction < 1.0 )
+		{continue;}
+		Ax = level.paths[i].coord[0];
+		Ay = level.paths[i].coord[1];
+		Az = level.paths[i].coord[2];
+		Bx = self->s.pos.trBase[0];
+		By = self->s.pos.trBase[1];
+		Bz = self->s.pos.trBase[2];
+		distance = sqrt((Ax - Bx)*(Ax - Bx) + (Ay - By)*(Ay - By) + (Az - Bz)*(Az - Bz));
+        if(distance < closestpathdistance)
+        {
+            closestpath = i;
+            closestpathdistance = distance;
+        }
+	}
+	return closestpath;
+}
+/**
+ * Found any path to rout
+ * @param path
+ * @param goal
+ * @param start
+ * @return 
+ */
+qboolean botFindPath( int *path , int goal, int start ) {
+    int i, j, curr_node, next_node;
+    qboolean exists;
+    curr_node = path[ start-1 ];
+    for(i = 0; i < 5; i++) {
+        next_node = level.paths[ curr_node ].nextid[ i ];
+        if(next_node > 0 && next_node < level.numPaths) {
+            exists = qfalse;
+            for(j = 0; j < BOT_FIND_PATH_MAX; j++) {
+                if(next_node == path[ j ]) {
+                    exists = qtrue;
+                    break;
+                }
+            }
+            if(!exists) {
+                path[start] = next_node;
+                if(next_node == goal) {
+                    //clean unused values
+                    for(j = start+1; j < BOT_FIND_PATH_MAX; j++) {
+                        path[ j ] = -1;
+                    }
+                    return qtrue;
+                } else if(start == BOT_FIND_PATH_MAX - 1) {
+                    return qfalse;
+                } else {
+                    if(botFindPath( path , goal, start+1 )) {
+                        return qtrue;
+                    }
+                }
+            }
+        } else {
+            continue; //we don't break to allow "empty nodes" in the middle
+        }
+    }
+    return qfalse;
+}
+
 
 /**
  * Find closest enemy
@@ -175,7 +249,7 @@ int botFindEnemy( gentity_t *self, int maxRange ) {
 			rankdbg = rank;
 			//Perform team based calculations (we pass rank to use it as base value)
 			rank = self->bot->funcs.team.targetRank(self, target, rank);
-			if(rank) increasePathEssence( self , (int)((float)rank / 10.0f) );
+			if(rank) increasePathEssence( self , target, (int)((float)rank / 10.0f) );
 			if(rank > bestRank) {
 				G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_UTIL + BOT_DEBUG_TARGET, "%3i %4i %4i %5i %s\n",
 						entityList[ i ],

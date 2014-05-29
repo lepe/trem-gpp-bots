@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 //Adjust this value if move actions are being discarded
 #define BOT_MOVE_QUEUE		10
+#define BOT_FIND_PATH_MAX	10
 #define BOT_TURN_VAL		45.0f
 #define BOT_TURN_SHORT		ANGLE2SHORT( BOT_TURN_VAL )
 #define BOT_TURN_ANGLE_DIV	(360.0f / (float)BOT_TURN_VAL)
@@ -316,7 +317,7 @@ void BotBlocked( gentity_t *self );
 void BotLost( gentity_t *self );
 int distanceToTargetNode( gentity_t *self );
 qboolean botAimAtPath( gentity_t *self );
-void increasePathEssence( gentity_t *self, int essence );
+void increasePathEssence( gentity_t *self, gentity_t *target, int essence );
 void setCrumb( gentity_t *self, int closestpath );
 
 // g_bot_util.c
@@ -325,7 +326,9 @@ int G_Rand_Range( int start, int end ); //LEPE
 int botGetDistanceBetweenPlayer( gentity_t *self, gentity_t *player );
 int botGetAngleBetweenPlayer( gentity_t *self, gentity_t *player );
 int botGetHealthPct( gentity_t *self );
+int botFindClosestNode( gentity_t *self );
 int botFindEnemy( gentity_t *self, int maxRange );
+qboolean botFindPath( int *path , int goal, int start );
 qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch);
 qboolean botFindClosestFriend( gentity_t *self );
 qboolean botSameTeam( gentity_t *ent1, gentity_t *ent2 );
