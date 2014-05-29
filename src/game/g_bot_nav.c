@@ -57,10 +57,13 @@ void BotTargetPath( gentity_t *self )
 			}
 		}
 	}
-	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "Last path id %d, FoundTime: %d\n", self->bot->path.lastpathid, level.time - self->bot->timer.foundPath);
+	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "Targeting path: %d, FoundTime: %d\n", self->bot->path.targetNode, level.time - self->bot->timer.foundPath);
 	//G_Printf("Target: %d, Distance %d\n",self->bot->path.targetNode, distanceToTargetNode(self));
 	if(distanceToTargetNode(self) < 70) 
 	{
+		//We set a crumb of our path
+		setCrumb( self, self->bot->path.targetNode ); 
+		
 		if(g_bot_manual_nav.integer) {
 			G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "(3) NAV State would have changed to: %d\n", FINDNEXTPATH);
 		} else {
@@ -92,6 +95,7 @@ void BotFindNewPath( gentity_t *self )
 {
 	int closestpath = botFindClosestNode( self );
 	self->bot->path.lastpathid = -1;
+	self->bot->path.lastJoint = -1;
 	if(closestpath >= 0)
 	{
 		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "New Path found\n");
@@ -183,12 +187,13 @@ void BotFindNextPath( gentity_t *self )
 		}
 		indexpath = 0;
 		if(possiblenextpath > 1) {
+			self->bot->path.lastJoint = self->bot->path.targetNode; //when was the last time we had to choose a path (used to create negative essence)
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH, "Last Joint: %d :\n",self->bot->path.lastJoint);
 			//bots decide here which path to follow based on the strength of the essence, previous nodes and possible unexplored nodes
 			if(g_bot_essence.integer == 1) {
 				//-------------
-				G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH, "Possible Paths: %d .",possiblenextpath);
+				G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH, "Possible Paths: %d :\n",possiblenextpath);
 				for(i =0; i < possiblenextpath; i++) {
-					G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"[ %d :",possiblepaths[i]);
 					known = qfalse;
 					for(j=0; j < self->bot->path.numCrumb; j++) {
 						if(self->bot->path.crumb[j] == possiblepaths[i]) {
@@ -198,27 +203,20 @@ void BotFindNextPath( gentity_t *self )
 					} 
 					pathessence[i] = level.paths[possiblepaths[i]].essence[ self->client->pers.teamSelection ];
 					essence = pathessence[i] > 50 ? GOOD_ESSENCE : (pathessence[i] < 50 ? BAD_ESSENCE : NO_ESSENCE);
-					G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"%d",pathessence[i]);
 					if(known == qfalse && essence == GOOD_ESSENCE) {
-						G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 50");
 						pathrank[i] = 50;                    
 					} else if(known == qfalse && essence == NO_ESSENCE) {
-						G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 30");
 						pathrank[i] = 30;                    
 					} else if(known == qtrue && (essence == GOOD_ESSENCE || essence == NO_ESSENCE)) {
-						G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 15");
 						pathrank[i] = 15;                    
 					} else if(known == qfalse) { //bad essence implied
-						G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 5");
 						pathrank[i] = 5;                    
 					} else { //known && bad essence implied
-						G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," x 1");
 						pathrank[i] = 1;                    
 					}
 					totalessence += pathessence[i] * pathrank[i];
-					G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"] TOTAL: %d\n",totalessence);
+					G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH," -- %d ) Essence : %d x %d = %d <known: %d>\n",possiblepaths[i], pathrank[i], pathessence[i],pathessence[i] * pathrank[i], known );
 				}
-				self->bot->path.lastJoint = self->bot->path.targetNode; //when was the last time we had to choose a path (used to create negative essence)
 				randnum = G_Rand();
 				for(i =0; i < possiblenextpath; i++) {
 					accumessence += ((pathessence[i] * pathrank[i]) * 100) / totalessence;
@@ -234,8 +232,6 @@ void BotFindNextPath( gentity_t *self )
 			}
 		}
 		nextpath = possiblepaths[indexpath];
-		//We set a crumb of our path
-		setCrumb( self, nextpath ); 
 	}
 	self->bot->path.lastpathid = self->bot->path.targetNode;
 	self->bot->path.targetNode = nextpath;
@@ -369,14 +365,16 @@ void setCrumb( gentity_t *self, int closestpath )
     qboolean regret = qfalse; //regret last decision: mark as negative essence
     for(i = 0; i < self->bot->path.numCrumb; i++) {
         if(self->bot->path.crumb[i] == closestpath) {
-            G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"Returning to: %i to node: %i\n",self->bot->path.numCrumb,closestpath);
+            G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"Returning to: %i , node: %i\n",self->bot->path.numCrumb,closestpath);
             nc = i;
-        } else if(nc > 0) {
-            if(self->bot->path.crumb[i] == self->bot->path.lastJoint) {
-                regret = qtrue;
-            } 
         }
-        if(regret == qtrue) {
+       // G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"nc: %d, crumb %i : %d, last: %d\n",nc,i,self->bot->path.crumb[i],self->bot->path.lastJoint);
+		if(nc > 0 && self->bot->path.crumb[i] == self->bot->path.lastJoint) {
+			regret = qtrue;
+			self->bot->path.lastJoint = -1; //we reset this
+			//we wait until the next loop to prevent marking the lastJoint as negative
+		} 
+		else if(regret == qtrue) { //We reset essence in all the next nodes
            G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"Regreting: %i\n",self->bot->path.crumb[i]);
            level.paths[self->bot->path.crumb[i]].essence[ self->client->pers.teamSelection ] = 1; 
         }

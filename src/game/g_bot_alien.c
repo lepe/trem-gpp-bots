@@ -433,6 +433,8 @@ void BotAttackAlien( gentity_t *self )
 	int veryCloseDistance = LEVEL4_CLAW_RANGE; 
 	int distance = botGetDistanceBetweenPlayer(self, self->bot->Enemy);
 	int anglediff = 0;
+	qboolean flank = qfalse;
+	qboolean jumpOnZero = qfalse;
 	//If we are closer than what humans can reach to us
 	if(distance < g_human_range.integer)
 	{
@@ -477,15 +479,7 @@ void BotAttackAlien( gentity_t *self )
 				}
 				if (distance <= LEVEL1_GRAB_RANGE) {
 					BotWalk( self );
-					anglediff = botGetAngleBetweenPlayer( self, self->bot->Enemy );
-					if(anglediff > 90 && anglediff <= 180) {
-						BotMoveLeft( self );
-					} else if(anglediff > 180 && anglediff < 270) {
-						BotMoveRight( self );
-					} else {
-						BotJump( self );
-						BotMainAttack( self );
-					}
+					flank = qtrue;
 				}
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL1_UPG)//adv basilisk
@@ -499,26 +493,24 @@ void BotAttackAlien( gentity_t *self )
 				if (distance <= LEVEL1_GRAB_U_RANGE) {
 					BotStop( self );
 					BotWalk( self );
-					anglediff = botGetAngleBetweenPlayer( self, self->bot->Enemy );
-					if(anglediff > 90 && anglediff <= 180) {
-						BotMoveLeft( self );
-					} else if(anglediff > 180 && anglediff < 270) {
-						BotMoveRight( self );
-					} else {
-						BotJump( self );
-					}
+					flank = qtrue;
+					jumpOnZero = qtrue;
 				}
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL2)//marauder
 			{
 				if (distance <= LEVEL2_CLAW_RANGE) {
 					BotMainAttack( self );
+					flank = qtrue;
+					jumpOnZero = qtrue;
 				}
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL2_UPG)//adv marauder
 			{
 				if (distance <= LEVEL2_CLAW_U_RANGE) {
 					BotMainAttack( self );
+					flank = qtrue;
+					jumpOnZero = qtrue;
 				} 
 				if (distance <= LEVEL2_AREAZAP_RANGE) {
  					BotSecAttack( self );
@@ -530,6 +522,7 @@ void BotAttackAlien( gentity_t *self )
  					BotSecAttack( self );
 				} else {
 					BotMainAttack( self );
+					flank = qtrue;
 				}
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL3_UPG)//adv dragon
@@ -542,6 +535,7 @@ void BotAttackAlien( gentity_t *self )
  					BotSecAttack( self ); //TODO: should Bot_Pounce be used here?
 				} else {
 					BotMainAttack( self );
+					flank = qtrue;
 				}
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL4)//tyrant
@@ -550,6 +544,25 @@ void BotAttackAlien( gentity_t *self )
  					BotSecAttack( self );
 				} else {
 					BotMainAttack( self );
+					flank = qtrue;
+				}
+			}
+			if(flank) {
+				anglediff = botGetAngleBetweenPlayer( self, self->bot->Enemy );
+				if(anglediff > 90 && anglediff <= 180) {
+					BotMoveLeft( self );
+				} else if(anglediff > 180 && anglediff < 270) {
+					BotMoveRight( self );
+				} else {
+					if(jumpOnZero) {
+						BotJump( self );
+					} else if(self->bot->Enemy->s.modelindex == BA_H_MGTURRET) {
+						if(G_Rand() < 50) {
+							BotMoveLeft( self );
+						} else {
+							BotMoveRight( self );
+						}
+					}
 				}
 			}
 			return;
@@ -602,13 +615,13 @@ int BotTargetRankAlien(gentity_t *self, gentity_t *target, float rank ) {
 			else if(self->health >= 200) rank += 40;
 
 			switch(target->s.modelindex) {
-				case BA_H_REACTOR:  rank += (25 * sd); break;
-				case BA_H_SPAWN: 	rank += (20 * sd); break;
-				case BA_H_MEDISTAT:	rank += (15 * sd); break;
+				case BA_H_REACTOR:  rank += (50 * sd); break;
+				case BA_H_SPAWN: 	rank += (30 * sd); break;
+				case BA_H_MEDISTAT:	rank += (25 * sd); break;
 				case BA_H_ARMOURY:  rank += (20 * sd); break;
 				case BA_H_REPEATER: rank += (25 * sd); break;
-				case BA_H_DCC: 		rank += (10 * sd); break;
-				default: 			rank += (5  * sd); break;
+				case BA_H_DCC: 		rank += (15 * sd); break;
+				default: 			rank += (10 * sd); break;
 			}
 			//Above Adv.Marauder, target more to structures
 			if(self->client->pers.classSelection > PCL_ALIEN_LEVEL2) {

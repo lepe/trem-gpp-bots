@@ -3501,67 +3501,69 @@ qboolean G_admin_botdbg( gentity_t *ent )
 				G_SanitiseString(namelog->name[ j ], name2_s, sizeof(name2_s) );
 				if( strstr( name2_s, name_s ) ) {
 					botent = &g_entities[namelog->slot];
-					botent->bot->debug = turnoff ? qfalse : qtrue;
-					success = qtrue;
-					if(read) {  	
-						if( !Q_stricmp( verb_s, "state") ) {
-							ADMP(va("[%s] State: %d\n", name2_s, botent->bot->state));
-						} else if( !Q_stricmp( verb_s, "navstate") ) {
-							ADMP(va("[%s] NavState: %d\n", name2_s, botent->bot->path.state));
-						} else if( !Q_stricmp( verb_s, "enemy") ) {
-							if(botent->bot->Enemy) {
-								ADMP(va("[%s] Enemy: %s (Visible: %d)\n", 
-										name2_s, 
-										botent->bot->Enemy->client ? botent->bot->Enemy->client->pers.netname : botent->bot->Enemy->classname,
-										(int)G_Visible(botent, botent->bot->Enemy, CONTENTS_SOLID)
-										));
+					if(botent->r.svFlags & SVF_BOT) {
+						botent->bot->debug = turnoff ? qfalse : qtrue;
+						success = qtrue;
+						if(read) {  	
+							if( !Q_stricmp( verb_s, "state") ) {
+								ADMP(va("[%s] State: %d\n", name2_s, botent->bot->state));
+							} else if( !Q_stricmp( verb_s, "navstate") ) {
+								ADMP(va("[%s] NavState: %d\n", name2_s, botent->bot->path.state));
+							} else if( !Q_stricmp( verb_s, "enemy") ) {
+								if(botent->bot->Enemy) {
+									ADMP(va("[%s] Enemy: %s (Visible: %d)\n", 
+											name2_s, 
+											botent->bot->Enemy->client ? botent->bot->Enemy->client->pers.netname : botent->bot->Enemy->classname,
+											(int)G_Visible(botent, botent->bot->Enemy, CONTENTS_SOLID)
+											));
+								} else {
+									ADMP(va("[%s] Enemy: NONE\n", name2_s));
+								}
+							} else if( !Q_stricmp( verb_s, "struct") ) {
+								if(botent->bot->Struct) {
+									ADMP(va("[%s] Struct: %s (Visible: %d)\n", 
+											name2_s, 
+											botent->bot->Struct->classname,
+											(int)G_Visible(botent, botent->bot->Struct, CONTENTS_SOLID)
+											));
+								} else {
+									ADMP(va("[%s] Struct: NONE\n", name2_s));
+								}
+							} else if( !Q_stricmp( verb_s, "friend") ) {
+								if(botent->bot->Friend) {
+									ADMP(va("[%s] Friend: %s (Visible: %d)\n", 
+											name2_s, 
+											botent->bot->Friend->client->pers.netname,
+											(int)G_Visible(botent, botent->bot->Friend, CONTENTS_SOLID)
+											));
+								} else {
+									ADMP(va("[%s] Friend: NONE\n", name2_s));
+								}
+							} else if( !Q_stricmp( verb_s, "xyz") ) {
+								ADMP(va("[%s] XYZ: %f2,%f2,%f2\n", name2_s, botent->s.pos.trBase[0],botent->s.pos.trBase[1],botent->s.pos.trBase[2]));
+							} else if( !Q_stricmp( verb_s, "angles") ) {
+								ADMP(va("[%s] Angles: Pitch %f2, Yaw %f2\n", name2_s, SHORT2ANGLE(botent->client->ps.delta_angles[ PITCH ]), 
+																			 SHORT2ANGLE(botent->client->ps.delta_angles[ YAW ])));
+							} else if( !Q_stricmp( verb_s, "think") ) {
+								ADMP( va("[%s] THINK: LVL1:%d, LVL2:%d, LVL3:%d, MAX:%d \n",  name2_s, 
+										botent->bot->think.state[ THINK_LEVEL_1 ],
+										botent->bot->think.state[ THINK_LEVEL_2 ],
+										botent->bot->think.state[ THINK_LEVEL_3 ],
+										botent->bot->think.state[ THINK_LEVEL_MAX ])
+										);
+							} else if( !Q_stricmp( verb_s, "target") ) {
+								for(j = THINK_LEVEL_1; j < THINK_LEVEL_MAX; j++) {
+									target = &g_entities[ botent->bot->think.target[j] ];
+									ADMP( va("[%s] LVL[%d]: %s \n", name2_s, j, target->client ? target->client->pers.netname : target->classname) );
+								}
+							} else if( !Q_stricmp( verb_s, "targetnode") ) {
+								ADMP(va("[%s] Target Node: %d\n", name2_s, botent->bot->path.targetNode));
+							} else if( !Q_stricmp( verb_s, "health") ) {
+								ADMP(va("[%s] Health PCT : %d\n", name2_s, botGetHealthPct( botent )));
 							} else {
-								ADMP(va("[%s] Enemy: NONE\n", name2_s));
+								ADMP( "^1Unknown read type\n");
+								return qfalse;
 							}
-						} else if( !Q_stricmp( verb_s, "struct") ) {
-							if(botent->bot->Struct) {
-								ADMP(va("[%s] Struct: %s (Visible: %d)\n", 
-										name2_s, 
-										botent->bot->Struct->classname,
-										(int)G_Visible(botent, botent->bot->Struct, CONTENTS_SOLID)
-										));
-							} else {
-								ADMP(va("[%s] Struct: NONE\n", name2_s));
-							}
-						} else if( !Q_stricmp( verb_s, "friend") ) {
-							if(botent->bot->Friend) {
-								ADMP(va("[%s] Friend: %s (Visible: %d)\n", 
-										name2_s, 
-										botent->bot->Friend->client->pers.netname,
-										(int)G_Visible(botent, botent->bot->Friend, CONTENTS_SOLID)
-										));
-							} else {
-								ADMP(va("[%s] Friend: NONE\n", name2_s));
-							}
-						} else if( !Q_stricmp( verb_s, "xyz") ) {
-							ADMP(va("[%s] XYZ: %f2,%f2,%f2\n", name2_s, botent->s.pos.trBase[0],botent->s.pos.trBase[1],botent->s.pos.trBase[2]));
-						} else if( !Q_stricmp( verb_s, "angles") ) {
-							ADMP(va("[%s] Angles: Pitch %f2, Yaw %f2\n", name2_s, SHORT2ANGLE(botent->client->ps.delta_angles[ PITCH ]), 
-																		 SHORT2ANGLE(botent->client->ps.delta_angles[ YAW ])));
-						} else if( !Q_stricmp( verb_s, "think") ) {
-							ADMP( va("[%s] THINK: LVL1:%d, LVL2:%d, LVL3:%d, MAX:%d \n",  name2_s, 
-									botent->bot->think.state[ THINK_LEVEL_1 ],
-									botent->bot->think.state[ THINK_LEVEL_2 ],
-									botent->bot->think.state[ THINK_LEVEL_3 ],
-									botent->bot->think.state[ THINK_LEVEL_MAX ])
-									);
-						} else if( !Q_stricmp( verb_s, "target") ) {
-							for(j = THINK_LEVEL_1; j < THINK_LEVEL_MAX; j++) {
-								target = &g_entities[ botent->bot->think.target[j] ];
-								ADMP( va("[%s] LVL[%d]: %s \n", name2_s, j, target->client ? target->client->pers.netname : target->classname) );
-							}
-						} else if( !Q_stricmp( verb_s, "targetnode") ) {
-							ADMP(va("[%s] Target Node: %d\n", name2_s, botent->bot->path.targetNode));
-						} else if( !Q_stricmp( verb_s, "health") ) {
-							ADMP(va("[%s] Health PCT : %d\n", name2_s, botGetHealthPct( botent )));
-						} else {
-							ADMP( "^1Unknown read type\n");
-							return qfalse;
 						}
 					}
 				}
