@@ -260,6 +260,33 @@ void BotClearQueue( gentity_t *self )
 	self->bot->move.exec = qfalse;
 }
 
+/**
+ * Test if bot is moving
+ * @param self
+ * @param move
+ */
+qboolean BotIsMoving( gentity_t *self, botMove move ) 
+{
+	switch(move) {
+		case BOT_RUN: 			return self->client->pers.cmd.forwardmove == BOT_FWD_FULL_VAL;
+		case BOT_WALK: 			return self->client->pers.cmd.forwardmove == BOT_WALK_VAL;
+		case BOT_JUMP: 			return self->client->pers.cmd.upmove == BOT_JUMP_VAL;
+		case BOT_STOP: 			return self->client->pers.cmd.forwardmove == 0 && self->client->pers.cmd.rightmove == 0;
+		case BOT_CROUCH:		return self->client->pers.cmd.upmove == BOT_CROUCH_VAL;
+		case BOT_WALLWALK:		return self->client->pers.cmd.upmove == BOT_WALLWALK_VAL;
+		case BOT_STAND:			return self->client->pers.cmd.upmove == 0;
+		case BOT_MOVE_LEFT: 	return self->client->pers.cmd.rightmove == BOT_LEFT_VAL;
+		case BOT_MOVE_RIGHT:	return self->client->pers.cmd.rightmove == BOT_RIGHT_VAL;
+		case BOT_MOVE_FWD:		return self->client->pers.cmd.forwardmove > 0;
+		case BOT_MOVE_BACK: 	return self->client->pers.cmd.forwardmove < 0;
+		case BOT_MAIN_ATTACK:	return self->client->pers.cmd.buttons & BUTTON_ATTACK;
+		case BOT_SEC_ATTACK: 	return self->client->pers.cmd.buttons & BUTTON_ATTACK2;
+		case BOT_MID_ATTACK: 	return self->client->pers.cmd.buttons & BUTTON_USE_HOLDABLE;
+		default: //nothing here
+			break;
+	}
+}
+
 //------------------ PUBLIC FUNCTIONS -----------------
 /*
  * These functions serve as shurtcut for: BotAddMove() 

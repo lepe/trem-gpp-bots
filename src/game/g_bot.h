@@ -358,6 +358,8 @@ void BotGesture ( gentity_t *self );
 void BotMainAttack ( gentity_t *self );
 void BotSecAttack ( gentity_t *self );
 void BotMidAttack ( gentity_t *self );
+qboolean BotIsMoving( gentity_t *self, botMove move );
+
 /*
 void BotLookUp( gentity_t *self, int deg );
 void BotLookDown( gentity_t *self, int deg );

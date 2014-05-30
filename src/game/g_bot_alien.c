@@ -554,14 +554,17 @@ void BotAttackAlien( gentity_t *self )
 				} else if(anglediff > 180 && anglediff < 270) {
 					BotMoveRight( self );
 				} else {
-					if(jumpOnZero) {
-						BotJump( self );
-					} else if(self->bot->Enemy->s.modelindex == BA_H_MGTURRET) {
-						if(G_Rand() < 50) {
-							BotMoveLeft( self );
-						} else {
-							BotMoveRight( self );
+					//in any structure, move but not jump
+					if(self->bot->Enemy->s.eType == ET_BUILDABLE) {
+						if(G_Rand() < 20 || !(BotIsMoving(self, BOT_MOVE_LEFT) || (BotIsMoving(self, BOT_MOVE_RIGHT)))) {
+							if(G_Rand() < 50) {
+								BotMoveLeft( self );
+							} else {
+								BotMoveRight( self );
+							}
 						}
+					} else if(jumpOnZero) {
+						BotJump( self );
 					}
 				}
 			}
