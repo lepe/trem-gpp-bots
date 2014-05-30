@@ -947,6 +947,8 @@ typedef struct
 
   int           physicsTime;                        // either cg.snap->time or cg.nextSnap->time
 
+  int           splashTime;                         // cg.time when loading ended
+  
   int           timelimitWarnings;                  // 5 min, 1 min, overtime
   int           fraglimitWarnings;
 
@@ -1286,7 +1288,7 @@ typedef struct
   qhandle_t   alienBuildableBleedPS;
   qhandle_t   humanBuildableBleedPS;
 
-
+  qhandle_t	  splashLogo;
   qhandle_t   teslaZapTS;
 
   sfxHandle_t lCannonWarningSound;

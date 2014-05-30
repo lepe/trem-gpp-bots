@@ -412,6 +412,8 @@ static void CG_MapRestart( void )
   // we really should clear more parts of cg here and stop sounds
 
   trap_Cvar_Set( "cg_thirdPerson", "0" );
+
+  cg.splashTime = cg.time;
 }
 
 /*

@@ -3413,6 +3413,47 @@ static void CG_DrawWarmup( void )
   UI_Text_Paint( 320 - w / 2, 200 + 1.5f * h, size, colorWhite, text, 0, 0, ITEM_TEXTSTYLE_SHADOWED );
 }
 
+//LEPE: imported from CUBOID
+/*
+======================
+CG_DrawSplash
+======================
+*/
+void CG_DrawSplash( void )
+{
+  float t, x, y, w, h, ar;
+  int i;
+  vec4_t color;
+  static qboolean splash_first = qtrue;
+
+  if( splash_first )
+  {
+    cg.splashTime = cg.time;
+    splash_first = qfalse;
+  }
+
+  for( i = 0; i < 3; i++ ) {
+	  color[ i ] = 1.0f;
+  }
+  
+  t = (float)( cg.time - cg.splashTime) / 1000;
+  if(t > 1.0f) t = 1.0f;
+  color[ 3 ] = t;
+
+  if( cg.splashTime + 4000 < cg.time )
+    return;
+
+  ar = ( 4.0f / 3.0f ) / ( (float)cgs.glconfig.vidWidth / cgs.glconfig.vidHeight );
+  h = 164 * ar;
+  w = 512 * ar;
+  x = 320 - w/2;
+  y = 240 - h/2;
+  
+  trap_R_SetColor( color );
+  CG_DrawPic( x, y, w, h, cgs.media.splashLogo );
+  trap_R_SetColor( NULL );
+}
+
 //==================================================================================
 
 /*
@@ -3471,6 +3512,8 @@ static void CG_Draw2D( void )
 
   if( !cg.scoreBoardShowing )
     CG_DrawCenterString( );
+
+  CG_DrawSplash( );
 }
 
 /*
