@@ -283,8 +283,10 @@ qboolean BotIsMoving( gentity_t *self, botMove move )
 		case BOT_SEC_ATTACK: 	return self->client->pers.cmd.buttons & BUTTON_ATTACK2;
 		case BOT_MID_ATTACK: 	return self->client->pers.cmd.buttons & BUTTON_USE_HOLDABLE;
 		default: //nothing here
+			G_Printf("WARN: IsMovement not implemented, returning false: %d\n",move);
 			break;
 	}
+	return qfalse;
 }
 
 //------------------ PUBLIC FUNCTIONS -----------------

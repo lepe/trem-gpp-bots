@@ -3444,8 +3444,8 @@ void CG_DrawSplash( void )
     return;
 
   ar = ( 4.0f / 3.0f ) / ( (float)cgs.glconfig.vidWidth / cgs.glconfig.vidHeight );
-  h = 164 * ar;
-  w = 512 * ar;
+  h = 82 * ar; //half the size
+  w = 256 * ar; //half the size
   x = 320 - w/2;
   y = 240 - h/2;
   

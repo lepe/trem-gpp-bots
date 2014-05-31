@@ -52,7 +52,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BOT_TIMER_NAV_SECOND	1000 / BOT_TIMER_NAV	//used in Blocked code
 #define BOT_TIMER_THINK_LEVEL_3_START_AT	3000  //this shift timer ahead so it won't overlap MAX
 #define BOT_TIMER_THINK_LEVEL_MAX_START_AT	1000  //this shift timer ahead so it won't overlap LVL3
-#define BOT_HIT_TIME		1000
 extern const int BOT_TIMER[];
 
 /*
@@ -191,7 +190,6 @@ typedef struct
   //THINK: variables used to decide per thinking level
   struct {
 	  botState 		state[THINK_LEVEL_MAX + 1];
-	  int 			target[THINK_LEVEL_MAX + 1];
   } think;
   //PATH: variables and properties related to Navigation
   struct {
@@ -294,7 +292,6 @@ typedef struct
 	struct {
 		void (*think)( gentity_t *self );		
 		void (*spec)( gentity_t *self );
-		int  (*target)( gentity_t *self, botThinkLevel level ); 	//target prioritization
 		int  (*targetRank)( gentity_t *self, gentity_t *target, float rank ); 	//target prioritization
 		void (*status[IDLE + 1])( gentity_t *self ); //IDLE will always be the last element in enum
 		void (*nav[LOST + 1])( gentity_t *self ); //Navigation state
@@ -332,7 +329,7 @@ qboolean botFindPath( int *path , int goal, int start );
 qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch);
 qboolean botFindClosestFriend( gentity_t *self );
 qboolean botSameTeam( gentity_t *ent1, gentity_t *ent2 );
-qboolean BotHitTarget( gentity_t *self );
+qboolean BotHitTarget( gentity_t *self, int time );
 gentity_t *botFindClosestBuildable( gentity_t *self, float r, buildable_t buildable );
 gentity_t *botFindDamagedStructure( gentity_t *self, float r, int damage );
 
@@ -414,7 +411,6 @@ void BotRetreatAlien( gentity_t *self );
 void BotAttackAlien( gentity_t *self ); 
 void BotNavigateAlien( gentity_t *self ); 
 void BotBlockedAlien( gentity_t *self ); 
-int BotTargetAlien( gentity_t *self, botThinkLevel level ); 
 int BotTargetRankAlien(gentity_t *self, gentity_t *target, float rank );
 gentity_t *botFindClosestBasilisk( gentity_t *self, float r );
 
@@ -431,5 +427,4 @@ void BotAttackHuman( gentity_t *self );
 void BotNavigateHuman( gentity_t *self ); 
 void BotBlockedHuman( gentity_t *self ); 
 void BotFollowHuman( gentity_t *self ); 
-int BotTargetHuman( gentity_t *self, botThinkLevel level ); 
 int BotTargetRankHuman(gentity_t *self, gentity_t *target, float rank );

@@ -583,21 +583,6 @@ void BotIdleAlien( gentity_t *self ) {
 
 }
 /**
- * Call botFindEnemy based on alien range
- * return id of target
- * @param self
- */
-/*
-int BotTargetAlien( gentity_t *self, botThinkLevel level) {
-	int range;
-	switch(level) {
-		case THINK_LEVEL_3: range = ALIENSENSE_RANGE;
-		case THINK_LEVEL_2: range = g_human_range.integer;
-		default: range = ALIENSENSE_RANGE;
-	}
-	return botFindEnemy( self, range );
-}*/
-/**
  * @param self
  * //TODO: replace hardcoded values
  */

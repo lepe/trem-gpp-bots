@@ -115,10 +115,6 @@ void BotSpectator( gentity_t *self ){
     self->bot->Enemy  = NULL;
 	VectorClear(self->bot->move.topoint);
 	self->lastHealth = self->health;
-	//Reset Enemy list
-	for(t = THINK_LEVEL_MAX; t >= THINK_LEVEL_MIN; t--) {
-		self->bot->think.target[t] = BOT_NO_ENEMY;
-	}
 	G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_COMMON + BOT_DEBUG_THINK, "Bot is spectator\n");
 	//TODO: check what else we need to reset
 }
@@ -137,6 +133,14 @@ int BotTargetRank( gentity_t *self, gentity_t *target ) {
 	rank += 3000 / distance;
 	//--- Add some rand chance (not so high)
 	rank += G_Rand_Range(0, 10);
+	//If we are attacking this target, increase the chance to stick to it (unless we haven't hit it within 5 secs):
+	if(self->bot->Enemy == target) {
+		if(!BotHitTarget( self, 5000 )) {
+			rank -= 30;
+		} else {
+			rank += 30;
+		}
+	}
 	//If its attacking you
 	if(self->client->lasthurt_client == target->s.number) {
 		rank += 10;
@@ -170,10 +174,16 @@ int BotTargetRank( gentity_t *self, gentity_t *target ) {
  */
 void BotFindTarget( gentity_t *self ){
 	int enemy;
+	gentity_t *target;
 	
 	enemy = botFindEnemy( self, g_human_range.integer );
 	if(enemy > BOT_NO_ENEMY) {
-		self->bot->Enemy = &g_entities[ enemy ];
+		target = &g_entities[ enemy ];
+		//If we changed target, reset hit timer
+		if(self->bot->Enemy != target) {
+			self->bot->timer.hit = level.time; 
+		}
+		self->bot->Enemy = target;
 		if(botGetDistanceBetweenPlayer( self , self->bot->Enemy ) < 100) {
 			self->bot->think.state[ THINK_LEVEL_MAX ] = ATTACK;
 		} else {
@@ -182,12 +192,6 @@ void BotFindTarget( gentity_t *self ){
 		//G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_COMMON + BOT_DEBUG_TARGET, "Enemy Found: %s\n", target->client ? target->client->pers.netname : target->classname);
 	} else {
 		//If we don't find an enemy, try using radar
-		/*
-		enemy = botFindEnemy( self, ALIENSENSE_RANGE );
-		if(enemy > BOT_NO_ENEMY) {
-			self->bot->think.target[ THINK_LEVEL_2 ] = enemy;
-		} else {
-		}*/
 		BotResetState( self, ATTACK );
 		self->bot->Enemy = NULL;
 	}

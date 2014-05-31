@@ -629,10 +629,12 @@ void BotAttackHuman( gentity_t *self )
 				} else {
 					BotMoveFwd( self );
 				}
-				//Only if we are close enought that we should hit it 
+				//Only if we are close enough that we should hit it 
 				if(distance < FLAMER_RADIUS) {
-					if(!BotHitTarget( self )) {
-						
+					if(!BotHitTarget( self , 1000 )) {
+						BotStand( self );
+						BotAddMove( self, G_Rand() < 50 ? BOT_MOVE_LEFT : BOT_MOVE_RIGHT, BOT_TIMER_ACTION);
+						BotStartMove( self, BOT_EMPTY_MOVE );
 					}
 				}
 			}
@@ -648,8 +650,10 @@ void BotAttackHuman( gentity_t *self )
 					BotStop( self );
 					BotCrouch( self );
 				}
-				if(!BotHitTarget( self )) {
-					
+				if(!BotHitTarget( self, 1000 )) {
+					BotAddMove( self, G_Rand() < 50 ? BOT_MOVE_LEFT : BOT_MOVE_RIGHT, BOT_TIMER_ACTION);
+					BotAddMove( self, G_Rand() < 50 ? BOT_MOVE_FWD: BOT_MOVE_BACK, BOT_TIMER_ACTION);
+					BotStartMove( self, BOT_EMPTY_MOVE );
 				}
 			}
 		}
@@ -717,20 +721,6 @@ void BotIdleHuman( gentity_t *self ) {
 	}
 }
 /**
- * Call botFindEnemy based on human range
- * @param self
- * @return 
- *//*
-int BotTargetHuman( gentity_t *self, botThinkLevel level ) {
-	int range;
-	switch(level) {
-		case THINK_LEVEL_3: range = HELMET_RANGE;
-		case THINK_LEVEL_2: range = g_human_range.integer;
-		default: range = HELMET_RANGE;
-	}
-	return botFindEnemy( self, range );
-}*/
-/**
  * Think the best target to attack
  * @param self
  * //TODO: replace hardcoded values
@@ -739,7 +729,7 @@ int BotTargetRankHuman( gentity_t *self, gentity_t *target, float rank ) {
 	int sd;
 	int distance;
 	
-	//If we can't see it and we don't have a helmet, forget it
+	//If we can't see it and we don't have a helmet, forget it. 
 	//TODO: record last known location, and if there is no other enemies around, go and explore it
 	//if(!(BG_InventoryContainsUpgrade( UP_HELMET, self->client->ps.stats) || 
 	if(!G_Visible(self, target, CONTENTS_SOLID)) {

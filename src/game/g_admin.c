@@ -3451,7 +3451,6 @@ qboolean G_admin_botdbg( gentity_t *ent )
 	char verb[ MAX_NAME_LENGTH ];
 	char verb_s[ MAX_NAME_LENGTH ];
   	gentity_t *botent;
-  	gentity_t *target;
 	qboolean turnoff = qfalse;
 	qboolean success = qfalse;
 	qboolean read	 = qfalse;
@@ -3551,11 +3550,6 @@ qboolean G_admin_botdbg( gentity_t *ent )
 										botent->bot->think.state[ THINK_LEVEL_3 ],
 										botent->bot->think.state[ THINK_LEVEL_MAX ])
 										);
-							} else if( !Q_stricmp( verb_s, "target") ) {
-								for(j = THINK_LEVEL_1; j < THINK_LEVEL_MAX; j++) {
-									target = &g_entities[ botent->bot->think.target[j] ];
-									ADMP( va("[%s] LVL[%d]: %s \n", name2_s, j, target->client ? target->client->pers.netname : target->classname) );
-								}
 							} else if( !Q_stricmp( verb_s, "targetnode") ) {
 								ADMP(va("[%s] Target Node: %d\n", name2_s, botent->bot->path.targetNode));
 							} else if( !Q_stricmp( verb_s, "health") ) {

@@ -231,16 +231,6 @@ int botFindEnemy( gentity_t *self, int maxRange ) {
 
 	for( i = 0; i < total_entities; i++ ) {
 		target = &g_entities[ entityList[ i ] ];
-		//Search for any enemy entity (player or structure)
-		/*
-		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_UTIL + BOT_DEBUG_TARGET, "TESTS: %p %d %d %p %d %d\n",
-				target,
-				(int)target->inuse,
-				target->health,
-				target->client,
-				target->s.eType,
-				(int)botSameTeam(self, target)
-				);*/
 		if(target && target->inuse && target->health > 0 &&
 		  (target->client || target->s.eType == ET_BUILDABLE) &&! botSameTeam(self, target))
 		{
@@ -446,14 +436,19 @@ qboolean botSameTeam( gentity_t *ent1, gentity_t *ent2 )
 }
 
 /**
- * Check if bot is hitting a target
+ * Check if bot is hitting a target within a period of time
+ * @param self [gentity_t]
+ * @param time [int] 
+ * //TODO: when humans change weapon, e.g to BLASTER, it may not hit the
+ * target anymore. We need to consider also the case in which the bot
+ * hit the target before and it was moved for some reason (explosion, etc)
  */
-qboolean BotHitTarget( gentity_t *self ) {
+qboolean BotHitTarget( gentity_t *self, int time ) {
 	qboolean hit;
 	hit = (self->bot->Enemy->credits[ self->s.clientNum ] > 0);
 	if(hit) {
 		self->bot->timer.hit = level.time;
-	} else if(level.time - self->bot->timer.hit > BOT_HIT_TIME) {
+	} else if(level.time - self->bot->timer.hit > time) {
 		hit = qfalse;
 	} else {
 		hit = qtrue;
