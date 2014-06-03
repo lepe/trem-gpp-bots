@@ -59,7 +59,7 @@ void BotTargetPath( gentity_t *self )
 	}
 	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_NAVSTATE, "Targeting path: %d, FoundTime: %d\n", self->bot->path.targetNode, level.time - self->bot->timer.foundPath);
 	//G_Printf("Target: %d, Distance %d\n",self->bot->path.targetNode, distanceToTargetNode(self));
-	if(distanceToTargetNode(self) < 70) 
+	if(distanceToTargetNode(self) < 100) 
 	{
 		//We set a crumb of our path
 		setCrumb( self, self->bot->path.targetNode ); 
@@ -204,11 +204,11 @@ void BotFindNextPath( gentity_t *self )
 					pathessence[i] = level.paths[possiblepaths[i]].essence[ self->client->pers.teamSelection ];
 					essence = pathessence[i] > 50 ? GOOD_ESSENCE : (pathessence[i] < 50 ? BAD_ESSENCE : NO_ESSENCE);
 					if(known == qfalse && essence == GOOD_ESSENCE) {
-						pathrank[i] = 50;                    
+						pathrank[i] = 200;                    
 					} else if(known == qfalse && essence == NO_ESSENCE) {
-						pathrank[i] = 30;                    
+						pathrank[i] = 100;                    
 					} else if(known == qtrue && (essence == GOOD_ESSENCE || essence == NO_ESSENCE)) {
-						pathrank[i] = 15;                    
+						pathrank[i] = 50;                    
 					} else if(known == qfalse) { //bad essence implied
 						pathrank[i] = 5;                    
 					} else { //known && bad essence implied
@@ -330,7 +330,7 @@ void increasePathEssence( gentity_t *self, gentity_t *target, int essence ) {
 		if(level.paths[ self->bot->path.crumb[i] ].essence[ self->client->pers.teamSelection ] < 50) level.paths[ self->bot->path.crumb[i] ].essence[ self->client->pers.teamSelection ] = 50;
 		if(level.paths[ self->bot->path.crumb[i] ].essence[ self->client->pers.teamSelection ] < 100) {
 			level.paths[ self->bot->path.crumb[i] ].essence[ self->client->pers.teamSelection ] += essence ; //for now just increment in 1...
-			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"Increasing: %i of total: %i (value: %i)\n",self->bot->path.crumb[i], self->bot->path.numCrumb, level.paths[ self->bot->path.crumb[i] ].essence[ self->client->pers.teamSelection ]);
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"Increasing [%i] essence of node: %i to value: %i\n", essence, self->bot->path.crumb[i], level.paths[ self->bot->path.crumb[i] ].essence[ self->client->pers.teamSelection ]);
 		}
 	}
 	if(target->s.eType == ET_BUILDABLE) {
@@ -346,7 +346,10 @@ void increasePathEssence( gentity_t *self, gentity_t *target, int essence ) {
 		if(botFindPath( path, target_close_node, 1 )) {
 			//if we found a path to the target, propagate essence to that point
 			for(i = 1; i < BOT_FIND_PATH_MAX; i++) {
-				level.paths[ path[i] ].essence[ self->client->pers.teamSelection ] += essence;
+				if(path[i] > -1) {
+					level.paths[ path[i] ].essence[ self->client->pers.teamSelection ] += essence;
+					G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_NAV + BOT_DEBUG_PATH,"Increasing [%i] essence of node: %i to value: %i (propagation)\n", essence, path[i], level.paths[ path[i] ].essence[ self->client->pers.teamSelection ]);
+				}
 			}
 		}
 	}

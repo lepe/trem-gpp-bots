@@ -35,7 +35,6 @@ v.2.0
 * Bots do something on maps without nodes (nothing great yet)
 * Bots can walk and aim at two different directions (experimental: off)
 * Bots aim is not instant (experimental: off)
-* Targets are chosen on proximity (before was on entity order)
 * Human bots now have basic repair capabilities
 * Human bots try to keep a distance when attacking structures (except saw and flame weapons)
 * teams are not locked anymore and 2 bots by team are deployed by default
@@ -43,6 +42,8 @@ v.2.0
 * bots/start.cfg is executed on map load
 * Essence is now divided by team. dnodes have new parameters: [aliens|humans|off]
 * Bots will use target prioritization to choose between enemies
+* FriendFire awareness implemented.
+* Hit detection which prevent humans to hit the wall for long time.
 * Introduced (but not fully implemented): profiles, range behavior, group thinking, hit detection, some bot states as RUSH,PATROL,etc
 
 v.16

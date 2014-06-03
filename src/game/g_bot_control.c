@@ -114,6 +114,7 @@ void BotAddMove( gentity_t *self, botMove move, int time ) {
  * @param self
  */
 void BotCleanMove( gentity_t *self ) {
+	char *movement;
 	/* 
 	 * We need to clear the upmove value in the next cycle after
 	 * jumping or we can't jump again immediately.
@@ -121,11 +122,13 @@ void BotCleanMove( gentity_t *self ) {
 	switch(self->bot->move.queue[ self->bot->move.read ].action) {
 		case BOT_JUMP:
 			self->client->pers.cmd.upmove = 0;
+			movement = "JUMP";
 		break;
 		case BOT_MOVE_LEFT:
 		case BOT_MOVE_RIGHT:
 			if(self->bot->move.queue[ self->bot->move.read ].time > 0) {
 				self->client->pers.cmd.rightmove = 0;
+				movement = "RESET LEFT-RIGHT";
 			}
 			break;
 		case BOT_MOVE_FWD:
@@ -133,6 +136,7 @@ void BotCleanMove( gentity_t *self ) {
 		case BOT_RUN:
 			if(self->bot->move.queue[ self->bot->move.read ].time > 0) {
 				self->client->pers.cmd.forwardmove = 0;
+				movement = "RESET FWD-BACK";
 			}
 			break;
 		case BOT_GESTURE:
@@ -140,109 +144,139 @@ void BotCleanMove( gentity_t *self ) {
 		case BOT_SEC_ATTACK:
 		case BOT_MID_ATTACK:
 			self->client->pers.cmd.buttons = 0;
+			movement = "RESET BUTTONS";
 			break;
 		default:
+			movement = "";
 			break;
 	}
+	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_CONTROL, "Clear: %s\n", movement);
 }
 /**
  * Executes the action to control the bot
  * @param self
  */
 void BotControl( gentity_t *self, botMove move ) {
+	char *movement;
 	//If we are executing something and it matches the blockedAction,  don't do anything
 	if(self->bot->timer.move > 0) {
 		if(move == self->bot->move.blockedAction) return;
 		if(move == BOT_RESET_BUTTONS || move == BOT_RESET_LEFT_RIGHT || move == BOT_RESET_FWD_BACK || move == BOT_STOP) return;
 	}
-	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_CONTROL, "Movement: %d\n", move);
 	switch(move) {
 		case BOT_WAIT: 
 			/*this is a dummy movement. Is used to preserve previous momentum. 
 			 *For example, if you want the bot to go left and after 2 sec to jump, 
 			 *you can set: BotMoveLeft( self ); BotWait( self, 2000 ); BotJump( self );
 			 */
+			movement = "WAIT";
 			break;
 		case BOT_RUN: 				
 			self->client->pers.cmd.forwardmove = BOT_FWD_FULL_VAL;
+			movement = "RUN";
 			break;
 		case BOT_WALK: //silent walk
 			self->client->pers.cmd.forwardmove = BOT_WALK_VAL;
+			movement = "WALK";
 			break;
 		case BOT_JUMP: 				
 			self->client->pers.cmd.upmove = BOT_JUMP_VAL;
+			movement = "JUMP";
 			break;
 		case BOT_STOP: 				
 			self->client->pers.cmd.buttons = 0;
 			self->client->pers.cmd.forwardmove = 0;
 			self->client->pers.cmd.rightmove = 0;
+			movement = "STOP";
 			break;
 		case BOT_CROUCH: 			
 			self->client->pers.cmd.upmove = BOT_CROUCH_VAL;
+			movement = "CROUCH";
 			break;
 		case BOT_WALLWALK:			
 			if( BG_ClassHasAbility( self->client->ps.stats[ STAT_CLASS ], SCA_WALLCLIMBER ) ) { //LEPE: if possible
 				self->client->pers.cmd.upmove = BOT_WALLWALK_VAL;
+				movement = "WALLWALK";
 			}
 			break;
 		case BOT_STAND:
 			self->client->pers.cmd.upmove = 0;
+			movement = "STAND";
 			break;
 		case BOT_MOVE_LEFT: 		
 			self->client->pers.cmd.rightmove = BOT_LEFT_VAL;
+			movement = "MOVE LEFT";
 			break;
 		case BOT_MOVE_RIGHT:		
 			self->client->pers.cmd.rightmove = BOT_RIGHT_VAL;
+			movement = "MOVE RIGHT";
 			break;
 		case BOT_MOVE_FWD:			
 			self->client->pers.cmd.forwardmove = BOT_FWD_VAL;
+			movement = "MOVE FORWARD";
 			break;
 		case BOT_MOVE_BACK: 		
 			self->client->pers.cmd.forwardmove = BOT_BCK_VAL;
+			movement = "MOVE BACKWARD";
 			break;
 		case BOT_LOOK_CENTER:
 			self->client->ps.delta_angles[ PITCH ] = 0;
+			movement = "LOOK CENTER";
 			break;
 		case BOT_LOOK_UP:			
  			self->client->ps.delta_angles[ PITCH ] -= ANGLE2SHORT( BOT_TURN_VAL ); //this makes bots to move aim in Z angles
+			movement = "LOOK UP";
 			break;
 		case BOT_LOOK_DOWN: 		
  			self->client->ps.delta_angles[ PITCH ] += ANGLE2SHORT( BOT_TURN_VAL ); //this makes bots to move aim in Z angles
+			movement = "LOOK DOWN";
 			break;
 		case BOT_LOOK_RANDOM:
 			self->client->ps.delta_angles[ YAW ] = ANGLE2SHORT( G_Rand_Range(1, 360) );
+			movement = "LOOK RANDOM";
 			break;		
 		case BOT_LOOK_LEFT:			
 			self->client->ps.delta_angles[ YAW ] += ANGLE2SHORT( BOT_TURN_VAL );
+			movement = "LOOK LEFT";
 			break;
 		case BOT_LOOK_RIGHT:		
 			self->client->ps.delta_angles[ YAW ] -= ANGLE2SHORT( BOT_TURN_VAL );
+			movement = "LOOK RIGHT";
 			break;
 		case BOT_MAIN_ATTACK:
 			self->client->pers.cmd.buttons |= BUTTON_ATTACK;
+			movement = "MAIN BUTTON";
 			break;
 		case BOT_SEC_ATTACK:
 			self->client->pers.cmd.buttons |= BUTTON_ATTACK2;
+			movement = "SEC. BUTTON";
 			break;
 		case BOT_MID_ATTACK:
 			self->client->pers.cmd.buttons |= BUTTON_USE_HOLDABLE;
+			movement = "MID. BUTTON";
 			break;
 		case BOT_GESTURE:
 			self->client->pers.cmd.buttons |= BUTTON_GESTURE;
+			movement = "GESTURE";
 			break;
 		case BOT_RESET_BUTTONS:
 			self->client->pers.cmd.buttons = 0;
+			movement = "RESET BUTTONS";
 			break;
 		case BOT_RESET_LEFT_RIGHT:
 			self->client->pers.cmd.rightmove = 0;
+			movement = "RESET LEFT-RIGHT";
 			break;
 		case BOT_RESET_FWD_BACK:
 			self->client->pers.cmd.forwardmove = 0;
+			movement = "RESET FWD-BACK";
 			break;
 		default:
+			movement = "";
 			G_Printf("Invalid Bot Movement: %d\n", move);
 			break;
 	}
+	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_CONTROL, "Movement: %s\n", movement);
 }
 /**
  * Clears queue (usually when bot is dead)
@@ -258,6 +292,7 @@ void BotClearQueue( gentity_t *self )
 	self->bot->move.write = 0;
 	self->bot->move.read = 0;
 	self->bot->move.exec = qfalse;
+    G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_CONTROL, "Queue Cleared.\n");
 }
 
 /**
@@ -309,11 +344,32 @@ void BotGesture ( gentity_t *self )	{ BotControl( self, BOT_GESTURE ); }
 void BotMainAttack ( gentity_t *self ){ BotControl( self, BOT_MAIN_ATTACK ); }
 void BotSecAttack ( gentity_t *self ){ BotControl( self, BOT_SEC_ATTACK ); }
 void BotMidAttack ( gentity_t *self ){ BotControl( self, BOT_MID_ATTACK ); }
-
+/*
+ LOOK functions
+ */
+void BotLookUp( gentity_t *self, int degrees )	 {
+ 	self->client->ps.delta_angles[ PITCH ] -= ANGLE2SHORT( degrees ); 
+	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_CONTROL, "Look Up: %d deg.\n", degrees);
+}
+void BotLookDown( gentity_t *self, int degrees ) { 
+ 	self->client->ps.delta_angles[ PITCH ] += ANGLE2SHORT( degrees ); 
+	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_CONTROL, "Look Down: %d deg.\n", degrees);
+}
+void BotLookLeft( gentity_t *self, int degrees ) { 
+	self->client->ps.delta_angles[ YAW ] += ANGLE2SHORT( degrees );
+	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_CONTROL, "Look Left: %d deg.\n", degrees);
+}
+void BotLookRight( gentity_t *self, int degrees ){ 
+	self->client->ps.delta_angles[ YAW ] -= ANGLE2SHORT( degrees );
+	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_CONTROL, "Look Right: %d deg.\n", degrees);
+}
 //########### ALIEN SPECIFIC ################
 //void Charge( gentity_t *self ) {}
 void Bot_Pounce( gentity_t *self, int angle )	{ 
+	BotControl( self, BOT_LOOK_CENTER );
+	BotLookUp( self, angle );
 	BotAddMove( self, BOT_SEC_ATTACK, LEVEL3_POUNCE_TIME_UPG ); 
+	BotAddMove( self, BOT_LOOK_CENTER, 0 );
 	BotStartMove( self, BOT_SEC_ATTACK );
 }
 

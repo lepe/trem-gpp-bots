@@ -65,11 +65,11 @@ void BotInitAlien( gentity_t *self ) {
 	self->bot->set.marauder[S3] 	= 5;
 	self->bot->set.marauder[S2] 	= 70;
 	self->bot->set.marauder[S1]		= 70;
-	self->bot->set.adv_basilisk[S3]	= 10;
-	self->bot->set.adv_basilisk[S2]	= 30;
+	self->bot->set.adv_basilisk[S3]	= 30;
+	self->bot->set.adv_basilisk[S2]	= 60;
 	self->bot->set.basilisk[S3] 	= 5;
-	self->bot->set.basilisk[S2] 	= 20;
-	self->bot->set.basilisk[S1] 	= 50;
+	self->bot->set.basilisk[S2] 	= 50;
+	self->bot->set.basilisk[S1] 	= 70;
 }
 /**
  * Decide if spawn as dretch or granger
@@ -123,7 +123,7 @@ void BotAlienThink( gentity_t *self )
 	///////////////////////// LEVEL MAX /////////////////////////
  	if(BotKeepThinking( self, THINK_LEVEL_MAX )) { 
 		if(self->client->pers.classSelection > PCL_ALIEN_LEVEL1_UPG && botGetHealthPct( self ) < 30) {
-			self->bot->think.state[ THINK_LEVEL_3 ] = RETREAT;
+		//	self->bot->think.state[ THINK_LEVEL_3 ] = RETREAT; Not yet. We need to evaluate more the situation
 		}
 	}
 	
@@ -134,24 +134,35 @@ void BotAlienThink( gentity_t *self )
  */
 void BotNavigateAlien( gentity_t *self )
 {
+	int angle;
+	int distance = distanceToTargetNode(self);
 	if( BG_ClassHasAbility( self->client->ps.stats[ STAT_CLASS ], SCA_WALLCLIMBER ) ) { //LEPE: if possible
 		if(G_Rand() < 70) {
 			BotWallWalk( self );
 		} else {
 			BotStand( self );
 		}
-	} else if(G_Rand() < 90 &&
-			(self->client->pers.classSelection == PCL_ALIEN_LEVEL2 || 
+	} else if((self->client->pers.classSelection == PCL_ALIEN_LEVEL2 || 
 			self->client->pers.classSelection == PCL_ALIEN_LEVEL2_UPG)) {
-				BotJump( self );
+				if(distance > 400) {
+					BotJump( self );
+				}
 	} else if((self->client->pers.classSelection == PCL_ALIEN_LEVEL3 && 
 			  self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG) || 
 			 (self->client->pers.classSelection == PCL_ALIEN_LEVEL3_UPG && 
 			  self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG_UPG)) {
-				BotRun( self );
-				if(G_Rand() < 30) Bot_Pounce( self, 30 );
+				if(distance > 400) {
+						 if(distance < 500) angle = 10;
+					else if(distance < 700) angle = 15;
+					else if(distance < 900) angle = 20;
+					else if(distance < 1200) angle = 25;
+					else angle = 45;
+					Bot_Pounce( self, angle );
+				}
 	} else if(self->client->pers.classSelection == PCL_ALIEN_LEVEL4) {
-		BotSecAttack( self );
+		if(distance > 250) {
+			BotSecAttack( self );
+		}
 	}
 }
 /**
@@ -180,6 +191,7 @@ void BotBlockedAlien( gentity_t *self )
 	} else if(try < BOT_TIMER_NAV_SECOND) {
 		if(!canwallwalk || try % BOT_TIMER_NAV_SECOND == 0) BotJump( self ); 
 	} else if(try == BOT_TIMER_NAV_SECOND) {
+		BotFindNewPath( self ); //Testing
 		BotControl( self, BOT_LOOK_RANDOM );
 	} else if(try > BOT_TIMER_NAV_SECOND) {
 		if(!canwallwalk || try % BOT_TIMER_NAV_SECOND == 0) BotJump( self );
@@ -202,14 +214,25 @@ void BotBlockedAlien( gentity_t *self )
 void BotEvolve( gentity_t *self )
 {
 	vec3_t origin;
-	qboolean classfound = qfalse;
 	class_t class = PCL_NONE;
+	qboolean classfound = qfalse;
+	qboolean lowclass = qfalse;
 	int levels;
 	int clientNum;
-	qboolean lowclass = qfalse;
+	int randval;
+	int sincelast;
+
 	clientNum = self->client - level.clients;
+	sincelast = level.time - self->bot->timer.improve; //TODO: use sincelast to decide probability
+	
+	//Do not evolve right away.
+	if(sincelast < 5000) return;
+	
 	self->bot->timer.improve = level.time;
-	if(G_Rand() < self->bot->set.tyrant[g_alienStage.integer] && classfound == qfalse && g_bot_tyrant.integer > 0)
+
+	randval = (G_Rand() - ((self->client->pers.credit / ALIEN_MAX_CREDITS) * 100));
+	
+	if(randval < self->bot->set.tyrant[g_alienStage.integer] && g_bot_tyrant.integer > 0)
 	{
 		class = PCL_ALIEN_LEVEL4;
  		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
@@ -234,11 +257,9 @@ void BotEvolve( gentity_t *self )
       {
         classfound=qfalse;
       }
-	if(classfound != qfalse)
-	  classfound=qtrue;
 	  
 	}
-	if(G_Rand() < self->bot->set.adv_goon[g_alienStage.integer] && classfound == qfalse && g_bot_advgoon.integer > 0)
+	if(randval < self->bot->set.adv_goon[g_alienStage.integer] && classfound == qfalse && g_bot_advgoon.integer > 0)
 	{
 		class = PCL_ALIEN_LEVEL3_UPG;
 		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
@@ -264,10 +285,8 @@ void BotEvolve( gentity_t *self )
       {
         classfound=qfalse;
       }
-	if(classfound != qfalse)
-	  classfound=qtrue;
 	}
-	if(G_Rand() < self->bot->set.adv_marauder[g_alienStage.integer] && classfound == qfalse && g_bot_advmara.integer > 0)
+	if(randval < self->bot->set.adv_marauder[g_alienStage.integer] && classfound == qfalse && g_bot_advmara.integer > 0)
 	{
 		class = PCL_ALIEN_LEVEL2_UPG;
  		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
@@ -292,10 +311,8 @@ void BotEvolve( gentity_t *self )
       {
         classfound=qfalse;
       }
-	if(classfound != qfalse)
-	  classfound=qtrue;
 	}
-	if(G_Rand() < self->bot->set.marauder[g_alienStage.integer] && classfound == qfalse && g_bot_mara.integer > 0)
+	if(randval < self->bot->set.marauder[g_alienStage.integer] && classfound == qfalse && g_bot_mara.integer > 0)
 	{
 		class = PCL_ALIEN_LEVEL2;
  		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
@@ -320,10 +337,8 @@ void BotEvolve( gentity_t *self )
       {
         classfound=qfalse;
       }
-	if(classfound != qfalse)
-	  classfound=qtrue;
 	}
-	if(G_Rand() < self->bot->set.adv_basilisk[g_alienStage.integer] && classfound == qfalse && g_bot_advbasi.integer > 0)
+	if(randval < self->bot->set.adv_basilisk[g_alienStage.integer] && classfound == qfalse && g_bot_advbasi.integer > 0)
 	{
 		class = PCL_ALIEN_LEVEL1_UPG;
  		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
@@ -341,7 +356,7 @@ void BotEvolve( gentity_t *self )
  			classfound = qtrue;
  		}
 	}
-	if(G_Rand() < self->bot->set.goon[g_alienStage.integer] && classfound == qfalse && g_bot_goon.integer > 0)
+	if(randval < self->bot->set.goon[g_alienStage.integer] && classfound == qfalse && g_bot_goon.integer > 0)
 	{
 		class = PCL_ALIEN_LEVEL3;
  		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
@@ -367,10 +382,8 @@ void BotEvolve( gentity_t *self )
       {
         classfound=qfalse;
       }
-	if(classfound != qfalse)
-	  classfound=qtrue;
 	}
-	if(G_Rand() < self->bot->set.basilisk[g_alienStage.integer] && classfound == qfalse && g_bot_basi.integer > 0)
+	if(randval < self->bot->set.basilisk[g_alienStage.integer] && classfound == qfalse && g_bot_basi.integer > 0)
 	{
 		class = PCL_ALIEN_LEVEL1;
  		levels = BG_ClassCanEvolveFromTo( self->client->pers.classSelection,
@@ -396,8 +409,6 @@ void BotEvolve( gentity_t *self )
       {
         classfound=qfalse;
       }
-	if(classfound != qfalse)
-	  classfound=qtrue;
 	}
 	if(classfound == qtrue)
 	{
@@ -408,7 +419,9 @@ void BotEvolve( gentity_t *self )
 			self->client->pers.evolveHealthFraction = 0.0f;
 		else if( self->client->pers.evolveHealthFraction > 1.0f )
 			self->client->pers.evolveHealthFraction = 1.0f;
-		if(lowclass == qfalse){G_AddCreditToClient( self->client, -(short)levels, qtrue );}
+		if(lowclass == qfalse){
+			G_AddCreditToClient( self->client, -(short)levels, qtrue );
+		}
 		self->client->pers.classSelection = class;
 		ClientUserinfoChanged( clientNum, qfalse );
 		VectorCopy( origin, self->s.pos.trBase );
@@ -443,9 +456,9 @@ void BotAttackAlien( gentity_t *self )
 			BotRun( self );
 			//If we are not close enough and the target is a bot or a player, strafe
 			//TODO: we could apply bot difficulty here. Like, easy bots will not strafe
-			if(distance > veryCloseDistance && self->bot->Enemy->s.eType == ET_PLAYER) {
+			if(distance > (veryCloseDistance * 2)) {
 				Bot_Strafe( self );
-			} else {
+			} else if(distance < veryCloseDistance) {
 				//TODO: test it
 				BotClearQueue( self ); //remove queued movements (probably Strafe), as we are too close
 			}
@@ -469,17 +482,17 @@ void BotAttackAlien( gentity_t *self )
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL0)//dretch
             {
-				//do nothing special yet
+					flank = qtrue;
+					jumpOnZero = qtrue;
             }
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL1)//basilisk
 			{
 				if (distance <= LEVEL1_CLAW_RANGE) {
 					BotMainAttack( self );
-					BotWalk( self );
 				}
 				if (distance <= LEVEL1_GRAB_RANGE) {
-					BotWalk( self );
 					flank = qtrue;
+					jumpOnZero = qtrue;
 				}
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL1_UPG)//adv basilisk
@@ -491,8 +504,6 @@ void BotAttackAlien( gentity_t *self )
  					BotSecAttack( self );
 				}
 				if (distance <= LEVEL1_GRAB_U_RANGE) {
-					BotStop( self );
-					BotWalk( self );
 					flank = qtrue;
 					jumpOnZero = qtrue;
 				}
@@ -503,6 +514,9 @@ void BotAttackAlien( gentity_t *self )
 					BotMainAttack( self );
 					flank = qtrue;
 					jumpOnZero = qtrue;
+				}
+				if(self->bot->Enemy->s.eType == ET_PLAYER) {
+					BotJump( self );
 				}
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL2_UPG)//adv marauder
@@ -515,11 +529,15 @@ void BotAttackAlien( gentity_t *self )
 				if (distance <= LEVEL2_AREAZAP_RANGE) {
  					BotSecAttack( self );
 				}
+				if(self->bot->Enemy->s.eType == ET_PLAYER) {
+					BotJump( self );
+				}
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL3)//dragon
 			{
-				if(distance > LEVEL3_CLAW_RANGE && self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG) {
- 					BotSecAttack( self );
+				if(distance > LEVEL3_CLAW_RANGE && self->client->ps.stats[ STAT_MISC ] == 0) { // < LEVEL3_POUNCE_JUMP_MAG) {
+ 					//BotSecAttack( self );
+					Bot_Pounce( self , 10 );
 				} else {
 					BotMainAttack( self );
 					flank = qtrue;
@@ -531,8 +549,9 @@ void BotAttackAlien( gentity_t *self )
 				if(self->client->ps.ammo > 0 && distance > 150) {
 					   BotMidAttack( self ); 
 				}
-				if(distance > LEVEL3_CLAW_UPG_RANGE && self->client->ps.stats[ STAT_MISC ] < LEVEL3_POUNCE_JUMP_MAG_UPG) {
- 					BotSecAttack( self ); //TODO: should Bot_Pounce be used here?
+				if(distance > LEVEL3_CLAW_UPG_RANGE && self->client->ps.stats[ STAT_MISC ] == 0) { // < LEVEL3_POUNCE_JUMP_MAG_UPG) {
+ 					//BotSecAttack( self ); 
+					Bot_Pounce( self , 10 );
 				} else {
 					BotMainAttack( self );
 					flank = qtrue;
@@ -599,12 +618,12 @@ int BotTargetRankAlien(gentity_t *self, gentity_t *target, float rank ) {
 	sd = G_TimeTilSuddenDeath() <= 0 ? 2 : 1;
 	if(target->s.eType == ET_BUILDABLE) {
 		if(self->client->pers.classSelection > PCL_ALIEN_LEVEL0 || !target->powered) {
-			if(self->health >= 100) rank += 20;
-			else if(self->health >= 200) rank += 40;
+			if(self->health >= 100) rank += 30;
+			else if(self->health >= 200) rank += 60;
 
 			switch(target->s.modelindex) {
-				case BA_H_REACTOR:  rank += (50 * sd); break;
-				case BA_H_SPAWN: 	rank += (30 * sd); break;
+				case BA_H_SPAWN: 	rank += (50 * sd); break;
+				case BA_H_REACTOR:  rank += (30 * sd); break;
 				case BA_H_MEDISTAT:	rank += (25 * sd); break;
 				case BA_H_ARMOURY:  rank += (20 * sd); break;
 				case BA_H_REPEATER: rank += (25 * sd); break;

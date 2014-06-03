@@ -779,8 +779,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
 				ent->bot->timer.aim = 0;
 				ent->bot->funcs.base.aim( ent );
 			}
-			//Perform navigation
-			if(ent->bot->timer.nav >= BOT_TIMER_NAV) {
+			//Perform navigation (some states)
+			if(ent->bot->state != ATTACK && ent->bot->timer.nav >= BOT_TIMER_NAV) {
 				//Reset nav timer
 				ent->bot->timer.nav = 0;
 				//Keep current state, so we can debug when it changes

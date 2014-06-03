@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 //Adjust this value if move actions are being discarded
 #define BOT_MOVE_QUEUE		10
-#define BOT_FIND_PATH_MAX	10
+#define BOT_FIND_PATH_MAX	20
 #define BOT_TURN_VAL		45.0f
 #define BOT_TURN_SHORT		ANGLE2SHORT( BOT_TURN_VAL )
 #define BOT_TURN_ANGLE_DIV	(360.0f / (float)BOT_TURN_VAL)
@@ -191,6 +191,9 @@ typedef struct
   struct {
 	  botState 		state[THINK_LEVEL_MAX + 1];
   } think;
+  struct {
+  	  int		targetHits; //used in hit detection to check if we were able to hit the target
+  } var;
   //PATH: variables and properties related to Navigation
   struct {
 	  botNavState	state;
@@ -330,6 +333,7 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch);
 qboolean botFindClosestFriend( gentity_t *self );
 qboolean botSameTeam( gentity_t *ent1, gentity_t *ent2 );
 qboolean BotHitTarget( gentity_t *self, int time );
+void BotResetHitTarget( gentity_t *self );
 gentity_t *botFindClosestBuildable( gentity_t *self, float r, buildable_t buildable );
 gentity_t *botFindDamagedStructure( gentity_t *self, float r, int damage );
 
@@ -355,6 +359,10 @@ void BotGesture ( gentity_t *self );
 void BotMainAttack ( gentity_t *self );
 void BotSecAttack ( gentity_t *self );
 void BotMidAttack ( gentity_t *self );
+void BotLookUp( gentity_t *self, int degrees );
+void BotLookDown( gentity_t *self, int degrees ); 
+void BotLookLeft( gentity_t *self, int degrees ); 
+void BotLookRight( gentity_t *self, int degrees ); 
 qboolean BotIsMoving( gentity_t *self, botMove move );
 
 /*

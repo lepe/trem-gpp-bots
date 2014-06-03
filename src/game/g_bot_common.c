@@ -181,7 +181,7 @@ void BotFindTarget( gentity_t *self ){
 		target = &g_entities[ enemy ];
 		//If we changed target, reset hit timer
 		if(self->bot->Enemy != target) {
-			self->bot->timer.hit = level.time; 
+			BotResetHitTarget( self );
 		}
 		self->bot->Enemy = target;
 		if(botGetDistanceBetweenPlayer( self , self->bot->Enemy ) < 100) {
@@ -457,6 +457,14 @@ void BotIdle( gentity_t *self ){
  */
 void BotAttack( gentity_t *self ){
 	self->bot->timer.foundPath = level.time;
+	//Try to avoid hitting your teamates. 
+	if(g_friendlyFire.integer && self->target_ent) {
+		if(botSameTeam(self, self->target_ent)) {
+			self->bot->Enemy = NULL;
+			BotResetState( self, ATTACK );
+			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_COMMON + BOT_DEBUG_STATE,"Friend Fire!, Stoppping\n");  
+		}
+	}
 }
 /**
  * Bot will defend base (camp). If away from spawn, it will retreat first

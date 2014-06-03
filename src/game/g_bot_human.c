@@ -242,6 +242,7 @@ void BotBlockedHuman( gentity_t *self ){
 		VectorCopy(self->r.currentOrigin, self->bot->path.blocked_origin);
 		if(!low_stamina) BotJump( self );
 	} else if(try == BOT_TIMER_NAV_SECOND) {
+		BotFindNewPath( self ); //Testing. 
 		BotControl( self, BOT_LOOK_RANDOM );
 	} 
 	if(try > BOT_TIMER_NAV_SECOND) {
@@ -667,6 +668,7 @@ void BotAttackHuman( gentity_t *self )
 			if(self->client->ps.ammo <= 0 && self->client->ps.clips <= 0)
 			{
 				G_ForceWeaponChange( self, WP_BLASTER );
+				BotResetHitTarget( self ); //we need to recheck if we are hitting using blaster
 			}
 		}
 		
@@ -738,7 +740,7 @@ int BotTargetRankHuman( gentity_t *self, gentity_t *target, float rank ) {
 	distance = botGetDistanceBetweenPlayer(self, target);
 	sd = G_TimeTilSuddenDeath() <= 0 ? 2 : 1;
 	if(target->s.eType == ET_BUILDABLE) {
-		if(self->health > 80) rank += 30;
+		if(self->health > 80) rank += 50;
 		switch(target->s.modelindex) {
 			case BA_A_SPAWN: 	rank += (50 * sd); break;
 			case BA_A_OVERMIND: rank += (30 * sd); break;

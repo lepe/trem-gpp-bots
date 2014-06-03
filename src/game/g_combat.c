@@ -1075,6 +1075,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       attacker->client->ps.persistant[ PERS_HITS ]++;
   }
 
+  //Update who is our target. //LEPE: used to prevent bots to hit other players
+  attacker->target_ent = targ;
+
   take = damage;
 
   // add to the damage inflicted on a player this frame

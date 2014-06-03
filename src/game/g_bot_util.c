@@ -174,7 +174,7 @@ qboolean botFindPath( int *path , int goal, int start ) {
     curr_node = path[ start-1 ];
     for(i = 0; i < 5; i++) {
         next_node = level.paths[ curr_node ].nextid[ i ];
-        if(next_node > 0 && next_node < level.numPaths) {
+        if(next_node > -1 && next_node < level.numPaths) {
             exists = qfalse;
             for(j = 0; j < BOT_FIND_PATH_MAX; j++) {
                 if(next_node == path[ j ]) {
@@ -439,19 +439,29 @@ qboolean botSameTeam( gentity_t *ent1, gentity_t *ent2 )
  * Check if bot is hitting a target within a period of time
  * @param self [gentity_t]
  * @param time [int] 
- * //TODO: when humans change weapon, e.g to BLASTER, it may not hit the
- * target anymore. We need to consider also the case in which the bot
- * hit the target before and it was moved for some reason (explosion, etc)
  */
 qboolean BotHitTarget( gentity_t *self, int time ) {
 	qboolean hit;
-	hit = (self->bot->Enemy->credits[ self->s.clientNum ] > 0);
-	if(hit) {
-		self->bot->timer.hit = level.time;
-	} else if(level.time - self->bot->timer.hit > time) {
-		hit = qfalse;
+	if(self->target_ent == self->bot->Enemy) {
+		hit = (self->bot->Enemy->credits[ self->s.clientNum ] > self->bot->var.targetHits);
+		if(hit) {
+			self->bot->timer.hit = level.time;
+		} else if(level.time - self->bot->timer.hit > time) {
+			hit = qfalse;
+		} else {
+			hit = qtrue;
+		}
 	} else {
-		hit = qtrue;
+		return qfalse;
 	}
 	return hit;
+}
+
+/**
+ * Reset hit counter
+ * @param self
+ */
+void BotResetHitTarget( gentity_t *self ) {
+	self->bot->timer.hit = level.time; 
+	self->bot->var.targetHits = self->bot->Enemy->credits[ self->s.clientNum ];
 }

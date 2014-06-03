@@ -92,6 +92,12 @@ g_admin_cmd_t g_admin_cmds[ ] =
 		"[^3name^7] [^5think | state | navstate | path | profile | general | main | admin | active | alien | human | control | util | common | say | nav ] ^7[ normal | verbose | quiet | off ]"
 	},
 
+	//LEPE
+	{"dbgcmd", G_admin_dbgcmd, qfalse, "dbgcmd",
+		"Debug functions",
+		"[findpath]"
+	},
+
     {"builder", G_admin_builder, qtrue, "builder",
       "show who built a structure",
       ""
@@ -120,6 +126,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"dnodes", G_drawnodes, qfalse, "drawnodes",
       "turn nodes on / off",
       "[ aliens | humans | off ]"
+    },
+    
+    {"rnodes", G_reloadnodes, qfalse, "drawnodes",
+      "Reload nodes from file",
+      "[ no parameters ]"
     },
 
     {"kick", G_admin_kick, qfalse, "kick",
@@ -161,12 +172,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "go to the next map in the cycle",
       ""
     },
-    //LEPE
-    {"rnodes", G_reloadnodes, qfalse, "redrawnodes",
-      "Reload nodes from file",
-      ""
-    },
-
+	
     {"passvote", G_admin_endvote, qfalse, "passvote",
       "pass a vote currently taking place",
       "(^5a|h^7)"
@@ -3436,6 +3442,45 @@ qboolean G_admin_botcmd( gentity_t *ent ) {
 		  }
         return success;
 
+}
+
+qboolean G_admin_dbgcmd( gentity_t *ent )
+{
+    int minargc;
+
+    char command[ 32 ];
+    char value1[ 3 ];
+    char value2[ 3 ];
+	
+    minargc = 3;
+    if( trap_Argc() < minargc )     {
+        ADMP( "^3!botcmd: ^7usage: !dbgcmd [command] [value1] [value2]\n" );
+        return qfalse;
+    }
+	trap_Argv( 1, command, sizeof( command ) );
+	trap_Argv( 2, value1, sizeof( value1 ) );
+	trap_Argv( 3, value2, sizeof( value2 ) );
+	trap_SendServerCommand(ent - g_entities, va("print \"%s %s %s\n\"", command, value1, value2 ) );
+	
+	if( !Q_stricmp( command, "findpath" ) ) { 
+		int i, path[ BOT_FIND_PATH_MAX ];
+		
+		path[ 0 ] = atoi(value1);
+		//reset possible path to -1
+		for(i = 1; i < BOT_FIND_PATH_MAX; i++) {
+			path[ i ] = -1;
+		}
+		if(botFindPath( path, atoi(value2), 1 )) {
+			for(i = 1; i < BOT_FIND_PATH_MAX; i++) {
+				if(path[i] > -1) {
+					G_Printf("%d : %d\n",i,path[i]);
+				}
+			}
+		} else {
+			G_Printf("No path found!\n");
+		}
+	}
+    return qtrue;
 }
 
 qboolean G_admin_botdbg( gentity_t *ent )
