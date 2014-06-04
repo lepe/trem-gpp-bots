@@ -62,6 +62,7 @@
     "^7\n"
     " Pikachu               GFX from cuboid\n"
     " Redman               Camera shake effect\n"
+    " ViruS               intro music\n"
     " GlobalWarming      Bots skins mod\n"
     "^3-- Acidtu.be non-related credits:^7\n"
     " [Foca.tk]            Main intro logo\n"
