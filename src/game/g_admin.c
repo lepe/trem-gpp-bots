@@ -128,11 +128,6 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[ aliens | humans | off ]"
     },
     
-    {"rnodes", G_reloadnodes, qfalse, "drawnodes",
-      "Reload nodes from file",
-      "[ no parameters ]"
-    },
-
     {"kick", G_admin_kick, qfalse, "kick",
       "kick a player with an optional reason",
       "[^3name|slot#^7] (^5reason^7)"
@@ -3636,13 +3631,6 @@ qboolean G_admin_botdbg( gentity_t *ent )
 		}
 	}
 	return success;
-}
-
-qboolean G_reloadnodes( gentity_t *ent )
-{
-    ADMP( "^3Reloading Paths\n" );
-    G_PathLoad();
-    return qtrue;
 }
 
 qboolean G_drawnodes( gentity_t *ent )

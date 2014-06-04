@@ -3170,7 +3170,7 @@ void Cmd_Node_f( gentity_t *ent )
 	if(trap_Argc( ) != 2 && trap_Argc( ) != 3)
 	{
 		trap_SendServerCommand( ent-g_entities,
-			"print \"Usage: node [add|connect|disconnect|random|move|cancel|timeout|action|clear|delete|save]\n\"");
+			"print \"Usage: node [add|connect|disconnect|random|move|cancel|timeout|action|clear|delete|save|load]\n\"");
 		for(i = 0;i < numnearby; i++)
 		{
 			trap_SendServerCommand( ent-g_entities,
@@ -3622,11 +3622,18 @@ void Cmd_Node_f( gentity_t *ent )
 			trap_SendServerCommand( -1,
 				"print \"Saved Path.\n\"");
 			return;
+		} 
+		else if( !Q_stricmp( cmd, "save" ) ) 
+		{
+			trap_SendServerCommand( -1,
+				"print \"Paths Loaded.\n\"");
+			G_PathLoad();
+			return;
 		}
 		else
 		{
 			trap_SendServerCommand( ent-g_entities,
-			"print \"Usage: node [add|connect|disconnect|random|move|cancel|timeout|action|clear|delete|save]\n\"");
+			"print \"Usage: node [add|connect|disconnect|random|move|cancel|timeout|action|clear|delete|save|load]\n\"");
 			trap_SendServerCommand( ent-g_entities,
 				"print \"Unknown option\n\"");
 			return;
