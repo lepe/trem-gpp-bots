@@ -632,7 +632,7 @@ void BotAttackHuman( gentity_t *self )
 				}
 				//Only if we are close enough that we should hit it 
 				if(distance < FLAMER_RADIUS) {
-					if(!BotHitTarget( self , 1000 )) {
+					if(!botHitTarget( self , 1000 )) {
 						BotStand( self );
 						BotAddMove( self, G_Rand() < 50 ? BOT_MOVE_LEFT : BOT_MOVE_RIGHT, BOT_TIMER_ACTION);
 						BotStartMove( self, BOT_EMPTY_MOVE );
@@ -651,7 +651,7 @@ void BotAttackHuman( gentity_t *self )
 					BotStop( self );
 					BotCrouch( self );
 				}
-				if(!BotHitTarget( self, 1000 )) {
+				if(!botHitTarget( self, 1000 )) {
 					BotAddMove( self, G_Rand() < 50 ? BOT_MOVE_LEFT : BOT_MOVE_RIGHT, BOT_TIMER_ACTION);
 					BotAddMove( self, G_Rand() < 50 ? BOT_MOVE_FWD: BOT_MOVE_BACK, BOT_TIMER_ACTION);
 					BotStartMove( self, BOT_EMPTY_MOVE );
@@ -668,7 +668,7 @@ void BotAttackHuman( gentity_t *self )
 			if(self->client->ps.ammo <= 0 && self->client->ps.clips <= 0)
 			{
 				G_ForceWeaponChange( self, WP_BLASTER );
-				BotResetHitTarget( self ); //we need to recheck if we are hitting using blaster
+				botResetHitTarget( self ); //we need to recheck if we are hitting using blaster
 			}
 		}
 		

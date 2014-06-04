@@ -567,7 +567,7 @@ void BotAttackAlien( gentity_t *self )
 				}
 			}
 			if(flank) {
-				anglediff = botGetAngleBetweenPlayer( self, self->bot->Enemy );
+				anglediff = botGetAngleBetweenPlayersView( self, self->bot->Enemy );
 				if(anglediff > 90 && anglediff <= 180) {
 					BotMoveLeft( self );
 				} else if(anglediff > 180 && anglediff < 270) {

@@ -40,10 +40,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * Add one bot into a team
  * @param name [string] bot's name
  * @param team [team_t] alien or human
- * @param skill [int] bot's skill (affects aim, reaction time, etc)
  * @param ignore [int] do not add it in X client number (unpractical, not really used)
  */
-void G_BotAdd( char *name, team_t team, int skill, int ignore ) {
+void G_BotAdd( char *name, team_t team, int ignore ) {
 	int i;
 	int clientNum;
 	char userinfo[MAX_INFO_STRING];
@@ -108,7 +107,6 @@ void G_BotAdd( char *name, team_t team, int skill, int ignore ) {
 	ent->inuse = qtrue;
 	ent->bot = (bot_t *)BG_Alloc( sizeof(bot_t) );
 //	ent->bot->path.crumb = BG_Alloc( sizeof(level.paths) );
-	ent->bot->profile.skill = skill < 1 ? 1 : skill;
 	
 	ent->r.svFlags |= SVF_BOT;
 	// register user information
@@ -195,7 +193,7 @@ void G_BotDelAll( void )
 void G_BotReload( gentity_t *ent, int clientNum )
 {
 	ClientDisconnect( clientNum );
-	G_BotAdd( ent->client->pers.netname, ent->client->pers.teamSelection, ent->bot->profile.skill, clientNum );
+	G_BotAdd( ent->client->pers.netname, ent->client->pers.teamSelection, clientNum );
 	trap_SendServerCommand( -1, "print \"Interfering bot reloaded\n\"" );
 }
 /**
@@ -204,10 +202,9 @@ void G_BotReload( gentity_t *ent, int clientNum )
  * @param clientNum [int] bot client id
  * @param command [string] :
  *          - regular , idle , standground, followattack, etc. (change bot mode)
- *          - skill (change bot skill)
  * 			- kill (kill the bot)
  * 			- give (fund a bot)
- * @param value [int] skill value or give value (for aliens 500 is about 1 evo)
+ * @param value [int] give value (for aliens 500 is about 1 evo)
  * 
  * //TODO: bot modes will be removed
  */
@@ -218,11 +215,7 @@ void G_BotCmd( int clientNum, char *command, int value, int value2 ) {
   if( !( ent->r.svFlags & SVF_BOT ) ) {
     return;
   }
-  if( !Q_stricmp( command, "skill" ) ) {
-
-    ent->bot->profile.skill = value;
-
-  } else if( !Q_stricmp( command, "give" ) ) { //LEPE: give money/evos to ent
+  if( !Q_stricmp( command, "give" ) ) { //LEPE: give money/evos to ent
 
     G_AddCreditToClient( ent->client, (short)value, qfalse );
 
@@ -268,7 +261,7 @@ void G_BotCmd( int clientNum, char *command, int value, int value2 ) {
 	  
   } else if( !Q_stricmp( command, "moveto" ) ) { 
 	  if(g_bot_manual.integer) {
-	  	  VectorCopy(level.paths[value].coord, ent->bot->move.topoint); 
+		  BotMoveToPoint( ent , level.paths[value].coord );
 	  	  G_Printf("MoveTo %d\n",value); 
 		  ADMP(va("Moving to node %d\n", value));
 	  }

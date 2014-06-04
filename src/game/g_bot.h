@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BOT_MOVE_PACE		100.0f
 #define BOT_DEBUG_ALL		-1
 #define BOT_NO_ENEMY		-1
+#define BOT_WOBBLE			20
 
 //timers
 #define BOT_TIMER_AIM		50	//Just aim
@@ -244,7 +245,6 @@ typedef struct
 	  int	talkative; //How much it talks
 	  int	impulsive; //How much it takes to take decisions
    */
-	  int	skill; //deprecated?
   } profile;
   //SETTINGS: 
  /*
@@ -324,7 +324,9 @@ void setCrumb( gentity_t *self, int closestpath );
 int G_Rand( void ); //LEPE
 int G_Rand_Range( int start, int end ); //LEPE
 int botGetDistanceBetweenPlayer( gentity_t *self, gentity_t *player );
-int botGetAngleBetweenPlayer( gentity_t *self, gentity_t *player );
+int botGetAngleBetweenPlayersView( gentity_t *self, gentity_t *player );
+int botGetAngleToPoint( gentity_t *self, vec3_t point );
+int botGetAngleToTarget( gentity_t *self, gentity_t *target );
 int botGetHealthPct( gentity_t *self );
 int botFindClosestNode( gentity_t *self );
 int botFindEnemy( gentity_t *self, int maxRange );
@@ -332,8 +334,8 @@ qboolean botFindPath( int *path , int goal, int start );
 qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch);
 qboolean botFindClosestFriend( gentity_t *self );
 qboolean botSameTeam( gentity_t *ent1, gentity_t *ent2 );
-qboolean BotHitTarget( gentity_t *self, int time );
-void BotResetHitTarget( gentity_t *self );
+qboolean botHitTarget( gentity_t *self, int time );
+void botResetHitTarget( gentity_t *self );
 gentity_t *botFindClosestBuildable( gentity_t *self, float r, buildable_t buildable );
 gentity_t *botFindDamagedStructure( gentity_t *self, float r, int damage );
 
@@ -363,6 +365,12 @@ void BotLookUp( gentity_t *self, int degrees );
 void BotLookDown( gentity_t *self, int degrees ); 
 void BotLookLeft( gentity_t *self, int degrees ); 
 void BotLookRight( gentity_t *self, int degrees ); 
+void BotMoveToPoint( gentity_t *self, vec3_t point ); 
+void BotMoveToPointClear( gentity_t *self ); 
+void BotMoveToPointExec( gentity_t *self );//used in g_active.c
+void BotAimToPoint( gentity_t *self, vec3_t point ); //used in g_active.c
+void BotAimToPointClear( gentity_t *self );
+void BotAimToPointExec( gentity_t *self ); //used in g_active.c
 qboolean BotIsMoving( gentity_t *self, botMove move );
 
 /*

@@ -324,6 +324,91 @@ qboolean BotIsMoving( gentity_t *self, botMove move )
 	return qfalse;
 }
 
+/**
+ * Move bot to point without using AIM (EXPERIMENTAL)
+ * depends on self->bot->move.topoint
+ * @param self
+ */
+void BotMoveToPoint( gentity_t *self, vec3_t point ) {
+	VectorCopy(point, self->bot->move.topoint);
+}
+void BotMoveToPointClear( gentity_t *self ) {
+	VectorClear(self->bot->move.topoint);
+}
+void BotMoveToPointExec( gentity_t *self ) {
+	if(VectorLength(self->bot->move.topoint) > 0) {
+		if(Distance(self->bot->move.topoint, self->s.pos.trBase) > BOT_MOVE_PACE) {
+			int angle = botGetAngleToPoint(self, self->bot->move.topoint);
+			// Convert angle to positive value
+			if(angle < 0) angle += 360;
+			// Move the bot:
+			if (angle == 0 || angle == 360) {
+				BotMoveFwd( self );
+				BotControl( self , BOT_RESET_LEFT_RIGHT);
+			} else if(angle > 0 && angle < 90) {
+				BotMoveFwd( self );
+				BotMoveRight( self );
+			} else if(angle == 90) {
+				BotMoveRight( self );
+				BotControl( self , BOT_RESET_FWD_BACK);
+			} else if(angle > 90 && angle < 180) {
+				BotMoveBack( self );
+				BotMoveRight( self );
+			} else if(angle == 180) {
+				BotMoveBack( self );
+				BotControl( self , BOT_RESET_LEFT_RIGHT);
+			} else if(angle > 180 && angle < 270) {
+				BotMoveBack( self );
+				BotMoveLeft( self );
+			} else if(angle == 270) {
+				BotMoveLeft( self );
+				BotControl( self , BOT_RESET_FWD_BACK);
+			} else if(angle > 270 && angle < 360) {
+				BotMoveFwd( self );
+				BotMoveLeft( self );
+			}
+			//get the amount in X and Y and Z that we have to move to.
+			//it hast to be based in a fixed amount towards the goal.
+		} else {
+			BotStop( self );
+			BotCrouch( self );
+			VectorClear(self->bot->move.topoint);
+		}
+	}
+}
+/**
+ * Move AIM gradually to reach a point. (EXPERIMENTAL)
+ * depends on self->bot->move.lookat
+ * @param self
+ */
+void BotAimToPoint( gentity_t *self, vec3_t point ) {
+	VectorCopy(point, self->bot->move.lookat);
+}
+void BotAimToPointClear( gentity_t *self ) {
+	VectorClear(self->bot->move.lookat);
+}
+void BotAimToPointExec( gentity_t *self ) {
+	if(abs(self->bot->move.lookat[ PITCH ] - self->client->ps.delta_angles[ PITCH ]) > BOT_TURN_SHORT) {
+		if(self->bot->move.lookat[ PITCH ] > self->client->ps.delta_angles[ PITCH ]) {
+			self->client->ps.delta_angles[ PITCH ] -= BOT_TURN_SHORT;
+		} else {
+			self->client->ps.delta_angles[ PITCH ] += BOT_TURN_SHORT;
+		}
+		//we will move towards that coordinate at a fixed pace until we reach it.
+	} else {
+		self->client->ps.delta_angles[ PITCH ] = self->bot->move.lookat[ PITCH ];
+	}
+	if(abs(self->bot->move.lookat[ YAW ] - self->client->ps.delta_angles[ YAW ]) > BOT_TURN_SHORT) {
+		if(self->bot->move.lookat[ YAW ] > self->client->ps.delta_angles[ YAW ]) {
+			self->client->ps.delta_angles[ YAW ] -= BOT_TURN_SHORT;
+		} else {
+			self->client->ps.delta_angles[ YAW ] += BOT_TURN_SHORT;
+		}
+	} else {
+		self->bot->move.lookat[ YAW ] = self->client->ps.delta_angles[ YAW ];
+	}
+}
+
 //------------------ PUBLIC FUNCTIONS -----------------
 /*
  * These functions serve as shurtcut for: BotAddMove() 

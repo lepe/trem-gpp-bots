@@ -69,11 +69,39 @@ int botGetDistanceBetweenPlayer( gentity_t *self, gentity_t *player ) {
  * If the target is facing the bot, it should be 180
  * @param self [gentity_t] a BOT
  * @param player [gentity_t] a player or bot
- * @return float (angle)
+ * @return int (angle)
  */
-int botGetAngleBetweenPlayer( gentity_t *self, gentity_t *player ) {
+int botGetAngleBetweenPlayersView( gentity_t *self, gentity_t *player ) {
 	if(!player->client) return 0;
 	return abs(SHORT2ANGLE(self->client->ps.delta_angles[ YAW ]) - SHORT2ANGLE(player->client->ps.delta_angles[ YAW ]));
+}
+
+/**
+ * Get the angle from bot position to a XY point (Z is ignored)
+ * @param self [gentity_t] a BOT
+ * @param player [gentity_t] a player or bot
+ * @return int (angle)
+ */
+int botGetAngleToPoint( gentity_t *self, vec3_t point ) {
+	vec3_t dirToTarget, angles;
+	float angle;
+	//Make a vector from trBase -> topoint  
+	VectorSubtract(point, self->s.pos.trBase, dirToTarget);
+	// Get the absolute angle of the new vector
+	vectoangles( dirToTarget, angles );
+	// Get the angle relative to bot's view
+	angle = SHORT2ANGLE(self->client->ps.delta_angles[ YAW ]) - angles[ YAW ];
+	return (int)angle;
+}
+/**
+ * Get the angle from bot to target (in terms of where the bot is 
+ * looking and where the target is located)  (Z is ignored)
+ * @param self
+ * @param target
+ * @return int (angle)
+ */
+int botGetAngleToTarget( gentity_t *self, gentity_t *target ) {
+	return botGetAngleToPoint( self , target->s.pos.trBase );
 }
 
 /*
@@ -103,10 +131,13 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch ) {
 	// Create our vector that points our gun to his face
 	VectorAdd( targetStraight, targetUp, dirToTarget );
 
-	if( target->s.eType != ET_BUILDABLE ) {	//LEPE: except when are buildables 
-	    dirToTarget[0] += self->bot->profile.skill * sin( self->client->time1000 );
-	    dirToTarget[1] += self->bot->profile.skill * cos( self->client->time1000 );
-	} 
+	if( target->s.eType == ET_BUILDABLE ) {	
+	    dirToTarget[0] += G_Rand_Range(1, BOT_WOBBLE) * sin( self->client->time1000 );
+	    dirToTarget[1] += G_Rand_Range(1, BOT_WOBBLE) * cos( self->client->time1000 );
+	} else {
+	    dirToTarget[0] += (G_Rand_Range(1, BOT_WOBBLE) + botGetAngleToTarget(self,target)) * sin( self->client->time1000 );
+	    dirToTarget[1] += (G_Rand_Range(1, BOT_WOBBLE) + botGetAngleToTarget(self,target)) * cos( self->client->time1000 );
+	}
 
 	// Grab the angles to use with delta_angles
 	vectoangles( dirToTarget, angleToTarget );
@@ -440,7 +471,7 @@ qboolean botSameTeam( gentity_t *ent1, gentity_t *ent2 )
  * @param self [gentity_t]
  * @param time [int] 
  */
-qboolean BotHitTarget( gentity_t *self, int time ) {
+qboolean botHitTarget( gentity_t *self, int time ) {
 	qboolean hit;
 	if(self->target_ent == self->bot->Enemy) {
 		hit = (self->bot->Enemy->credits[ self->s.clientNum ] > self->bot->var.targetHits);
@@ -461,7 +492,7 @@ qboolean BotHitTarget( gentity_t *self, int time ) {
  * Reset hit counter
  * @param self
  */
-void BotResetHitTarget( gentity_t *self ) {
+void botResetHitTarget( gentity_t *self ) {
 	self->bot->timer.hit = level.time; 
 	self->bot->var.targetHits = self->bot->Enemy->credits[ self->s.clientNum ];
 }

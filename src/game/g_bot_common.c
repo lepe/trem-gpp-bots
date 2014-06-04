@@ -102,6 +102,8 @@ void BotSpectator( gentity_t *self ){
 	BotClearQueue( self );
 	BotStop( self );
 	BotStand( self );
+	BotMoveToPointClear( self );
+	BotAimToPointClear( self );
 	self->bot->path.state = FINDNEWPATH;
 	self->bot->path.pathChosen = qfalse;
 	self->bot->path.nextNode = qfalse;
@@ -113,7 +115,6 @@ void BotSpectator( gentity_t *self ){
     self->bot->Struct = NULL;
     self->bot->Friend = NULL;
     self->bot->Enemy  = NULL;
-	VectorClear(self->bot->move.topoint);
 	self->lastHealth = self->health;
 	G_BotDebug(self, BOT_VERB_NORMAL, BOT_DEBUG_COMMON + BOT_DEBUG_THINK, "Bot is spectator\n");
 	//TODO: check what else we need to reset
@@ -135,7 +136,7 @@ int BotTargetRank( gentity_t *self, gentity_t *target ) {
 	rank += G_Rand_Range(0, 10);
 	//If we are attacking this target, increase the chance to stick to it (unless we haven't hit it within 5 secs):
 	if(self->bot->Enemy == target) {
-		if(!BotHitTarget( self, 5000 )) {
+		if(!botHitTarget( self, 5000 )) {
 			rank -= 30;
 		} else {
 			rank += 30;
@@ -181,7 +182,7 @@ void BotFindTarget( gentity_t *self ){
 		target = &g_entities[ enemy ];
 		//If we changed target, reset hit timer
 		if(self->bot->Enemy != target) {
-			BotResetHitTarget( self );
+			botResetHitTarget( self );
 		}
 		self->bot->Enemy = target;
 		if(botGetDistanceBetweenPlayer( self , self->bot->Enemy ) < 100) {
@@ -354,13 +355,13 @@ void BotAim( gentity_t *self )
 		case ATTACK:
 		case DEFEND:
 			if(self->bot->Friend) {
-				VectorCopy(self->bot->Friend->s.pos.trBase , self->bot->move.topoint); //move towards your Friend
+				BotMoveToPoint( self, self->bot->Friend->s.pos.trBase );//move towards your Friend
 			}
 			if(self->bot->Enemy) {
 				botAimAtTarget(self, self->bot->Enemy, qtrue);
 			}
 			if(self->bot->Struct) {
-				//VectorCopy(self->bot->Struct->s.pos.trBase , self->bot->move.topoint); //move towards the structure
+				//BotMoveToPoint( self, self->bot->Struct->s.pos.trBase ); //move towards the structure
 			}
 			break;
 		case FOLLOW:
@@ -462,6 +463,7 @@ void BotAttack( gentity_t *self ){
 		if(botSameTeam(self, self->target_ent)) {
 			self->bot->Enemy = NULL;
 			BotResetState( self, ATTACK );
+			BotControl( self , BOT_RESET_BUTTONS );
 			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_COMMON + BOT_DEBUG_STATE,"Friend Fire!, Stoppping\n");  
 		}
 	}
