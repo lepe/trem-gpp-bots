@@ -3430,6 +3430,7 @@ void CG_DrawSplash( void )
   {
     cg.splashTime = cg.time;
     splash_first = qfalse;
+	trap_S_StartLocalSound( cgs.media.splashMusic, CHAN_LOCAL_SOUND );
   }
 
   for( i = 0; i < 3; i++ ) {

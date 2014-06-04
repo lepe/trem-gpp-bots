@@ -780,6 +780,7 @@ static void CG_RegisterGraphics( void )
     cgs.media.buildWeaponTimerPie[ i ] = trap_R_RegisterShader( buildWeaponTimerPieShaders[ i ] );
 
   cgs.media.splashLogo				  = trap_R_RegisterShader( "ui/assets/logo.tga" );
+  cgs.media.splashMusic				  = trap_R_RegisterShader( "sound/intro.wav" );
   // player health cross shaders
   cgs.media.healthCross               = trap_R_RegisterShader( "ui/assets/neutral/cross.tga" );
   cgs.media.healthCross2X             = trap_R_RegisterShader( "ui/assets/neutral/cross2.tga" );

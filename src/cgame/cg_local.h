@@ -1289,6 +1289,7 @@ typedef struct
   qhandle_t   humanBuildableBleedPS;
 
   qhandle_t	  splashLogo;
+  qhandle_t	  splashMusic;
   qhandle_t   teslaZapTS;
 
   sfxHandle_t lCannonWarningSound;

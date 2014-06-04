@@ -135,6 +135,9 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch ) {
 	VectorAdd( targetStraight, targetUp, dirToTarget );
 
 	wobble = (target->s.eType == ET_BUILDABLE ? 0 : BOT_WOBBLE) + self->bot->var.angleToTarget;
+	if(self->client->ps.eFlags & EF_POISONCLOUDED) {
+		wobble += G_Rand();
+	}
 	dirToTarget[0] += (wobble * sin( self->client->time1000 ));
 	dirToTarget[1] += (wobble * cos( self->client->time1000 ));
 
