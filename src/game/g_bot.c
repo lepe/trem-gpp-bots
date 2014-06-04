@@ -40,9 +40,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * Add one bot into a team
  * @param name [string] bot's name
  * @param team [team_t] alien or human
- * @param ignore [int] do not add it in X client number (unpractical, not really used)
  */
-void G_BotAdd( char *name, team_t team, int ignore ) {
+void G_BotAdd( char *name, team_t team ) {
 	int i;
 	int clientNum;
 	char userinfo[MAX_INFO_STRING];
@@ -85,8 +84,6 @@ void G_BotAdd( char *name, team_t team, int ignore ) {
         // We will assign slots from maxclients - 1 to maxclients - reservedSlots - 1
 	clientNum = -1;
 	for( i = level.maxclients - 1; i > level.maxclients - reservedSlots - 1; i-- ) {
-		if( i == ignore )
-		{continue;}
 		if( !g_entities[i].inuse ) {
 			clientNum = i;
 			break;
@@ -193,7 +190,7 @@ void G_BotDelAll( void )
 void G_BotReload( gentity_t *ent, int clientNum )
 {
 	ClientDisconnect( clientNum );
-	G_BotAdd( ent->client->pers.netname, ent->client->pers.teamSelection, clientNum );
+	G_BotAdd( ent->client->pers.netname, ent->client->pers.teamSelection );
 	trap_SendServerCommand( -1, "print \"Interfering bot reloaded\n\"" );
 }
 /**

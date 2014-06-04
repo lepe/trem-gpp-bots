@@ -801,11 +801,11 @@ void ClientTimerActions( gentity_t *ent, int msec )
 				}
 				//Move to point gradually without aiming
 				if(g_bot_move_and_aim.integer) {
-					BotMoveToPoint( ent );
+					BotMoveToPointExec( ent );
 				}
 				//Adjust AIM gradually
 				if(g_bot_step_aim.integer) {
-					BotAimToPoint( ent );
+					BotAimToPointExec( ent );
 				}
 			}
 			//execute movements (uses a separate variable timer)

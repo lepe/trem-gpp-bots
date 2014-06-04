@@ -115,6 +115,7 @@ void BotAddMove( gentity_t *self, botMove move, int time ) {
  */
 void BotCleanMove( gentity_t *self ) {
 	char *movement;
+	movement = "";
 	/* 
 	 * We need to clear the upmove value in the next cycle after
 	 * jumping or we can't jump again immediately.
@@ -147,10 +148,11 @@ void BotCleanMove( gentity_t *self ) {
 			movement = "RESET BUTTONS";
 			break;
 		default:
-			movement = "";
 			break;
 	}
-	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_CONTROL, "Clear: %s\n", movement);
+	if(!Q_stricmp( movement, "" )) {
+		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_CONTROL, "Clear: %s\n", movement);
+	}
 }
 /**
  * Executes the action to control the bot
@@ -158,6 +160,7 @@ void BotCleanMove( gentity_t *self ) {
  */
 void BotControl( gentity_t *self, botMove move ) {
 	char *movement;
+	movement = "";
 	//If we are executing something and it matches the blockedAction,  don't do anything
 	if(self->bot->timer.move > 0) {
 		if(move == self->bot->move.blockedAction) return;
@@ -272,11 +275,12 @@ void BotControl( gentity_t *self, botMove move ) {
 			movement = "RESET FWD-BACK";
 			break;
 		default:
-			movement = "";
 			G_Printf("Invalid Bot Movement: %d\n", move);
 			break;
 	}
-	G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_CONTROL, "Movement: %s\n", movement);
+	if(!Q_stricmp( movement, "" )) {
+		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_CONTROL, "Movement: %s\n", movement);
+	}
 }
 /**
  * Clears queue (usually when bot is dead)

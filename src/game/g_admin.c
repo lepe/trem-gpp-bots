@@ -3365,7 +3365,7 @@ qboolean G_admin_bot( gentity_t *ent ) {
                 }
 
                 // got name, team_int and skill_int
-                G_BotAdd(name, team_int, skill_int, -1);
+                G_BotAdd(name, team_int);
                 return qtrue;
         } else if(!Q_stricmp(command,"del")) {
                 // del [name]

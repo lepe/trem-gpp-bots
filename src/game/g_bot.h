@@ -220,7 +220,7 @@ typedef struct
 	  int write; //index used to know which queue slot to write into
 	  qboolean exec; //used to start performing a movement
 	  vec3_t topoint; //move to that coordinate without aiming
-	  int lookat[2]; //move aim to that point : disabled until we find a way to make it smooth (requires g_bot_step_aim = 1)
+	  vec3_t lookat; //move aim to that point : disabled until we find a way to make it smooth (requires g_bot_step_aim = 1)
   } move;
   //TIMER: used to time actions (variables).
   struct {
@@ -234,8 +234,8 @@ typedef struct
 	  int	hit;		//time to identify if we hit some target
   } timer;
   //PROFILE: bot personality
-  struct {
   /*
+  struct {
 	  int	obedient; //follows esssence or it goes to explore often
 	  int	aggressive; //try to attack more often or stays at base (camp) and repairs/build more
 	  int	cooperative; //try to keep close to other bots
@@ -244,8 +244,8 @@ typedef struct
 	  int	evasive; //The more, it will try not to go straight to the target but will be slower. 
 	  int	talkative; //How much it talks
 	  int	impulsive; //How much it takes to take decisions
-   */
   } profile;
+   */
   //SETTINGS: 
  /*
   * In the case of humans, human properties represent % of buying that item (from S1 to S3, this is: 0-2).
@@ -303,7 +303,7 @@ typedef struct
 } bot_t;
 
 // g_bot.c
-void G_BotAdd( char *name, team_t team, int skill, int ignore );
+void G_BotAdd( char *name, team_t team );
 void G_BotDelAll( void ); //Delete all
 void G_BotDel( int clientNum );
 void G_BotReload( gentity_t *ent, int clientNum );
