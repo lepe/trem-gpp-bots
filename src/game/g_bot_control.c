@@ -343,8 +343,6 @@ void BotMoveToPointExec( gentity_t *self ) {
 	if(VectorLength(self->bot->move.topoint) > 0) {
 		if(Distance(self->bot->move.topoint, self->s.pos.trBase) > BOT_MOVE_PACE) {
 			int angle = botGetAngleToPoint(self, self->bot->move.topoint);
-			// Convert angle to positive value
-			if(angle < 0) angle += 360;
 			// Move the bot:
 			if (angle == 0 || angle == 360) {
 				BotMoveFwd( self );

@@ -91,6 +91,8 @@ int botGetAngleToPoint( gentity_t *self, vec3_t point ) {
 	vectoangles( dirToTarget, angles );
 	// Get the angle relative to bot's view
 	angle = SHORT2ANGLE(self->client->ps.delta_angles[ YAW ]) - angles[ YAW ];
+	// Convert angle to positive value
+	if(angle < 0) angle += 360;
 	return (int)angle;
 }
 /**
@@ -113,7 +115,8 @@ int botGetAngleToTarget( gentity_t *self, gentity_t *target ) {
  */
 qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch ) {
 	vec3_t dirToTarget, angleToTarget, highPoint, targetUp, targetStraight, realBase;
-
+	int wobble;
+	
 	// Calculate the point on top of model (head) (well, 15% lower). 50% lower for humans
 	VectorCopy( target->s.pos.trBase, highPoint );
 	highPoint[2] += target->r.maxs[2] * (self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ? 0.50 : 0.85);
@@ -131,13 +134,9 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch ) {
 	// Create our vector that points our gun to his face
 	VectorAdd( targetStraight, targetUp, dirToTarget );
 
-	if( target->s.eType == ET_BUILDABLE ) {	
-	    dirToTarget[0] += G_Rand_Range(1, BOT_WOBBLE) * sin( self->client->time1000 );
-	    dirToTarget[1] += G_Rand_Range(1, BOT_WOBBLE) * cos( self->client->time1000 );
-	} else {
-	    dirToTarget[0] += (G_Rand_Range(1, BOT_WOBBLE) + botGetAngleToTarget(self,target)) * sin( self->client->time1000 );
-	    dirToTarget[1] += (G_Rand_Range(1, BOT_WOBBLE) + botGetAngleToTarget(self,target)) * cos( self->client->time1000 );
-	}
+	wobble = (target->s.eType == ET_BUILDABLE ? 0 : BOT_WOBBLE) + self->bot->var.angleToTarget;
+	dirToTarget[0] += (wobble * sin( self->client->time1000 ));
+	dirToTarget[1] += (wobble * cos( self->client->time1000 ));
 
 	// Grab the angles to use with delta_angles
 	vectoangles( dirToTarget, angleToTarget );

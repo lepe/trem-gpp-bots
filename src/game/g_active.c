@@ -778,6 +778,11 @@ void ClientTimerActions( gentity_t *ent, int msec )
 				//Reset aim timer
 				ent->bot->timer.aim = 0;
 				ent->bot->funcs.base.aim( ent );
+				if(ent->bot->var.angleToTarget > 1) {
+					ent->bot->var.angleToTarget -= 4; //around 2 seconds for 180 degrees
+				} else {
+					ent->bot->var.angleToTarget = 0;
+				}
 			}
 			//Perform navigation (some states)
 			if(ent->bot->state != ATTACK && ent->bot->timer.nav >= BOT_TIMER_NAV) {

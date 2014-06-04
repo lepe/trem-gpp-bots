@@ -44,7 +44,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BOT_MOVE_PACE		100.0f
 #define BOT_DEBUG_ALL		-1
 #define BOT_NO_ENEMY		-1
-#define BOT_WOBBLE			20
+#define BOT_WOBBLE			50
 
 //timers
 #define BOT_TIMER_AIM		50	//Just aim
@@ -194,6 +194,7 @@ typedef struct
   } think;
   struct {
   	  int		targetHits; //used in hit detection to check if we were able to hit the target
+	  int 		angleToTarget; //simulate wobbling
   } var;
   //PATH: variables and properties related to Navigation
   struct {

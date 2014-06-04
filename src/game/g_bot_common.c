@@ -183,6 +183,7 @@ void BotFindTarget( gentity_t *self ){
 		//If we changed target, reset hit timer
 		if(self->bot->Enemy != target) {
 			botResetHitTarget( self );
+			self->bot->var.angleToTarget = botGetAngleToTarget(self,target);
 		}
 		self->bot->Enemy = target;
 		if(botGetDistanceBetweenPlayer( self , self->bot->Enemy ) < 100) {
@@ -195,6 +196,7 @@ void BotFindTarget( gentity_t *self ){
 		//If we don't find an enemy, try using radar
 		BotResetState( self, ATTACK );
 		self->bot->Enemy = NULL;
+		self->bot->var.angleToTarget = 0;
 	}
 }
 
