@@ -41,7 +41,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * @param name [string] bot's name
  * @param team [team_t] alien or human
  */
-void G_BotAdd( char *name, team_t team ) {
+qboolean G_BotAdd( char *name, team_t team ) {
 	int i;
 	int clientNum;
 	char userinfo[MAX_INFO_STRING];
@@ -74,7 +74,7 @@ void G_BotAdd( char *name, team_t team ) {
                 G_SanitiseString(namelog->name[ i ], name_tmp_s, sizeof(name_tmp_s) );
                 if( i == namelog->nameOffset && namelog->slot > -1 && !strcmp( name_s, name_tmp_s ) ) {
                     trap_Print("Nick already exists\n");
-                    return;
+                    return qfalse;
                 }
             }
         }
@@ -92,12 +92,12 @@ void G_BotAdd( char *name, team_t team ) {
 	if(clientNum == -1)
 	{
 		trap_Print("Error: Bots were not assigned correctly\n"); //LEPE
-		return;
+		return qfalse;
 	}
 	if(clientNum < level.maxclients - reservedSlots - 1) 
 	{
 		trap_Print("no more slots for bot\n");
-		return;
+		return qfalse;
 	}
 	
 	ent = &g_entities[ clientNum ];
@@ -121,7 +121,7 @@ void G_BotAdd( char *name, team_t team ) {
 	if(ClientConnect(clientNum, qtrue) != NULL ) {
 		G_Printf("Something weird happened. Bot was not added.");
 		// won't let us join
-		return;
+		return qfalse;
 	}
 	ClientBegin( clientNum );
     G_BotDebug(ent, BOT_VERB_IMPORTANT, BOT_DEBUG_GENERAL, "Bot Added\n");
@@ -135,6 +135,7 @@ void G_BotAdd( char *name, team_t team ) {
 		level.alienBots++;
 	}
 	//TODO: load profile
+	return qtrue;
 }
 /**
  * Delete a specific bot
@@ -156,13 +157,122 @@ void G_BotDel( int clientNum ) {
 		BG_Free(ent->bot);
 	}
     //LEPE:
-    if(ent->stageTeam == TEAM_HUMANS && level.humanBots > 0) {
+    if(ent->client->pers.teamSelection == TEAM_HUMANS && level.humanBots > 0) {
         level.humanBots--;
-    } else if(ent->stageTeam == TEAM_ALIENS && level.alienBots > 0) {
+    } else if(ent->client->pers.teamSelection == TEAM_ALIENS && level.alienBots > 0) {
         level.alienBots--;
     }
 	ClientDisconnect(clientNum);
 }
+/**
+ * Add a random bot to a team
+ * @param team
+ */
+void G_BotAddRandom ( team_t team ) {
+	int ini, fin, sel;
+	char name[MAX_NAME_LENGTH];
+	const char *names[50] = {
+		//------------- ALIENS
+		"Fringe", 
+		"Kesh", 
+		"Ditto", 
+		"MonsterPocket", 
+		"Chiaka", 
+		
+		"Shinsho", 
+		"Watto", 
+		"Worf", 
+		"Klaatu", 
+		"LordNibbler", 
+		
+		"Tarantula", 
+		"URTasty", 
+		"BlackWidow", 
+		"DontRun", 
+		"BaByBoom", 
+		
+		"Mufasa", 
+		"Armadillo", 
+		"FreakMonkey", 
+		"GotMilk", 
+		"DaKilla", 
+		
+		"FunkyChicken", 
+		"WantMore", 
+		"Pringles", 
+		"Godzilla", 
+		"KissMyAxe", 
+		
+		//------------ HUMANS 
+		
+		"Quorra", 
+		"RandomClu", 
+		"C-Tron", 
+		"Erroronous", 
+		"SegFault", 
+		
+		"HeartBleed", 
+		"Tenshion", 
+		"2-OP-4U", 
+		"UrMamma", 
+		"DiePanzerkraft", 
+		
+		"Johnny5", 
+		"NorthPark", 
+		"Hallucinogen", 
+		"HateMe", 
+		"ManiacPsycho", 
+		
+		"CoreDump", 
+		"AfroHead", 
+		"FuzzyLogic", 
+		"SexyChick", 
+		"IOU-Sucka", 
+		
+		"TeamKiller", 
+		"Messiah", 
+		"ZeroSystem", 
+		"CltrAltDel", 
+		"OptimusPrime", 
+	};
+	int reservedSlots = trap_Cvar_VariableIntegerValue( "sv_privateclients" );
+	ini = team == TEAM_ALIENS ? 0 : 25;
+	fin = team == TEAM_ALIENS ? 26 : 49;
+	//Do not add more than we can handle
+	if(level.humanBots + level.alienBots < reservedSlots) {
+		do {
+			sel = G_Rand_Range(ini,fin);
+			Q_strncpyz( name, names[sel], sizeof( name ) );
+		} while(!G_BotAdd(name, team));	
+	}
+}
+/**
+ * Delete a random bot from a team (the worst score)
+ * @param team
+ */
+void G_BotDelRandom ( team_t team ) {
+	int i;
+	gentity_t *ent;
+	int score;
+	int worst = -1;
+	int worstScore = 9999;
+	
+	int reservedSlots = trap_Cvar_VariableIntegerValue( "sv_privateclients" );
+	for( i = level.maxclients - 1; i > level.maxclients - reservedSlots - 1; i-- ) {
+		ent = &g_entities[ i ];
+		if(ent->r.svFlags & SVF_BOT && ent->client->pers.teamSelection == team) {
+			score = ent->client->ps.persistant[ PERS_SCORE ];
+			if(score < worstScore) {
+				worst = i;
+				worstScore = score;
+			}
+		}
+	}
+	if(worst > 0) {
+		G_BotDel(worst);
+	}
+}
+
 /**
  * Deletes all bots
  */
@@ -264,7 +374,7 @@ void G_BotCmd( int clientNum, char *command, int value, int value2 ) {
 	  }
 	  
   } else {
-    ADMP("unknown command\n");
+    ADMP("unknown bot command\n");
   }
   return;
 }

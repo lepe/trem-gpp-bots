@@ -304,11 +304,13 @@ typedef struct
 } bot_t;
 
 // g_bot.c
-void G_BotAdd( char *name, team_t team );
+qboolean G_BotAdd( char *name, team_t team );
 void G_BotDelAll( void ); //Delete all
 void G_BotDel( int clientNum );
 void G_BotReload( gentity_t *ent, int clientNum );
 void G_BotCmd( int clientNum, char *command, int value, int value2 );
+void G_BotAddRandom ( team_t team );
+void G_BotDelRandom ( team_t team );
 
 // g_bot_nav.c
 void BotTargetPath( gentity_t *self );

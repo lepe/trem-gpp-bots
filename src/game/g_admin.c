@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // big ugly global buffer for use with buffered printing of long outputs
 static char g_bfb[ 32000 ];
 
-// note: list ordered alphabetically
+// note: list ordered alphabetically !IMPORTANT (if not, it will fail!)
 g_admin_cmd_t g_admin_cmds[ ] =
   {
     {"adjustban", G_admin_adjustban, qfalse, "ban",
@@ -78,12 +78,12 @@ g_admin_cmd_t g_admin_cmds[ ] =
     //ROTAX
     {"bot", G_admin_bot, qfalse, "bot",
       "Add or delete bot(s)",
-      "[^3add/del^7] [name] [^5aliens/humans^7] (skill)"
+      "[^3add/del^7] [name] [^5aliens/humans^7]"
     },
     
     {"botcmd", G_admin_botcmd, qfalse, "botcmd",
       "Change bot behavior.",
-      "[^3name^7] [^5regular/idle/standground/followattack/followidle | skill | give | kill ^7]"
+      "[botname] [command] [value]"
     },
 	
 	//LEPE
@@ -91,12 +91,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
 		"Debug bot information",
 		"[^3name^7] [^5think | state | navstate | path | profile | general | main | admin | active | alien | human | control | util | common | say | nav ] ^7[ normal | verbose | quiet | off ]"
 	},
-
-	//LEPE
-	{"dbgcmd", G_admin_dbgcmd, qfalse, "dbgcmd",
-		"Debug functions",
-		"[findpath]"
-	},
+	
+    {"botjoin", G_admin_botjoin, qfalse, "botjoin",
+      "Add or delete random bots",
+      "[^5aliens/humans/both^7] [-#|+#]"
+    },
 
     {"builder", G_admin_builder, qtrue, "builder",
       "show who built a structure",
@@ -117,6 +116,12 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "load a map (and optionally force layout)",
       "[^3mapname^7] (^5layout^7)"
     },
+	
+	//LEPE
+	{"dbgcmd", G_admin_dbgcmd, qfalse, "dbgcmd",
+		"Debug functions",
+		"[findpath]"
+	},
 
     {"denybuild", G_admin_denybuild, qfalse, "denybuild",
       "take away a player's ability to build",
@@ -3318,8 +3323,6 @@ qboolean G_admin_bot( gentity_t *ent ) {
         char name2_s[ MAX_NAME_LENGTH ];
         char team[10];
         team_t team_int;
-        char skill[2];
-        int skill_int;
         qboolean success = qfalse;
         int j;
         namelog_t *namelog;
@@ -3327,7 +3330,7 @@ qboolean G_admin_bot( gentity_t *ent ) {
         minargc = 3;
         if( trap_Argc() < minargc )     {
                 ADMP( "^7Please have at least command and name.\n" );
-                ADMP( "^3!bot: ^7usage: !bot [add/del] [name] (team) (skill)\n" );
+                ADMP( "^3!bot: ^7usage: !bot [add/del] [name] (team) \n" );
                 return qfalse;
         }
 
@@ -3336,11 +3339,10 @@ qboolean G_admin_bot( gentity_t *ent ) {
         G_SanitiseString( name, name_s, sizeof(name_s) );
 
         if(!Q_stricmp(command,"add")) {
-                // add [name] [team] (skill)
                 minargc = 4;
                 if( trap_Argc() < minargc )     {
                         ADMP( "^7Please have at least name and team.\n" );
-                        ADMP( "^3!bot: ^7usage: !bot [add/del] [name] [humans/aliens] (skill)\n" );
+                        ADMP( "^3!bot: ^7usage: !bot [add/del] [name] [humans/aliens]\n" );
                         return qfalse;
                 }
 
@@ -3352,16 +3354,8 @@ qboolean G_admin_bot( gentity_t *ent ) {
                         team_int = TEAM_ALIENS;
                 } else {
                         ADMP( "^7Invalid bot team.\n" );
-                        ADMP( "^3!bot: ^7usage: !bot add [name] [humans/aliens] (skill)\n" );
+                        ADMP( "^3!bot: ^7usage: !bot add [name] [humans/aliens]\n" );
                         return qfalse;
-                }
-
-                minargc = 5;
-                if(trap_Argc() < minargc) {
-                        skill_int = 0;
-                } else {
-                        trap_Argv( 4, skill, sizeof( skill ) );
-                        skill_int = atoi(skill);
                 }
 
                 // got name, team_int and skill_int
@@ -3373,7 +3367,7 @@ qboolean G_admin_bot( gentity_t *ent ) {
 				
                 trap_Argv( 3, team, sizeof( team ) );
 //               for( i = 0; i < MAX_NAMELOG_NAMES && namelog[ i ];i++ ) {
-                 for( namelog = level.namelogs; namelog; namelog = namelog->next )
+                 for( namelog = level.namelogs; namelog; namelog = namelog->next ) {
                         if( namelog->slot >= 0 ) {
                                 for( j = 0; j < MAX_NAMELOG_NAMES && namelog->name[ j ][ 0 ]; j++ ) {
                                         G_SanitiseString(namelog->name[ j ], name2_s, sizeof(name2_s) );
@@ -3388,13 +3382,87 @@ qboolean G_admin_bot( gentity_t *ent ) {
 													success = qtrue;
 											}
 										}
-                                }
-                        }
-                }
-
+                        		}
+                		}
+        		}
                 return success;
-                //ADMP( "delete not implemented yet\n" );
-                //return qfalse;
+		}
+		return qfalse;
+}
+
+qboolean G_admin_botjoin( gentity_t *ent ) {
+	//botjoin [humans|aliens] +/-#
+        char team[10];
+        char qty[ 3 ];
+		int qty_int, i, minargc;
+        team_t team_int;
+		int botsinteam;
+		int reservedSlots = trap_Cvar_VariableIntegerValue( "sv_privateclients" );
+		int totalbots = level.humanBots + level.alienBots;
+		
+        minargc = 2;
+        if( trap_Argc() < minargc )     {
+			  //LEPE: start bots
+			  G_DeployBots( );
+              return qtrue;
+        }
+
+        trap_Argv( 1, team, sizeof( team ) );
+        trap_Argv( 2, qty, sizeof( qty ) );
+
+		if(!Q_stricmp(team,"humans")) {
+				team_int = TEAM_HUMANS;
+				botsinteam = level.humanBots;
+		} else if(!Q_stricmp(team,"aliens")) {
+				team_int = TEAM_ALIENS;
+				botsinteam = level.alienBots;
+		} else if(!Q_stricmp(team,"both")) {
+				team_int = TEAM_NONE;
+				botsinteam = level.alienBots > level.humanBots ? level.alienBots : level.humanBots;
+		} else {
+				ADMP( "^7Invalid bot team.\n" );
+                ADMP( "^3!botjoin: ^7usage: !botjoin (team) (qty)\n" );
+				return qfalse;
+		}
+
+		qty_int = atoi(qty);
+		if(qty_int > 0) {
+			//if we are about to exceed our capacity, limit it
+			if(qty_int > reservedSlots - totalbots) {
+				qty_int = reservedSlots - totalbots;
+			}
+			for(i = 0; i < qty_int; i++) {
+				if(team_int == TEAM_NONE) {
+	        		G_BotAddRandom(TEAM_HUMANS);
+	        		G_BotAddRandom(TEAM_ALIENS);
+				} else {
+	        		G_BotAddRandom(team_int);
+				}
+			}
+			if(team_int == TEAM_ALIENS) {
+				level.extraAlienBots += qty_int;
+			} else {
+				level.extraHumanBots += qty_int;
+			}
+		} else if(qty_int < 0) {
+			if(qty_int > botsinteam) {
+				qty_int = botsinteam;
+			}
+			for(i = 0; i < abs(qty_int); i++) {
+				if(team_int == TEAM_NONE) {
+	        		G_BotDelRandom(TEAM_HUMANS);
+	        		G_BotDelRandom(TEAM_ALIENS);
+				} else {
+        			G_BotDelRandom(team_int);
+				}
+			}
+			if(team_int == TEAM_ALIENS) {
+				level.extraAlienBots -= qty_int;
+			} else {
+				level.extraHumanBots -= qty_int;
+			}
+		}
+        return qtrue;
 }
 
 qboolean G_admin_botcmd( gentity_t *ent ) {

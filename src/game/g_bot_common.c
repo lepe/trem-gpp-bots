@@ -164,8 +164,10 @@ int BotTargetRank( gentity_t *self, gentity_t *target ) {
 		rank += 50;
 	}
 	//The enemies or my friends are my enemies!
-	if(self->bot->Friend->bot && self->bot->Friend->bot->Enemy == target) {
-		rank += 30;
+	if(self->bot->Friend) {
+		if(self->bot->Friend->bot && self->bot->Friend->bot->Enemy == target) {
+			rank += 30;
+		}
 	}
 	return rank;
 }

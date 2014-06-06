@@ -160,6 +160,8 @@ vmCvar_t  g_bot_prifle;
 vmCvar_t  g_bot_flamer;
 vmCvar_t  g_bot_lcannon;
 //LEPE:(add also in g_local.h)
+
+vmCvar_t  g_bot_minPerTeam;
 vmCvar_t  g_bot_join;
 vmCvar_t  g_bot_basi;
 vmCvar_t  g_bot_advbasi;
@@ -245,6 +247,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_bot_advgoon, "g_bot_advgoon", "1", 0, 0, qfalse },
   { &g_bot_tyrant, "g_bot_tyrant", "1", 0, 0, qfalse },
   { &g_bot_join, "g_bot_join", "1", 0, 0, qfalse },
+  { &g_bot_minPerTeam, "g_bot_minPerTeam", "2", CVAR_ARCHIVE, 0, qfalse },
   { &g_bot_essence, "g_bot_essence", "1", 0, 0, qfalse },
   { &g_bot_tagname, "g_bot_tagname", "1", 0, 0, qfalse },
   { &g_bot_manual, "g_bot_manual", "0", 0, 0, qfalse },
@@ -367,6 +370,7 @@ Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, i
   {
     case GAME_INIT:
       G_InitGame( arg0, arg1, arg2 );
+	  trap_SendConsoleCommand( EXEC_APPEND, "exec bots.cfg\n" ); 
       return 0;
 
     case GAME_SHUTDOWN:
@@ -1068,10 +1072,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
     level.alienTeamLocked = qtrue;
     level.humanTeamLocked = qtrue;
     trap_Cvar_Set( "g_lockTeamsAtStart", "0" );
-  }
-  //LEPE: start bots
-  if(level.numAlienClients == 0 && level.numHumanClients == 0) {
- 	trap_SendConsoleCommand( EXEC_APPEND, "exec bots/start.cfg\n" ); 
   }
 }
 
@@ -2931,23 +2931,51 @@ void G_RunFrame( int levelTime )
   level.frameMsec = trap_Milliseconds();
 }
 /**
- * Call for scripts (.cfg) to add or remove bots according to the number of connected players
- * for example: if a player joins aliens, it will call: bots/A1.cfg . If that player leaves, it
- * will call bots/A0.cfg
+ * Called on event. (when someone joins or leaves)
  * @param ent [gentity_t] player who enter or leaves the game.
 **/
-void G_DeployBots( gentity_t *ent ) 
+void G_DeployBotsExec( gentity_t *ent ) 
 {
     if(g_bot_join.integer) {
-         G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN,"A Players: %d\nH Players: %d\n",level.numAlienClients,level.numHumanClients);
-        if(! (ent->r.svFlags & SVF_BOT)) { 
-            if(level.numAlienClients - level.alienBots >= 0) {
-                trap_SendConsoleCommand( EXEC_APPEND, va("exec bots/A%d.cfg\n", level.numAlienClients - level.alienBots) ); 
-            } 
-            if(level.numHumanClients - level.humanBots >= 0) {
-                trap_SendConsoleCommand( EXEC_APPEND, va("exec bots/H%d.cfg\n", level.numHumanClients - level.humanBots) ); 
-            }
-        }
-        G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN,"A Bots: %d\nH Bots: %d\n",level.alienBots,level.humanBots);
+        if(! (ent->r.svFlags & SVF_BOT)) {
+			G_DeployBots( );
+		}
     }
+}
+
+/**
+ * Add bots or remove bots depending on how many players are in each team
+**/
+void G_DeployBots( void )  {
+	int i;
+	//Negative means more Humans than Aliens
+	int alien_players = level.numAlienClients - level.alienBots;
+	int human_players = level.numHumanClients - level.humanBots;
+	int alien_human_diff = alien_players - human_players;
+	int aliens = g_bot_minPerTeam.integer + level.extraAlienBots - (alien_human_diff < 0 ? alien_human_diff : 0);
+	int humans = g_bot_minPerTeam.integer + level.extraHumanBots + (alien_human_diff > 0 ? alien_human_diff : 0);
+	int aliens_add_rm = aliens - level.alienBots;
+	int humans_add_rm = humans - level.humanBots;
+	
+    G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN,"A Players: %d\nH Players: %d\n",alien_players,human_players);
+	
+	if(aliens_add_rm > 0) {
+		for(i = 0; i < aliens_add_rm; i++) {
+			G_BotAddRandom(TEAM_ALIENS);
+		}
+	} else if(aliens_add_rm < 0) {
+		for(i = 0; i < abs(aliens_add_rm); i++) {
+			G_BotDelRandom(TEAM_ALIENS);
+		}
+	}
+	if(humans_add_rm > 0) {
+		for(i = 0; i < humans_add_rm; i++) {
+			G_BotAddRandom(TEAM_HUMANS);
+		}
+	} else if(humans_add_rm < 0) {
+		for(i = 0; i < abs(humans_add_rm); i++) {
+			G_BotDelRandom(TEAM_HUMANS);
+		}
+	}
+	G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN,"A Bots: %d\nH Bots: %d\n",level.alienBots,level.humanBots);
 }

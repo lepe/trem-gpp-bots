@@ -444,10 +444,14 @@ void BotEvolve( gentity_t *self )
 void BotAttackAlien( gentity_t *self )
 {
 	int veryCloseDistance = LEVEL4_CLAW_RANGE; 
-	int distance = botGetDistanceBetweenPlayer(self, self->bot->Enemy);
+	int distance = 0;
 	int anglediff = 0;
 	qboolean flank = qfalse;
 	qboolean jumpOnZero = qfalse;
+	
+	if(!self->bot->Enemy) return;
+	
+	distance = botGetDistanceBetweenPlayer(self, self->bot->Enemy);
 	//If we are closer than what humans can reach to us
 	if(distance < g_human_range.integer)
 	{
@@ -535,10 +539,11 @@ void BotAttackAlien( gentity_t *self )
 			}
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL3)//dragon
 			{
-				if(distance > LEVEL3_CLAW_RANGE && self->client->ps.stats[ STAT_MISC ] == 0) { // < LEVEL3_POUNCE_JUMP_MAG) {
+				if(distance > LEVEL3_CLAW_RANGE) { 
  					//BotSecAttack( self );
 					Bot_Pounce( self , 10 );
 				} else {
+					if(G_Rand() < 20) Bot_Pounce( self , 10 );
 					BotMainAttack( self );
 					flank = qtrue;
 				}
@@ -549,10 +554,11 @@ void BotAttackAlien( gentity_t *self )
 				if(self->client->ps.ammo > 0 && distance > 150) {
 					   BotMidAttack( self ); 
 				}
-				if(distance > LEVEL3_CLAW_UPG_RANGE && self->client->ps.stats[ STAT_MISC ] == 0) { // < LEVEL3_POUNCE_JUMP_MAG_UPG) {
+				if(distance > LEVEL3_CLAW_UPG_RANGE) { 
  					//BotSecAttack( self ); 
 					Bot_Pounce( self , 10 );
 				} else {
+					if(G_Rand() < 20) Bot_Pounce( self , 10 );
 					BotMainAttack( self );
 					flank = qtrue;
 				}

@@ -184,6 +184,7 @@ qboolean G_admin_buildlog( gentity_t *ent );
 qboolean G_admin_revert( gentity_t *ent );
 //ROTAX
 qboolean G_admin_bot( gentity_t *ent );
+qboolean G_admin_botjoin( gentity_t *ent );
 qboolean G_admin_botcmd( gentity_t *ent );
 qboolean G_drawnodes( gentity_t *ent );
 qboolean G_reloadnodes( gentity_t *ent ); //LEPE

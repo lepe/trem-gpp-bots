@@ -49,7 +49,7 @@ int G_Rand( void ) {
  * @return int
  */
 int G_Rand_Range( int start, int end ) {
-    return (int)(rand() % (start - end)) + end;
+    return (int)(rand() % (end - start)) + start;
 }
 
 // ROTAX: really an int? what if it's too long? If it is, we are fuxed.
@@ -326,13 +326,15 @@ qboolean botFindClosestFriend( gentity_t *self ) {
 				//Do not follow if its following
 				leader = target;
 				if(leader->bot) {
-					while(leader->bot->Friend && max < 20) {
+					while(leader->bot && leader->bot->Friend && max < 20) {
 						leader = leader->bot->Friend;
 						max++;
 					}
 					if(leader != self) {
 						self->bot->Friend = leader;
-						leader->bot->Friend = NULL; //be sure he is not following anyone
+						if(leader->bot) {
+							leader->bot->Friend = NULL; //be sure he is not following anyone
+						}
 						G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_UTIL,"following %s\n", leader->client->pers.netname);
 					}
 					return qtrue;
@@ -496,5 +498,9 @@ qboolean botHitTarget( gentity_t *self, int time ) {
  */
 void botResetHitTarget( gentity_t *self ) {
 	self->bot->timer.hit = level.time; 
-	self->bot->var.targetHits = self->bot->Enemy->credits[ self->s.clientNum ];
+	if(self->bot->Enemy) {
+		self->bot->var.targetHits = self->bot->Enemy->credits[ self->s.clientNum ];
+	} else {
+		self->bot->var.targetHits = 0;
+	}
 }

@@ -703,6 +703,8 @@ typedef struct
   //Bots related ----
   int               alienBots;
   int               humanBots;
+  int               extraAlienBots; //extra means that were added manually 
+  int               extraHumanBots;
   int               essenceFadeTimer; //used to control how essence is faded in ant algorithm
   int				groupLogicTimer;
   //----
@@ -1023,7 +1025,8 @@ void G_PathLoad( void );
 void G_EraseNodes(void);
 void G_RedrawNodes( void );
 void G_DrawNodes( void );
-void G_DeployBots( gentity_t *ent );  //LEPE
+void G_DeployBotsExec( gentity_t *ent );  //LEPE
+void G_DeployBots( void );  //LEPE
 void ScoreboardMessage( gentity_t *client );
 void MoveClientToIntermission( gentity_t *client );
 void G_MapConfigs( const char *mapname );
@@ -1248,6 +1251,7 @@ extern  vmCvar_t  g_bot_move_and_aim;  //allow bots to move and aim at the same 
 extern  vmCvar_t  g_bot_step_aim;  //bots aim is not instant (experimental)
 extern  vmCvar_t  g_bot_skins;  //enable skins for bots :)
 extern  vmCvar_t  g_bot_join;  //disable bots join
+extern  vmCvar_t  g_bot_minPerTeam;  //minimum bots per team
 
 extern  vmCvar_t  g_bot_debug_verbosity;
 extern  vmCvar_t  g_bot_debug_type;

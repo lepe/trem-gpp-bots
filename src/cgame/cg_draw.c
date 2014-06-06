@@ -3443,7 +3443,6 @@ void CG_DrawSplash( void )
 
   if( cg.splashTime + 4000 < cg.time )
     return;
-
   ar = ( 4.0f / 3.0f ) / ( (float)cgs.glconfig.vidWidth / cgs.glconfig.vidHeight );
   h = 82 * ar; //half the size
   w = 256 * ar; //half the size

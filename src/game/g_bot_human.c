@@ -272,6 +272,9 @@ void BotBuy( gentity_t *self )
 	//int maxAmmo, maxClips;
     int prob = 0; //probability to buy item //LEPE
 	int clientNum = self->client - level.clients;
+
+	if(!self->bot->Struct) return;
+	
 	if(self->bot->Struct->s.modelindex != BA_H_ARMOURY || ! G_Visible(self, self->bot->Struct, CONTENTS_SOLID)) {
 		self->bot->Struct = NULL;
 		return;
@@ -590,7 +593,11 @@ void BotBuy( gentity_t *self )
 void BotAttackHuman( gentity_t *self )
 {
 	int tooCloseDistance = 200; 
-	int distance = botGetDistanceBetweenPlayer(self, self->bot->Enemy);
+	int distance = 0;
+	
+	if(!self->bot->Enemy) return;
+	
+	distance = botGetDistanceBetweenPlayer(self, self->bot->Enemy);
 	
     G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_UTIL + BOT_DEBUG_HUMAN, "Enemy: %p\n", self->bot->Enemy);
     G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_UTIL + BOT_DEBUG_HUMAN, "Distance: %d\n", distance);
