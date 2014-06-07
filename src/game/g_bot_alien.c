@@ -227,6 +227,8 @@ void BotEvolve( gentity_t *self )
 	
 	//Do not evolve right away.
 	if(sincelast < 5000) return;
+	//Do not evolve if its low on HP
+	if(botGetHealthPct(self) < 50) return;
 	
 	self->bot->timer.improve = level.time;
 

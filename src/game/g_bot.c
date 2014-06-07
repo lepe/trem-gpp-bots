@@ -144,6 +144,8 @@ qboolean G_BotAdd( char *name, team_t team ) {
 void G_BotDel( int clientNum ) {
 	gentity_t *ent;
 
+	if(clientNum < 0) return;
+
 	ent = &g_entities[clientNum];
 	if( !( ent->r.svFlags & SVF_BOT ) ) {
 		trap_Print( va("'^7%s^7' is not a bot\n", ent->client->pers.netname) );
