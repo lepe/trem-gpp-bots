@@ -1,0 +1,105 @@
+alienAcidTubePS // Acid Tube
+{
+  ejector // acid spray
+  {
+    particle
+    {
+      shader sync acid101 acid102 acid103 acid104 acid105 acid106 acid107 acid108
+
+      displacement 0 0 0 ~2
+      normalDisplacement 20
+
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 300~75%
+      velocity 0 0 1 ~10
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -1 ~30
+
+      radius 0 8 20
+      alpha  0 1.0 0
+      rotation 0 ~360 -
+      bounce 0.2
+
+      lifeTime 600~50%
+    }
+
+    count 50
+    delay 0
+    period 5 - 0
+  }
+		
+		ejector // acid decals
+  {
+    particle
+    {
+      shader sync acid101
+
+      displacement 0 0 0 0
+      normalDisplacement 0
+
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 300~75%
+      velocity 0 0 1 ~10
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 900
+      acceleration 0 0 -1 ~30
+
+      radius 0 0 0
+      alpha 0 0 0
+      rotation 0 ~360 -
+						
+      bounce 0.3
+	     bounceMark 0~1 32~8 acidsplat1
+						bounceSound 1 sound/buildables/acid_tube/acidsplat.wav
+						
+						onDeathSystem alienBuildableBleedPS
+
+      lifeTime 1000~50%
+    }
+
+    count 1
+    delay 0
+    period 5 - 0
+  }
+}
+
+models/weapons/hive/missilePS // Hive
+{
+  ejector
+  {
+    particle
+    {
+      shader 20 models/weapons/hive/sprite1.tga models/weapons/hive/sprite2.tga
+
+      displacement 0 0 0 ~4
+
+      parentVelocityFraction  0.5
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 100
+      velocity 0 0 1 ~180
+
+      accelerationType cent
+      accelerationDir point
+      accelerationMagnitude 2000
+
+      rotation 0 -20~40 -20~40
+      radius 0 2 2
+      alpha 0 1 0
+      bounce 0.5
+
+      lifeTime 4000
+    }
+
+    count infinite
+    delay 0
+    period 100 - 0
+  }
+}

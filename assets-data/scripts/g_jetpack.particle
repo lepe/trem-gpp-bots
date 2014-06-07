@@ -1,0 +1,95 @@
+jetPackDescendPS
+{
+  ejector
+  {
+    particle
+    {
+      shader sync bluesmoke
+      displacement 0 0 0 0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 50
+      velocity 0 0 -1 ~15
+
+      accelerationType static
+      accelerationDir linear
+      acceleration 0 0 -1 ~5
+      accelerationMagnitude 25
+
+      radius 0 5 40
+      alpha 250 0.15 0
+      rotation 0 ~360 ~360
+      bounce 0
+
+      lifeTime 1000
+    }
+    count infinite
+    delay 0
+    period 45 - 0
+  }
+}
+
+jetPackAscendPS
+{
+  ejector
+  {
+    particle
+    {
+      shader sync bluesmoke
+      displacement 0 0 0 0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 50
+      velocity 0 0 -1 ~15
+
+      accelerationType static
+      accelerationDir linear
+      acceleration 0 0 -1 ~5
+      accelerationMagnitude 25
+
+      radius 0 5 40
+      alpha 250 0.3 0
+      rotation 0 ~360 ~360
+      bounce 0
+
+      lifeTime 2000
+    }
+    count infinite
+    delay 0
+    period 45 - 0
+  }
+}
+
+jetPackHoverPS
+{
+  ejector
+  {
+    particle
+    {
+      shader sync bluesmoke
+      displacement 0 0 0 0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 50
+      velocity 0 0 -1 ~15
+
+      accelerationType static
+      accelerationDir linear
+      acceleration 0 0 -1 ~5
+      accelerationMagnitude 25
+
+      radius 0 5 40
+      alpha 250 0.2 0
+      rotation 0 ~360 ~360
+      bounce 0
+
+      lifeTime 1500
+    }
+    count infinite
+    delay 0
+    period 45 - 0
+  }
+}
