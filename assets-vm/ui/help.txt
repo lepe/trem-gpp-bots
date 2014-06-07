@@ -9,7 +9,7 @@
     "If there are any problems with these bots please register on our forum "
     "and post your problem there in the BotsCamp section. The alternative is "
     "to speak to any of our great admins, provided you happen to pass them. "
-    "(They are listed in ^1Administration ^7tab).\n\n"
+    "(They are listed in ^3Administration ^7tab).\n\n"
     "^3We hope you will enjoy your time here, and remember to stay tuned, alot of "
     "new things are on their way!\n\n"
     "^2Forum: ^7http:/^7/forum.acidtu.be\n"
@@ -22,15 +22,16 @@
      "In ^2Bots^1Camp^7, bots are automatically added to balance the game. However, you still "
      "have the rights to change the amount of bots the way you see fit. There will also be "
      "some other miscellaneous commands in this section. The higher your admin level, the more "
-     "commands you will have available. Please note that if you have just joined the server, "
-     "you will only be able to add/del bots; a LEVEL 1 command. \n\n"
+     "commands you will have available. please note that if you have just joined the server you "
+     "WILL NOT be able to add/del bots. This requires Level 1, which can be attained by using "
+     "/register command. (please see player levels for more information).\n\n"
      "Level-Command's-Available-To : Command Format : What It Does : Example : Example Explanation\n"
-     "^3Level 1^7 (and up): ^2/callbot ^1<humans OR aliens OR both> ^5<{- OR +}1,2,3 OR 4> ^7: This makes a vote that will "
-     "add (+) or delete (-) bots from humans or aliens (provided it passes). The number specifies "
-     "amount of bots added/deleted (the max amounts of bots changed in one vote is 4). : /callbot humans -3 : "
-     "This will delete 3 bots from the human team."
+     "^3Level 1^7 (and up): ^2/callbot ^1<humans OR aliens OR both> ^5<{- OR +}1,2,3 OR 4> ^7: "
+     "This makes a vote that will add (+) or delete (-) bots from humans or aliens (provided it passes). "
+     "The number specifies the amount of bots added/deleted (maximum 4 bots per vote): "
+     "/callbot humans -3 : This will delete 3 bots from the human team."
   }
-  "Why ^2Bots^1Camp^3?"
+  "^3Why ^2Bots^1Camp^3?"
   {
     "This is a fun server to play when very few people are on and your waiting for "
     "more to join. Also there are some fun challenging layouts that already exist "
@@ -40,7 +41,7 @@
     "experienced players, and to allow for single player and coop tremulous games.\n"
     "\n                                                                                 ^4*^7<^4{^1d^2Gr8Lookin^4Sparky\n"
   }
-  "^1Future^3Ambitions"
+  "^3Future Ambitions"
  {  "^2Bots^1Camp ^7has many future ambitions so make sure you stay tuned! Read further to learn what they are!\n\n"
   "^1-^7Make bots talk\n"
   "^1-^7Add single player and co-op missions against bots that get increasingly hard\n"
@@ -49,7 +50,7 @@
   "^1-^7Make bots to be great teammates for players\n"
   "^1-^7Make customizable bots and perform bots tournaments!\n"
   }
-  "Why ^3Asia?"
+  "^3Why Asia?"
   {
     "''To let Overpowered Asian Level and Australia eliminate the deficient European-ridden GPP.''"
     " - [kor]^2F^7risqy^8.^4V^5i^1r^6u^3S^7\n"
@@ -62,7 +63,7 @@
     "''^2cirus bru^7'' - PaN61\n"
     "''Tremulous GPP is now Edge-Mania. Good to be free of it.'' - <Tumbo>"
   }
-  "^1Player Levels"
+  "^3Player Levels"
   {  
       "^6BOT-TEASER ^7(Level ^60^7): Guests, anyone joining for first time to BotsCamp\n"
       "^5BOT-MOCKER ^7(Level ^51^7): Those who register using the ^5/register^7 command.\n"
@@ -70,7 +71,7 @@
       "^3BOT-RANGER ^7(Level ^33^7): Moderators^7\n"
       "^1BOT-MASTER ^7(Level ^14^7): Administrators^7\n"
   }
-  "^1Administration"
+  "^3Administration"
   {
     "- ^2Global^1Warming^2-^7Server Owner/Main Coder^2-^7(Currently Displaying Traits Of World Domination).\n"
     "- ^4*^7<^4{^1d^2Gr8Lookin^4Sparky^2-^7Logical Idea Generator/Server Patroller^2-^7Very, Very Crazzzzy. (He Thinks There Out To Get Him)!\n"
@@ -78,7 +79,7 @@
     "- ^3Pikachu^2-^7Artist/Other Stuff^2-^7Does Some Nice Effects!\n"
     "- ^1KoR^8|^2F^7risqy ^7(^4V^5i^1r^6u^3S^7)^2-^7Provides great support with knowledge of Tremulous^2-^7(A CookieStealer).\n"
   }
-  "^3Contributions:"
+  "^3Contributions"
   {
     " Pikachu             GFX from cuboid & some weapons sounds\n"
     " Redman             Camera shake effect\n"

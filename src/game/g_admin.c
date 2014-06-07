@@ -3457,9 +3457,9 @@ qboolean G_admin_botjoin( gentity_t *ent ) {
 				}
 			}
 			if(team_int == TEAM_ALIENS) {
-				level.extraAlienBots -= qty_int;
+				level.extraAlienBots += qty_int;
 			} else {
-				level.extraHumanBots -= qty_int;
+				level.extraHumanBots += qty_int;
 			}
 		}
         return qtrue;

@@ -188,7 +188,7 @@ void G_BotAddRandom ( team_t team ) {
 		"Tarantula", 
 		"URTasty", 
 		"BlackWidow", 
-		"DontRun", 
+		"MoonWalker", 
 		"BaByBoom", 
 		
 		"Mufasa", 

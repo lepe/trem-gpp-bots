@@ -134,7 +134,7 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch ) {
 	// Create our vector that points our gun to his face
 	VectorAdd( targetStraight, targetUp, dirToTarget );
 
-	wobble = (target->s.eType == ET_BUILDABLE ? 0 : BOT_WOBBLE) + self->bot->var.angleToTarget;
+	wobble = (target->s.eType == ET_BUILDABLE ? 0 : BOT_WOBBLE);// + self->bot->var.angleToTarget;
 	if(self->client->ps.eFlags & EF_POISONCLOUDED) {
 		wobble += G_Rand();
 	}
