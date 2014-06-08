@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="64"
+   height="64"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   inkscape:export-filename="/home/kaname/Projects/trem-gpp-bots/assets-data/emoticons/trapper_1x1.tga.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90"
+   sodipodi:docname="trapper.svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="5.1255329"
+     inkscape:cx="21.711472"
+     inkscape:cy="4.5456865"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1280"
+     inkscape:window-height="1002"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-988.36218)">
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:4.70362234;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect2985"
+       width="59.296379"
+       height="59.296379"
+       x="2.3518112"
+       y="990.71399" />
+    <path
+       style="fill:#ffffff;stroke:none"
+       d="m 28.679944,1016.6586 c 6.440243,4.6475 13.777752,9.5392 18.144455,16.7787 -1.867406,-9.3597 -8.091318,-15.0854 -14.632624,-20.2906 8.513756,2.8729 12.978804,7.0146 17.364048,18.1445 1.667914,-10.9777 -4.029547,-18.5987 -16.778743,-23.6073 l -1.170611,-8.38938 -1.560813,4.09718 c -6.532407,-0.144 -13.715929,2.9924 -14.437523,12.8767 l -3.316728,1.3657 8.779575,2.1461 c 3.196142,13.454 10.328485,17.9506 19.119963,19.7053 -7.595797,-3.9223 -13.062693,-11.0007 -15.022828,-21.071 -2.860626,2.4677 19.021786,21.9657 18.339557,18.5346 -1.447131,-0.4955 -16.140047,-18.4544 -14.827728,-20.2905 z"
+       id="path4042"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccccccccc" />
+  </g>
+</svg>

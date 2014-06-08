@@ -1,10 +1,8 @@
 {
   "^2Bots^1Camp^3!"
   {
-    "Welcome to ^2Bots^1Camp ^7[GPP-BOT] mod for Tremulous GPP. \n"
-    "If you need help, feel free to ask around, and there are the category "
-    "tabs on the left you can click on, feel free to explore them.\n"
-    "We are always looking for people that can help us improve this mod through "
+    "Welcome to ^2Bots^1Camp ^7[GPP-BOT] mod for Tremulous GPP ^1(a 100% vanilla server)! \n"
+  "We are always looking for people that can help us improve this mod through "
     "great ideas, comments, code patches and more. \n\n"
     "If there are any problems with these bots please register on our forum "
     "and post your problem there in the BotsCamp section. The alternative is "
@@ -21,16 +19,31 @@
   {
      "In ^2Bots^1Camp^7, bots are automatically added to balance the game. However, you still "
      "have the rights to change the amount of bots the way you see fit. There will also be "
-     "some other miscellaneous commands in this section. The higher your admin level, the more "
-     "commands you will have available. please note that if you have just joined the server you "
+     "some other miscellaneous commands in this section. "
+     "please note that if you have just joined the server you "
      "WILL NOT be able to add/del bots. This requires Level 1, which can be attained by using "
      "/register command. (please see player levels for more information).\n\n"
-     "Level-Command's-Available-To : Command Format : What It Does : Example : Example Explanation\n"
+     "Comman-Level : Command-Format : What-It-Does : Example : Example-Explanation\n"
      "^3Level 1^7 (and up): ^2/callbot ^1<humans OR aliens OR both> ^5<{- OR +}1,2,3 OR 4> ^7: "
      "This makes a vote that will add (+) or delete (-) bots from humans or aliens (provided it passes). "
      "The number specifies the amount of bots added/deleted (maximum 4 bots per vote): "
      "/callbot humans -3 : This will delete 3 bots from the human team."
-  }
+   }
+   "^3Icons Help"
+   {  "^7Here you will find a list of icons and how to use them. To use an icon you must put 2 "
+      "brackets around the words below (like this ^3[word]^7)."
+      "[bot] bot"
+   }
+   "^3FAQ [help]"
+   { 
+     "^1'What do the textures mean?!':"  "^1The special textures ONLY apply to bots!. "
+     ^7 Normal players will still get flashy lights, but that's all. \n"
+     "^3'How is botscamp 100% vanilla?':" "^7 We are proud to state botscamp is 100% vanilla. "
+     "The only things we have changed do not really affect gameplay. What we have changed are "
+     "that we have added bots to the game, added distinct textures and changed some things in the menu.\n"
+     "^3'Why can't i do [bot] in my name?!':" "^7Since we don't want players to get muddled up "
+     "between bots and normal players, only bots can have [bot] in their name.\n"
+   }
   "^3Why ^2Bots^1Camp^3?"
   {
     "This is a fun server to play when very few people are on and your waiting for "
@@ -40,15 +53,6 @@
     "training server for beginners as well as to help fine tune the skills of more "
     "experienced players, and to allow for single player and coop tremulous games.\n"
     "\n                                                                                 ^4*^7<^4{^1d^2Gr8Lookin^4Sparky\n"
-  }
-  "^3Future Ambitions"
- {  "^2Bots^1Camp ^7has many future ambitions so make sure you stay tuned! Read further to learn what they are!\n\n"
-  "^1-^7Make bots talk\n"
-  "^1-^7Add single player and co-op missions against bots that get increasingly hard\n"
-  "^1-^7Create different modes for bots like ''swarm mode (have ^1heaps^7 of bots join a team that are easy to kill)\n"
-  "^1-^7Make bots build\n"
-  "^1-^7Make bots to be great teammates for players\n"
-  "^1-^7Make customizable bots and perform bots tournaments!\n"
   }
   "^3Why Asia?"
   {
@@ -62,6 +66,15 @@
     "''theos is awesome'' - <oxytocin>\n"
     "''^2cirus bru^7'' - PaN61\n"
     "''Tremulous GPP is now Edge-Mania. Good to be free of it.'' - <Tumbo>"
+  }
+  "^3Future Ambitions"
+ {  "^2Bots^1Camp ^7has many future ambitions so make sure you stay tuned! Read further to learn what they are!\n\n"
+  "^1-^7Make bots talk\n"
+  "^1-^7Add single player and co-op missions against bots that get increasingly hard\n"
+  "^1-^7Create different modes for bots like ''swarm mode (have ^1heaps^7 of bots join a team that are easy to kill)\n"
+  "^1-^7Make bots build\n"
+  "^1-^7Make bots to be great teammates for players\n"
+  "^1-^7Make customizable bots and perform bots tournaments!\n"
   }
   "^3Player Levels"
   {  
