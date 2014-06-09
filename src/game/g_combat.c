@@ -1071,12 +1071,12 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   {
     if( OnSameTeam( targ, attacker ) )
       attacker->client->ps.persistant[ PERS_HITS ]--;
-    else
+    else {
       attacker->client->ps.persistant[ PERS_HITS ]++;
+	}
+    //Update who is our target. //LEPE: used to prevent bots to hit other players
+    attacker->target_ent = targ;
   }
-
-  //Update who is our target. //LEPE: used to prevent bots to hit other players
-  attacker->target_ent = targ;
 
   take = damage;
 

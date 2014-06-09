@@ -243,15 +243,31 @@ itemDef
   background "ui/assets/neutral/charge_bg_h.tga"
 }
 
+//SPECTATOR TEXT
+itemDef
+{
+  name "followtext"
+  rect 200 375 240 25
+  foreColor 1 1 1 1
+  aspectBias ALIGN_CENTER
+  textalign ALIGN_CENTER
+  textvalign VALIGN_TOP
+  visible MENU_TRUE
+  decoration
+  textScale .7
+  textStyle ITEM_TEXTSTYLE_SHADOWED
+  ownerdraw CG_FOLLOW
+}
+
 //TEAM OVERLAY
 itemDef
 {
   name "teamoverlay"
-  rect BORDER 175 200 128
+  rect BORDER 120 160 128
   style WINDOW_STYLE_EMPTY
   visible MENU_TRUE
   decoration
   forecolor COMMON_HUD_R COMMON_HUD_G COMMON_HUD_B 0.75
-  textscale 0.85
+  textscale 1.0
   ownerdraw CG_TEAMOVERLAY
 }

@@ -6,7 +6,7 @@ GAME_DIR=/var/games/tremulous
 MOD=gpp-bot
 # Directory to set links to pk3s (empty = none)
 # can be relative or absolute
-WEB_DIR=web
+WEB_DIR=$GAME_DIR/web
 # Set package version
 VERSION=$(cat VERSION);
 

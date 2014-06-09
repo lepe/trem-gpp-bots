@@ -6,7 +6,7 @@ GAME_DIR=/var/games/tremulous
 MOD=gpp-bot
 # Directory to set links to pk3s (empty = none)
 # can be relative or absolute
-WEB_DIR=web
+WEB_DIR=$GAME_DIR/web
 # Set package version
 VERSION=$(cat VERSION);
 
@@ -17,7 +17,7 @@ COPYTOUSER=1;
 #(Advanced): Modify if required
 DEPLOY_DIR=$GAME_DIR/$MOD
 
-DATA_PK3_DIR=assets-data
+DATA_PK3_DIR=assets
 #-----------------------------------------
 ROOT_PWD=$(pwd);
 cd $DATA_PK3_DIR

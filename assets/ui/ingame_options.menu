@@ -289,26 +289,6 @@
       }
     }
 
-    itemDef
-    {
-      name player
-      group optionsGrp
-      type ITEM_TYPE_YESNO
-      text "Static Death Cam:"
-      cvar "cg_staticDeathCam"
-      rect CONTENT_X (CONTENT_Y+(6*ELEM_H)) CONTENT_W ELEM_H
-      textalign ALIGN_RIGHT
-      textvalign VALIGN_CENTER
-      textalignx CONTENT_OFF
-      textscale .25
-      forecolor 1 1 1 1
-      visible MENU_FALSE
-      action
-      {
-        play "sound/misc/menu1.wav";
-      }
-    }
-
 //////// HUD
 
     itemDef
@@ -418,32 +398,10 @@
     {
       name hud
       group optionsGrp
-      type ITEM_TYPE_MULTI
+      type ITEM_TYPE_YESNO
       text "Show Team Overlay:"
       cvar "cg_drawTeamOverlay"
-      cvarFloatList { "Off" 0 "All Teammates" 1 "Support Teammates" 2 "Nearby Teammates" 3 }
       rect CONTENT_X (CONTENT_Y+(5*ELEM_H)) CONTENT_W ELEM_H
-      textalign ALIGN_RIGHT
-      textvalign VALIGN_CENTER
-      textalignx CONTENT_OFF
-      textscale .25
-      forecolor 1 1 1 1
-      visible MENU_FALSE
-      action
-      {
-        play "sound/misc/menu1.wav";
-      }
-    }
-
-    itemDef
-    {
-      name hud
-      group optionsGrp
-      type ITEM_TYPE_MULTI
-      text "Sort Team Overlay:"
-      cvar "cg_teamOverlaySortMode"
-      cvarFloatList { "None" 0 "Score" 1 "Weapon/Class" 2 }
-      rect CONTENT_X (CONTENT_Y+(6*ELEM_H)) CONTENT_W ELEM_H
       textalign ALIGN_RIGHT
       textvalign VALIGN_CENTER
       textalignx CONTENT_OFF
@@ -463,7 +421,7 @@
       type ITEM_TYPE_YESNO
       text "Show Gun:"
       cvar "cg_drawGun"
-      rect CONTENT_X (CONTENT_Y+(7*ELEM_H)) CONTENT_W ELEM_H
+      rect CONTENT_X (CONTENT_Y+(6*ELEM_H)) CONTENT_W ELEM_H
       textalign ALIGN_RIGHT
       textvalign VALIGN_CENTER
       textalignx CONTENT_OFF
@@ -484,7 +442,7 @@
       text "Show Speed:"
       cvar "cg_drawspeed"
       cvarFloatList { "No" 0 "Text" 1 "Graph" 2 "Text + Graph" 3 "Text No-Z" 5 "Graph No-Z" 6 "Text + Graph No-Z" 7 }
-      rect CONTENT_X (CONTENT_Y+(8*ELEM_H)) CONTENT_W ELEM_H
+      rect CONTENT_X (CONTENT_Y+(7*ELEM_H)) CONTENT_W ELEM_H
       textalign ALIGN_RIGHT
       textvalign VALIGN_CENTER
       textalignx CONTENT_OFF
@@ -504,7 +462,7 @@
       type ITEM_TYPE_YESNO
       text "Show FPS:"
       cvar "cg_drawFPS"
-      rect CONTENT_X (CONTENT_Y+(9*ELEM_H)) CONTENT_W ELEM_H
+      rect CONTENT_X (CONTENT_Y+(8*ELEM_H)) CONTENT_W ELEM_H
       textalign ALIGN_RIGHT
       textvalign VALIGN_CENTER
       textalignx CONTENT_OFF
@@ -524,7 +482,7 @@
       type ITEM_TYPE_YESNO
       text "Show Timer:"
       cvar "cg_drawTimer"
-      rect CONTENT_X (CONTENT_Y+(10*ELEM_H)) CONTENT_W ELEM_H
+      rect CONTENT_X (CONTENT_Y+(9*ELEM_H)) CONTENT_W ELEM_H
       textalign ALIGN_RIGHT
       textvalign VALIGN_CENTER
       textalignx CONTENT_OFF
@@ -544,7 +502,7 @@
       type ITEM_TYPE_YESNO
       text "Show Demo State:"
       cvar "cg_drawDemoState"
-      rect CONTENT_X (CONTENT_Y+(11*ELEM_H)) CONTENT_W ELEM_H
+      rect CONTENT_X (CONTENT_Y+(10*ELEM_H)) CONTENT_W ELEM_H
       textalign ALIGN_RIGHT
       textvalign VALIGN_CENTER
       textalignx CONTENT_OFF
@@ -2041,9 +1999,29 @@
       name gsoftware
       group optionsGrp
       type ITEM_TYPE_YESNO
+      text "Show Time:"
+      cvar "cg_drawTimer"
+      rect SCONTENT_X (SCONTENT_Y+(7*ELEM_H)) SCONTENT_W ELEM_H
+      textalign ALIGN_RIGHT
+      textvalign VALIGN_CENTER
+      textalignx SCONTENT_OFF
+      textscale .25
+      forecolor 1 1 1 1
+      visible MENU_TRUE
+      action
+      {
+        play "sound/misc/menu1.wav";
+      }
+    }
+
+    itemDef
+    {
+      name gsoftware
+      group optionsGrp
+      type ITEM_TYPE_YESNO
       text "In Game Videos:"
       cvar "r_inGameVideo"
-      rect SCONTENT_X (SCONTENT_Y+(7*ELEM_H)) SCONTENT_W ELEM_H
+      rect SCONTENT_X (SCONTENT_Y+(8*ELEM_H)) SCONTENT_W ELEM_H
       textalign ALIGN_RIGHT
       textvalign VALIGN_CENTER
       textalignx SCONTENT_OFF
@@ -2063,7 +2041,7 @@
       type ITEM_TYPE_YESNO
       text "Depth Sort Particles:"
       cvar "cg_depthSortParticles"
-      rect SCONTENT_X (SCONTENT_Y+(8*ELEM_H)) SCONTENT_W ELEM_H
+      rect SCONTENT_X (SCONTENT_Y+(9*ELEM_H)) SCONTENT_W ELEM_H
       textalign ALIGN_RIGHT
       textvalign VALIGN_CENTER
       textalignx SCONTENT_OFF
@@ -2084,7 +2062,7 @@
       text "Particle Physics:"
       cvar "cg_bounceParticles"
       cvarFloatList { "Low Quality" 0 "High Quality" 1 }
-      rect SCONTENT_X (SCONTENT_Y+(9*ELEM_H)) SCONTENT_W ELEM_H
+      rect SCONTENT_X (SCONTENT_Y+(10*ELEM_H)) SCONTENT_W ELEM_H
       textalign ALIGN_RIGHT
       textvalign VALIGN_CENTER
       textalignx SCONTENT_OFF
@@ -2105,7 +2083,7 @@
       text "Light Flares:"
       cvar "cg_lightFlare"
       cvarFloatList { "Off" 0 "No Fade" 1 "Timed Fade" 2 "Real Fade" 3 }
-      rect SCONTENT_X (SCONTENT_Y+(10*ELEM_H)) SCONTENT_W ELEM_H
+      rect SCONTENT_X (SCONTENT_Y+(11*ELEM_H)) SCONTENT_W ELEM_H
       textalign ALIGN_RIGHT
       textvalign VALIGN_CENTER
       textalignx SCONTENT_OFF

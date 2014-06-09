@@ -464,12 +464,10 @@ void BotAttack( gentity_t *self ){
 	self->bot->timer.foundPath = level.time;
 	//Try to avoid hitting your teamates. 
 	if(g_friendlyFire.integer && self->target_ent) {
-		if(botSameTeam(self, self->target_ent)) {
-			self->bot->Enemy = NULL;
-			BotResetState( self, ATTACK );
-			BotControl( self , BOT_RESET_BUTTONS );
-			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_COMMON + BOT_DEBUG_STATE,"Friend Fire!, Stoppping\n");  
-		}
+		//if(botSameTeam(self, self->target_ent)) {
+			//BotControl( self , BOT_RESET_BUTTONS ); Not working. fix it later
+			//G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_COMMON + BOT_DEBUG_STATE,"Friend Fire!, Stoppping\n");  
+		//}
 	}
 }
 /**

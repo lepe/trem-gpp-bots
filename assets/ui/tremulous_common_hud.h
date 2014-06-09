@@ -29,14 +29,14 @@ itemDef
 itemDef
 {
   name "tutorial"
-  rect BORDER 275 MAIN_W 130
+  rect BORDER 250 MAIN_W 180
   aspectBias ALIGN_LEFT
   style WINDOW_STYLE_EMPTY
   visible MENU_TRUE
   decoration
   forecolor 1 1 1 0.35
   textalign ALIGN_LEFT
-  textvalign VALIGN_CENTER
+  textvalign VALIGN_TOP
   textscale 0.3
   textstyle ITEM_TEXTSTYLE_NORMAL
   ownerdraw CG_TUTORIAL
@@ -204,21 +204,5 @@ itemDef
   rect 320 240 0 0
   forecolor COMMON_HUD_R COMMON_HUD_G COMMON_HUD_B .35
   ownerdraw CG_PLAYER_CROSSHAIR
-}
-
-//SPECTATOR TEXT
-itemDef
-{
-    name "followtext"
-    rect 200 375 240 25
-    foreColor 1 1 1 1
-    aspectBias ALIGN_CENTER
-    textalign ALIGN_CENTER
-    textvalign VALIGN_TOP
-    visible MENU_TRUE
-    decoration
-    textScale .7
-    textStyle ITEM_TEXTSTYLE_SHADOWED
-    ownerdraw CG_FOLLOW
 }
 

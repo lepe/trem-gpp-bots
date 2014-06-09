@@ -310,7 +310,7 @@ models/weapons/flamer/muzzlePS
 
       velocityType      cent
       velocityDir       linear
-      velocityMagnitude 500
+      velocityMagnitude 300
       velocity          0 0 0 ~0
 
       physicsRadius 15

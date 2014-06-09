@@ -2,8 +2,8 @@
 
 {
 
-#define W           420
-#define H           290
+#define W           600 
+#define H           400
 #define X           10
 #define Y           60
 #define BORDER      10
