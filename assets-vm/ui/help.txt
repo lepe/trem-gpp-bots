@@ -25,7 +25,7 @@
      "^3Why can't i do ''bot'' in my name?!: ^7Since we don't want players to get muddled up "
      "between bots and normal players, only bots can have ''bot'' in their name.\n"
      "^3Why ^2Bots^1Camp^3?: ^7(short answer) because its fun to play with when no players are around (more about it on the menu).\n"
-     "^3Why Asia?: (short answer) because Asia is going to take over Europe (more about it on the menu).\n"
+     "^3Why Asia?: ^7(short answer) because Asia is going to take over Europe (more about it on the menu).\n"
    }
   "^3Bot Commands"
   {
