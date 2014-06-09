@@ -29,20 +29,49 @@
      "The number specifies the amount of bots added/deleted (maximum 4 bots per vote): "
      "/callbot humans -3 : This will delete 3 bots from the human team."
    }
-   "^3Icons Help"
-   {  "^7Here you will find a list of icons and how to use them. To use an icon you must put 2 "
-      "brackets around the words below (like this ^3[word]^7)."
-      "[bot] bot"
+  "[official] ^3Emoticons (a - e)"
+   {  
+      "^7Here you will find a list of icons and how to use them. To use an icon you must put 2 "
+      "brackets around the words below like this: ^3[word]^7.\n\n"
+      "[abomb] abomb , [acidtube] acidtube , [advbasilisk] advbasilisk , [advdragoon] advdragoon , "
+      "[advgranger] advgranger , [advmarauder] advmarauder , [alien] alien , [alien2] alien2 , "
+      "[armor] armor , [armoury] armoury , [axes] axes, [ball] ball , [barbute] barbute , "
+      "[barricade] barricade , [basilisk] basilisk , [battery] battery , [bee] bee , [beer] beer , "
+      "[blaster] blaster , [bomb] bomb , [booster] booster , [bot] bot , [botadv] botadv , "
+      "[botface] botface , [botside] botside , [bsuit] bsuit , [bulb] bulb , "
+      "[bull] bull , [butterfly] butterfly , [cat] cat , [chaingun] chaingun , [ckit] ckit , "
+      "[claws] claws , [coffee] coffee , [cowled] cowled , [crown] crown , [cuboid] cuboid , "
+      "[defcomp] defcomp , [dev] dev , [dragoon] dragoon , [dretch] dretch , [eagle] eagle, [egg] egg ... "
    }
-   "^3FAQ [help]"
+  "[featured] ^3Emoticons (f - s)"
+   {  
+      "[featured] featured , [fish] fish , [flag] flag , [flamer] flamer , "
+      "[gecko] gecko , [ghost] ghost , [gluttony] gluttony , [granger] granger , [grenade] grenade , "
+      "[hat] hat , [health] health , [helmet] helmet , [help] help , [hive] hive , [hovel] hovel , "
+      "[human] human , [imp] imp , [jetpack] jetpack , [jetpack2] jetpack2 , [jigsaw] jigsaw , "
+      "[lasgun] lasgun , [law] law , [lcannon] lcannon , [marauder] marauder , [mdriver] mdriver , "
+      "[medstat] medstat , [mkit] mkit , [monkey] monkey , [nade] nade , [ninja] ninja , "
+      "[official] official , [oldhelm] oldhelm , [ontarget] ontarget , [overkill] overkill , "
+      "[overmind] overmind , [painsaw] painsaw , [palm] palm , [poison] poison , [prifle] prifle ,"
+      "[pyromaniac] pyromaniac , [radioactive] radioactive , [reactor] reactor , [repeater] repeater ,"
+      "[rifle] rifle , [robe] robe , [rocket] rocket , [run] run , [shield] shield , [shotgun] shotgun ,"
+      "[skull] skull , [sleepy] sleepy , [snail] snail , [squid] squid , [steelwing] steelwing ..."
+   }
+  "[coffee] ^3Emoticons (t - z)"
+   {  
+        "[tank] tank , [telenode] telenode , [tent] tent , [terror] terror , [tesla] tesla , [totem] totem ,"
+        "[trapper] trapper , [tree] tree , [turret] turret , [tyrant] tyrant , [tyrantface] tyrantface ,"
+        "[warn] warn , [wing] wing , [winged] winged"
+   }
+   "[help] ^3FAQ"
    { 
-     "^1'What do the textures mean?!':"  "^1The special textures ONLY apply to bots!. "
-     ^7 Normal players will still get flashy lights, but that's all. \n"
-     "^3'How is botscamp 100% vanilla?':" "^7 We are proud to state botscamp is 100% vanilla. "
+     "^1What do the textures mean?!: ^1The special textures ONLY apply to bots!. "
+     "^7 Normal players will still get flashy lights, but that's all. \n"
+     "^3How is botscamp 100% vanilla?: ^7 We are proud to state botscamp is 100% vanilla. "
      "The only things we have changed do not really affect gameplay. What we have changed are "
      "that we have added bots to the game, added distinct textures and changed some things in the menu.\n"
-     "^3'Why can't i do [bot] in my name?!':" "^7Since we don't want players to get muddled up "
-     "between bots and normal players, only bots can have [bot] in their name.\n"
+     "^3Why can't i do ''bot'' in my name?!: ^7Since we don't want players to get muddled up "
+     "between bots and normal players, only bots can have ''bot'' in their name.\n"
    }
   "^3Why ^2Bots^1Camp^3?"
   {
@@ -68,7 +97,7 @@
     "''Tremulous GPP is now Edge-Mania. Good to be free of it.'' - <Tumbo>"
   }
   "^3Future Ambitions"
- {  "^2Bots^1Camp ^7has many future ambitions so make sure you stay tuned! Read further to learn what they are!\n\n"
+  {  "^2Bots^1Camp ^7has many future ambitions so make sure you stay tuned! Read further to learn what they are!\n\n"
   "^1-^7Make bots talk\n"
   "^1-^7Add single player and co-op missions against bots that get increasingly hard\n"
   "^1-^7Create different modes for bots like ''swarm mode (have ^1heaps^7 of bots join a team that are easy to kill)\n"

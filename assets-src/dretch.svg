@@ -14,7 +14,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="goon.svg">
+   sodipodi:docname="dretch.svg"
+   inkscape:export-filename="/home/lepe/Projects/git/trem-gpp-bots/assets-data/emoticons/dretch_1x1.tga.png"
+   inkscape:export-xdpi="22.5"
+   inkscape:export-ydpi="22.5">
   <defs
      id="defs4">
     <filter
@@ -66,7 +69,7 @@
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="3.4365672"
-     inkscape:cx="24.5"
+     inkscape:cx="-11.728013"
      inkscape:cy="116.36048"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -99,7 +102,7 @@
      transform="translate(-269.14099,-423.38622)">
     <path
        inkscape:connector-curvature="0"
-       d="M 269.50147,423.42096 H 397.68822 V 551.60771 H 269.50147 z"
+       d="m 269.14099,423.38622 h 128 v 128 h -128 z"
        id="path4351" />
     <g
        style="fill:#ffffff"
@@ -173,7 +176,7 @@
        sodipodi:cy="31.537458"
        sodipodi:rx="15.131379"
        sodipodi:ry="28.953312"
-       d="m 83.222581,31.537458 a 15.131379,28.953312 0 1 1 -30.262758,0 15.131379,28.953312 0 1 1 30.262758,0 z"
+       d="m 83.222581,31.537458 c 0,15.990473 -6.774549,28.953312 -15.131379,28.953312 -8.35683,0 -15.131379,-12.962839 -15.131379,-28.953312 0,-15.990472 6.774549,-28.9533115 15.131379,-28.9533115 8.35683,0 15.131379,12.9628395 15.131379,28.9533115 z"
        transform="translate(266.5221,439.09957)" />
     <g
        transform="matrix(-1,0,0,1,668.58154,13.342197)"

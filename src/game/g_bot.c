@@ -58,9 +58,9 @@ qboolean G_BotAdd( char *name, team_t team ) {
 		G_DecolorString(name, name_s, MAX_NAME_LENGTH);
 		if (! (Com_StringContains(name_s, "[BOT]", 0))) {
 			if(team == TEAM_HUMANS) {
-				strcat(name_tmp_s, "^4[BOT]");
+				strcat(name_tmp_s, "^4[BOT] ");
 			} else if(team == TEAM_ALIENS) {
-				strcat(name_tmp_s, "^1[BOT]");
+				strcat(name_tmp_s, "^1[BOT] ");
 			}
 			strcat(name_tmp_s, name);
 			strcpy(name, name_tmp_s);
