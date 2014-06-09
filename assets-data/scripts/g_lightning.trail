@@ -1,0 +1,61 @@
+models/buildables/tesla/zap // Tesla Generator Lightning
+{
+  beam
+  {
+    shader models/ammo/tesla/tesla_bolt
+
+    segments 9
+    width 8 8
+    color { 0.75 0.5 1 } -
+
+    textureType repeat front 100
+
+    jitter 12 200
+    jitter 2 20
+  }
+
+  beam
+  {
+    shader models/ammo/tesla/tesla_bolt
+
+    segments 9
+    width 8 8
+    color { 0.5 0.8 1 } -
+
+    textureType repeat back 50
+
+    jitter 12 150
+    jitter 2 30
+  }
+}
+
+models/weapons/lev2zap/lightning // Advanced Marauder Lightning
+{
+  beam
+  {
+    shader models/ammo/tesla/tesla_bolt
+
+    segments 5
+    width 16.0 16.0
+    color { 0.8 0.8 0.8 } -
+
+    textureType repeat front 100.0
+
+    jitter 4 200
+    jitter 1 20
+  }
+
+  beam
+  {
+    shader models/ammo/tesla/tesla_bolt
+
+    segments 8
+    width 5 5
+    color { 0.5 0.8 1 } -
+
+    textureType repeat back 50
+
+    jitter 2 150
+    jitter 1 30
+  }
+}

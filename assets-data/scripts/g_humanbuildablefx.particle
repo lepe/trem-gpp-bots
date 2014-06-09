@@ -1,0 +1,413 @@
+humanBuildableBleedPS
+{
+  ejector
+  {
+    particle // residual sparks
+    {
+      shader sync spark00
+
+      displacement 0 0 0 ~1
+						normalDisplacement -8
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 200
+      velocity 0 0 0.2 ~60
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 500
+      acceleration 0~360 0~360 -1 0
+
+      radius 0 1.5~1 0
+      alpha  0 1 1
+      rotation 0 ~360 -
+      bounce 0.6
+
+      lifeTime 600~20%
+    }
+
+    count 1~2
+    delay 0
+    period 0 - 0
+  }
+		
+  ejector // impact sparks
+  {
+    particle
+    {
+      shader sync  spark01frame01 spark01frame03
+
+      displacement 0 0 0 4
+
+      normalDisplacement 15
+
+      velocityType static
+      accelerationType static
+
+      radius 0 10~60% 0~4
+      alpha  0 1 0
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 100
+    }
+
+    count 1~1
+    delay 0
+    period 0 - 0
+  }
+}
+
+humanBuildableDamagedPS
+{
+  ejector
+  {
+    particle
+    {
+      shader sync gfx/sprites/smoke
+
+      displacement 0 0 16 0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 25
+      velocity 0 0 1 ~60
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 25
+      acceleration  0 0 1 0
+
+      radius 0 10 50
+      alpha  0 0.6 0
+      rotation 0 ~360 -
+      bounce 0.5
+
+      lifeTime 1000~25%
+    }
+
+    count infinite
+    delay 0
+    period 100 - 0
+  }
+
+  ejector
+  {
+    particle
+    {
+      shader sync spark00
+
+      displacement 0 0 11 0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 200
+      velocity 0 0 1 ~60
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -1 0
+
+      radius 0 4 0
+      alpha  0 1 0
+      rotation 0 ~360 -
+      bounce 0.6
+
+      lifeTime 1500~50%
+    }
+
+    count infinite
+    delay 0
+    period 700 - 0
+  }
+}
+
+humanBuildableDestroyedTrailPS
+{
+  ejector // fire trail
+  {
+    particle
+    {
+      shader sync fire09 fire10 fire11 fire12 fire13 fire14 fire15 fire16 fire17 fire18 fire19
+
+      displacement 0 0 6 0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 30
+      velocity 0 0 0 ~60
+
+      radius 0 5 15
+      alpha 150 1 0
+      rotation 0 ~360 -
+      bounce 0.3
+
+      lifeTime 200
+    }
+    count 110
+    delay 0
+    period 10 - 0
+  }
+		
+		ejector // smoke trail
+  {
+		  particle
+    {
+      shader sync gfx/sprites/smoke
+
+      displacement 0 0 15 0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 30
+      velocity 0 0 0 ~60
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 25
+      acceleration 0 0 0.2 0
+
+      radius 0 4 20~5
+      alpha  0 0.250.1 0
+      rotation 0 ~360 -
+      bounce 0.3
+
+      lifeTime 450~100
+    }
+				count 70
+    delay 15
+    period 10 - 0
+  }
+		
+		ejector // debris upward fire
+  {
+		  particle
+    {
+      shader sync fire08 fire09 fire10 fire11 fire12 fire13 fire14 fire15 fire16 fire17 fire18 fire19
+
+      displacement 0~4 0~4 6 0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 40~5
+      velocity  0.1 0.1 0.5~1 0.1
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 50
+      acceleration 0 0 -0.3 0
+
+      radius 0 6~2 11~2
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 700~100
+    }
+
+    count 50~10
+    delay 200
+    period 100~40 - 0
+  }
+		
+  ejector // debris base fire
+  {
+				particle
+    {
+      shader sync fire05 fire06 fire07 fire08 fire09 fire10 fire11 fire12 fire13 fire14 fire15 fire16 fire17 fire18 fire19
+
+      displacement 0 0 6 0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 1
+      velocity 0 0 0 0
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 1
+      acceleration 0 0 0 0
+
+      radius 0 8 16
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 1000~100
+    }
+
+    count 40
+    delay 1300
+    period 112~40% - 0
+  }
+}
+
+humanBuildableDestroyedPS
+{
+  ejector // boom
+  {
+				particle // light up environment
+    {
+      dynamicLight 0 300 0 { 1 0.75 0 }
+      lifeTime 600~100
+    }
+
+				particle // explosion ring 1
+    {
+      shader sync radialblast01 radialblast02 radialblast03 radialblast04 radialblast05
+
+      displacement 0 0 0 0
+
+      normalDisplacement 15
+
+      velocityType static
+      accelerationType static
+
+      radius 0 40 150
+      alpha 0 1 0
+      rotation 0 ~360 -
+      bounce 0
+      
+      scaleWithCharge 0.1
+
+      lifeTime 200
+    }
+				
+				particle // explosion ring 2
+    {
+      shader sync radialblast03 radialblast03 radialblast03 radialblast03 radialblast04 radialblast05
+
+      displacement 0 0 0 0
+
+      normalDisplacement 15
+
+      velocityType static
+      accelerationType static
+
+      radius 0 0 100
+      alpha 0 1 0
+      rotation 0 ~360 -
+      bounce 0
+      
+      scaleWithCharge 0.10
+
+      lifeTime 100
+    }
+				
+				particle // explosion flash
+    {
+      shader sync explosionflash
+
+      displacement 0 0 0 0
+
+      normalDisplacement 100
+
+      velocityType static
+      accelerationType static
+
+      radius 0 100 0
+      alpha 80 1 0
+      rotation 0 ~360 -
+      bounce 0
+      
+      scaleWithCharge 0.1
+
+      lifeTime 200
+    }
+
+    count 1
+    delay 0
+    period 0 - ~0%
+  }
+
+  ejector // sparks
+  {
+    particle // spam some sparks
+    {
+      shader sync spark00
+
+      displacement 0 0 8 0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 350~75%
+      velocity 0 0 1 ~60
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -1 0
+
+      radius 0 2 0
+      alpha  0 1 0
+      rotation 0 ~360 -
+      bounce 0.4~100%
+
+      lifeTime 3000~90%
+    }
+
+    count 50
+    delay 0
+    period 0 - 0
+		}
+
+  ejector // debris
+  {
+		  particle // metal gib models with child trail
+    {
+      model models/fx/metal_gibs/m_gib1.md3 models/fx/metal_gibs/m_gib2.md3 models/fx/metal_gibs/m_gib3.md3 models/fx/metal_gibs/m_gib5.md3 models/fx/metal_gibs/m_gib6.md3 models/fx/metal_gibs/m_gib7.md3 models/fx/metal_gibs/m_gib8.md3
+
+      displacement 0 0 40 0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 300~75%
+      velocity 0 0 1 ~60
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -1 0
+
+      radius 5900 1~30% 0
+      bounce 0.2
+      bounceMark 1~1 16 gfx/marks/burn_mrk
+      bounceSound ~1 sound/buildables/human/fragmentbounce.wav
+
+      lifeTime        7000~1000
+						childSystem humanBuildableDestroyedTrailPS
+    }
+
+    count 3~1
+    delay 0
+    period 10 - 0
+  }
+
+  ejector // quick large puffy explosion clouds
+  {
+    particle
+    {
+      shader sync smoke01 smoke02 smoke03 smoke04 smoke05 smoke06 smoke07 smoke08 smoke09 smoke10 smoke11 smoke12 smoke13 smoke14 smoke15 smoke16
+
+      displacement ~20 ~20 ~20 10
+
+      parentVelocityFraction 0.5
+
+						velocityType static
+      velocityDir linear
+      velocityMagnitude 150
+      velocity ~1 ~1 0.2 ~50
+
+      radius 0 5~20 200~20
+      alpha  0 0.4 0
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 600
+    }
+
+    count 6
+    delay 0
+    period 0 - 0
+  }
+}
