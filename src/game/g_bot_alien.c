@@ -583,7 +583,11 @@ void BotAttackAlien( gentity_t *self )
 				} else {
 					//in any structure, move but not jump
 					if(self->bot->Enemy->s.eType == ET_BUILDABLE) {
-						if(G_Rand() < 20 || !(BotIsMoving(self, BOT_MOVE_LEFT) || (BotIsMoving(self, BOT_MOVE_RIGHT)))) {
+						if(BotIsMoving(self, BOT_MOVE_LEFT) || BotIsMoving(self, BOT_MOVE_RIGHT)) {
+							if(G_Rand() < 30) {
+								BotStop( self );
+							}
+						} else {
 							if(G_Rand() < 50) {
 								BotMoveLeft( self );
 							} else {

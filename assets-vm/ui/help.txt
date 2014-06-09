@@ -15,6 +15,18 @@
     "If you do not have an IRC client simply visit our forum and chat in the box below.\n"
     "Because ^4V^5i^1r^6u^3S^7 is lonely on IRC, please give him a poke. He's feeling sad."
   }
+   "[help] ^3FAQ"
+   { 
+     "^1What do the textures mean?!: ^1The special textures ONLY apply to bots!. "
+     "^7 Normal players will still get flashy lights, but that's all. \n"
+     "^3How is botscamp 100% vanilla?: ^7 We are proud to state botscamp is 100% vanilla. "
+     "The only things we have changed do not really affect gameplay. What we have changed are "
+     "that we have added bots to the game, added distinct textures and changed some things in the menu.\n"
+     "^3Why can't i do ''bot'' in my name?!: ^7Since we don't want players to get muddled up "
+     "between bots and normal players, only bots can have ''bot'' in their name.\n"
+     "^3Why ^2Bots^1Camp^3?: ^7(short answer) because its fun to play with when no players are around (more about it on the menu).\n"
+     "^3Why Asia?: (short answer) because Asia is going to take over Europe (more about it on the menu).\n"
+   }
   "^3Bot Commands"
   {
      "In ^2Bots^1Camp^7, bots are automatically added to balance the game. However, you still "
@@ -37,11 +49,11 @@
       "[advgranger] advgranger , [advmarauder] advmarauder , [alien] alien , [alien2] alien2 , "
       "[armor] armor , [armoury] armoury , [axes] axes, [ball] ball , [barbute] barbute , "
       "[barricade] barricade , [basilisk] basilisk , [battery] battery , [bee] bee , [beer] beer , "
-      "[blaster] blaster , [bomb] bomb , [booster] booster , [bot] bot , [botadv] botadv , "
-      "[botface] botface , [botside] botside , [bsuit] bsuit , [bulb] bulb , "
+      "[blaster] blaster , [bomb] bomb , [booster] booster , [bot] bot , [botadv.png] botadv.png , "
+      "[botface.png] botface.png , [botside.png] botside.png , [bsuit] bsuit , [bulb] bulb , "
       "[bull] bull , [butterfly] butterfly , [cat] cat , [chaingun] chaingun , [ckit] ckit , "
       "[claws] claws , [coffee] coffee , [cowled] cowled , [crown] crown , [cuboid] cuboid , "
-      "[defcomp] defcomp , [dev] dev , [dragoon] dragoon , [dretch] dretch , [eagle] eagle, [egg] egg ... "
+      "[defcomp] defcomp , [dev] dev , [dragoon] dragoon , [dretch] dretch , [eagle] eagle , [egg] egg ... "
    }
   "[featured] ^3Emoticons (f - s)"
    {  
@@ -63,48 +75,6 @@
         "[trapper] trapper , [tree] tree , [turret] turret , [tyrant] tyrant , [tyrantface] tyrantface ,"
         "[warn] warn , [wing] wing , [winged] winged"
    }
-   "[help] ^3FAQ"
-   { 
-     "^1What do the textures mean?!: ^1The special textures ONLY apply to bots!. "
-     "^7 Normal players will still get flashy lights, but that's all. \n"
-     "^3How is botscamp 100% vanilla?: ^7 We are proud to state botscamp is 100% vanilla. "
-     "The only things we have changed do not really affect gameplay. What we have changed are "
-     "that we have added bots to the game, added distinct textures and changed some things in the menu.\n"
-     "^3Why can't i do ''bot'' in my name?!: ^7Since we don't want players to get muddled up "
-     "between bots and normal players, only bots can have ''bot'' in their name.\n"
-   }
-  "^3Why ^2Bots^1Camp^3?"
-  {
-    "This is a fun server to play when very few people are on and your waiting for "
-    "more to join. Also there are some fun challenging layouts that already exist "
-    "that are good for both single player and coop.\n\n"
-    "That is one of the objectives of BotsCamp, the other objectives are to have a "
-    "training server for beginners as well as to help fine tune the skills of more "
-    "experienced players, and to allow for single player and coop tremulous games.\n"
-    "\n                                                                                 ^4*^7<^4{^1d^2Gr8Lookin^4Sparky\n"
-  }
-  "^3Why Asia?"
-  {
-    "''To let Overpowered Asian Level and Australia eliminate the deficient European-ridden GPP.''"
-    " - [kor]^2F^7risqy^8.^4V^5i^1r^6u^3S^7\n"
-    "''Because I live in Japan'' - ^2Global^1Warming^7\n"
-    "''I'm Australian.'' - ^1Igneel^7the^1Dragon^7 (not [dragoon] but dragon)\n"
-    "''01110011 01110100 01100110 01110101'' - ^1[BOT]AlienZ^7\n"
-    "''At least it isn't that un******h*d [poop] project'' - /dev/humancontroller^7\n"
-    "''Tremulous is still alive?'' - ^2Kharnov^7\n"
-    "''theos is awesome'' - <oxytocin>\n"
-    "''^2cirus bru^7'' - PaN61\n"
-    "''Tremulous GPP is now Edge-Mania. Good to be free of it.'' - <Tumbo>"
-  }
-  "^3Future Ambitions"
-  {  "^2Bots^1Camp ^7has many future ambitions so make sure you stay tuned! Read further to learn what they are!\n\n"
-  "^1-^7Make bots talk\n"
-  "^1-^7Add single player and co-op missions against bots that get increasingly hard\n"
-  "^1-^7Create different modes for bots like ''swarm mode (have ^1heaps^7 of bots join a team that are easy to kill)\n"
-  "^1-^7Make bots build\n"
-  "^1-^7Make bots to be great teammates for players\n"
-  "^1-^7Make customizable bots and perform bots tournaments!\n"
-  }
   "^3Player Levels"
   {  
       "^6BOT-TEASER ^7(Level ^60^7): Guests, anyone joining for first time to BotsCamp\n"
@@ -120,6 +90,29 @@
     "- ^1Igneel^7the^1dragon^2-^7Idea Generator/Server Patroller/Other Stuff^2-^7A Dragon, Not A Dragoon!\n"
     "- ^3Pikachu^2-^7Artist/Other Stuff^2-^7Does Some Nice Effects!\n"
     "- ^1KoR^8|^2F^7risqy ^7(^4V^5i^1r^6u^3S^7)^2-^7Provides great support with knowledge of Tremulous^2-^7(A CookieStealer).\n"
+  }
+  "^3Why ^2Bots^1Camp^3? (Long)"
+  {
+    "This is a fun server to play when very few people are on and your waiting for "
+    "more to join. Also there are some fun challenging layouts that already exist "
+    "that are good for both single player and coop.\n\n"
+    "That is one of the objectives of BotsCamp, the other objectives are to have a "
+    "training server for beginners as well as to help fine tune the skills of more "
+    "experienced players, and to allow for single player and coop tremulous games.\n"
+    "\n                                                                                 ^4*^7<^4{^1d^2Gr8Lookin^4Sparky\n"
+  }
+  "^3Why Asia? (Long)"
+  {
+    "''To let Overpowered Asian Level and Australia eliminate the deficient European-ridden GPP.''"
+    " - [kor]^2F^7risqy^8.^4V^5i^1r^6u^3S^7\n"
+    "''Because I live in Japan'' - ^2Global^1Warming^7\n"
+    "''I'm Australian.'' - ^1Igneel^7the^1Dragon^7 (not [dragoon] but dragon)\n"
+    "''01110011 01110100 01100110 01110101'' - ^1[BOT]AlienZ^7\n"
+    "''At least it isn't that un******h*d [poop] project'' - /dev/humancontroller^7\n"
+    "''Tremulous is still alive?'' - ^2Kharnov^7\n"
+    "''theos is awesome'' - <oxytocin>\n"
+    "''^2cirus bru^7'' - PaN61\n"
+    "''Tremulous GPP is now Edge-Mania. Good to be free of it.'' - <Tumbo>"
   }
   "^3Contributions"
   {

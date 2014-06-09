@@ -1218,6 +1218,8 @@ extern  vmCvar_t  g_allowTeamOverlay;
 
 extern  vmCvar_t  g_censorship;
 
+extern  vmCvar_t  g_adminRegisterLevel; //from CUBOID
+
 // ROTAX
 extern  vmCvar_t  g_pathediting;
 extern  vmCvar_t  g_human_range;

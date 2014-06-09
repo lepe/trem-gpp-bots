@@ -191,6 +191,7 @@ qboolean G_reloadnodes( gentity_t *ent ); //LEPE
 qboolean G_password( gentity_t *ent );
 qboolean G_admin_botdbg(  gentity_t *ent ); //LEPE
 qboolean G_admin_dbgcmd(  gentity_t *ent ); //LEPE
+qboolean G_admin_register( gentity_t *ent ); //from CUBOID
 
 void G_admin_print( gentity_t *ent, char *m );
 void G_admin_buffer_print( gentity_t *ent, char *m );

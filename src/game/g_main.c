@@ -143,6 +143,8 @@ vmCvar_t  g_censorship;
 
 vmCvar_t  g_tag;
 
+vmCvar_t  g_adminRegisterLevel; //from CUBOID
+
 // ROTAX
 vmCvar_t  g_pathediting;
 vmCvar_t  g_human_range;
@@ -222,6 +224,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_doWarmup, "g_doWarmup", "0", CVAR_ARCHIVE, 0, qtrue  },
   { &g_logFile, "g_logFile", "games.log", CVAR_ARCHIVE, 0, qfalse  },
   { &g_logFileSync, "g_logFileSync", "0", CVAR_ARCHIVE, 0, qfalse  },
+  
+  { &g_adminRegisterLevel, "g_adminRegisterLevel", "1", CVAR_ARCHIVE, 0, qfalse  },
 
   { &g_password, "g_password", "", CVAR_USERINFO, 0, qfalse  },
   { &g_pathediting, "g_pathediting", "0", 0, 0, qfalse },

@@ -193,6 +193,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
       ""
     },
 
+    {"register", G_admin_register, qfalse, "register",
+      "register your name",
+      ""
+    },
+
     {"rename", G_admin_rename, qfalse, "rename",
       "rename a player",
       "[^3name|slot#^7] [^3new name^7]"
@@ -654,7 +659,7 @@ static void admin_default_levels( void )
   l->level = level++;
   Q_strncpyz( l->name, "^4Unknown Player", sizeof( l->name ) );
   Q_strncpyz( l->flags,
-    "listplayers admintest adminhelp time",
+    "listplayers admintest adminhelp time register",
     sizeof( l->flags ) );
 
   l = l->next = BG_Alloc( sizeof( g_admin_level_t ) );
@@ -3769,4 +3774,41 @@ void nodethink(gentity_t *ent)
 	VectorCopy(pos,ent->r.currentOrigin );
 }
 
+/*
+================
+G_admin_register
+================
+*/
+qboolean G_admin_register( gentity_t *ent )
+{
+  if( !ent )
+    return qfalse;
 
+  if( !ent->client->pers.admin || !ent->client->pers.admin->level )
+  {
+    g_admin_admin_t *a;
+    
+    for( a = g_admin_admins; a && a->next; a = a->next );
+    
+    if( a )
+      a = a->next = BG_Alloc( sizeof( g_admin_admin_t ) );
+    else
+      a = g_admin_admins = BG_Alloc( sizeof( g_admin_admin_t ) );
+    
+    ent->client->pers.admin = a;
+    Q_strncpyz( a->guid, ent->client->pers.guid, sizeof( a->guid ) );
+    a->level = g_adminRegisterLevel.integer;
+    
+    AP( va( "print \"^3register: ^7'%s^7' is now LEVEL 1\n\"", ent->client->pers.netname ) );
+  }
+  else
+    ADMP( "^3register: ^7you are now LEVEL 1 (read -Manual- for commands you can use now)\n" );
+  
+  Q_strncpyz( ent->client->pers.admin->name, 
+              ent->client->pers.netname, 
+              sizeof( ent->client->pers.admin->name ) );
+
+  admin_writeconfig( );
+
+  return qtrue;
+}
