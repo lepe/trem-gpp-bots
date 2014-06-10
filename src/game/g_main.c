@@ -143,24 +143,18 @@ vmCvar_t  g_censorship;
 
 vmCvar_t  g_tag;
 
+vmCvar_t  g_adminRegisterLevel; //from CUBOID
+
 // ROTAX
 vmCvar_t  g_pathediting;
 vmCvar_t  g_human_range;
 vmCvar_t  g_human_strafe;
-vmCvar_t  g_level0_range;
-vmCvar_t  g_level1_range;
-vmCvar_t  g_level1UPG_range;
-vmCvar_t  g_level2_range;
-vmCvar_t  g_level2UPG_range;
-vmCvar_t  g_level3_range;
-vmCvar_t  g_level3UPG_range;
-vmCvar_t  g_level4_range;
 vmCvar_t  g_bot;
 vmCvar_t  g_bot_spawnprotection;
 vmCvar_t  g_bot_evolve;
 vmCvar_t  g_bot_mgun;
 vmCvar_t  g_bot_shotgun;
-vmCvar_t  g_bot_psaw;
+vmCvar_t  g_bot_painsaw;
 vmCvar_t  g_bot_lasgun;
 vmCvar_t  g_bot_mdriver;
 vmCvar_t  g_bot_chaingun;
@@ -168,6 +162,8 @@ vmCvar_t  g_bot_prifle;
 vmCvar_t  g_bot_flamer;
 vmCvar_t  g_bot_lcannon;
 //LEPE:(add also in g_local.h)
+
+vmCvar_t  g_bot_minPerTeam;
 vmCvar_t  g_bot_join;
 vmCvar_t  g_bot_basi;
 vmCvar_t  g_bot_advbasi;
@@ -176,13 +172,17 @@ vmCvar_t  g_bot_advmara;
 vmCvar_t  g_bot_goon;
 vmCvar_t  g_bot_advgoon;
 vmCvar_t  g_bot_tyrant;
-vmCvar_t  g_debugBots; 
-vmCvar_t  g_debugPaths;
-vmCvar_t  g_debugNodes; 
-vmCvar_t  g_debugEssence; 
-vmCvar_t  g_debugAnts; 
-vmCvar_t  g_debugBotBuy;
 
+vmCvar_t  g_bot_essence;
+vmCvar_t  g_bot_tagname;
+vmCvar_t  g_bot_manual;
+vmCvar_t  g_bot_manual_nav;
+vmCvar_t  g_bot_move_and_aim;
+vmCvar_t  g_bot_step_aim;
+vmCvar_t  g_bot_skins;
+//Debug for console:
+vmCvar_t  g_bot_debug_verbosity;
+vmCvar_t  g_bot_debug_type;
 
 // copy cvars that can be set in worldspawn so they can be restored later
 static char cv_gravity[ MAX_CVAR_VALUE_STRING ];
@@ -200,7 +200,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_restarted, "g_restarted", "0", CVAR_ROM, 0, qfalse  },
   { &g_lockTeamsAtStart, "g_lockTeamsAtStart", "0", CVAR_ROM, 0, qfalse  },
   { NULL, "sv_mapname", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
-  { NULL, "P", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
+  { NULL, "P", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse },
 
   // latched vars
 
@@ -224,6 +224,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_doWarmup, "g_doWarmup", "0", CVAR_ARCHIVE, 0, qtrue  },
   { &g_logFile, "g_logFile", "games.log", CVAR_ARCHIVE, 0, qfalse  },
   { &g_logFileSync, "g_logFileSync", "0", CVAR_ARCHIVE, 0, qfalse  },
+  
+  { &g_adminRegisterLevel, "g_adminRegisterLevel", "1", CVAR_ARCHIVE, 0, qfalse  },
 
   { &g_password, "g_password", "", CVAR_USERINFO, 0, qfalse  },
   { &g_pathediting, "g_pathediting", "0", 0, 0, qfalse },
@@ -231,18 +233,10 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_bot_spawnprotection, "g_bot_spawnprotection", "2000", CVAR_ARCHIVE, 0, qfalse },
   { &g_human_range, "g_human_range", "3000", CVAR_ARCHIVE, 0, qfalse },
   { &g_human_strafe, "g_human_strafe", "0", CVAR_ARCHIVE, 0, qfalse },
-  { &g_level0_range, "g_level0_range", "300", CVAR_ARCHIVE, 0, qfalse },
-  { &g_level1_range, "g_level1_range", "300", CVAR_ARCHIVE, 0, qfalse },
-  { &g_level1UPG_range, "g_level1UPG_range", "300", CVAR_ARCHIVE, 0, qfalse },
-  { &g_level2_range, "g_level2_range", "350", CVAR_ARCHIVE, 0, qfalse },
-  { &g_level2UPG_range, "g_level2UPG_range", "400", CVAR_ARCHIVE, 0, qfalse },
-  { &g_level3_range, "g_level3_range", "500", CVAR_ARCHIVE, 0, qfalse },
-  { &g_level3UPG_range, "g_level3UPG_range", "600", CVAR_ARCHIVE, 0, qfalse },
-  { &g_level4_range, "g_level4_range", "300", CVAR_ARCHIVE, 0, qfalse },
   { &g_bot_evolve, "g_bot_evolve", "1", 0, 0, qfalse },
   { &g_bot_mgun, "g_bot_mgun", "1", 0, 0, qfalse },
   { &g_bot_shotgun, "g_bot_shotgun", "1", 0, 0, qfalse },
-  { &g_bot_psaw, "g_bot_psaw", "1", 0, 0, qfalse },
+  { &g_bot_painsaw, "g_bot_painsaw", "1", 0, 0, qfalse },
   { &g_bot_lasgun, "g_bot_lasgun", "1", 0, 0, qfalse },
   { &g_bot_mdriver, "g_bot_mdriver", "1", 0, 0, qfalse },
   { &g_bot_chaingun, "g_bot_chaingun", "1", 0, 0, qfalse },
@@ -257,6 +251,14 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_bot_advgoon, "g_bot_advgoon", "1", 0, 0, qfalse },
   { &g_bot_tyrant, "g_bot_tyrant", "1", 0, 0, qfalse },
   { &g_bot_join, "g_bot_join", "1", 0, 0, qfalse },
+  { &g_bot_minPerTeam, "g_bot_minPerTeam", "2", CVAR_ARCHIVE, 0, qfalse },
+  { &g_bot_essence, "g_bot_essence", "1", 0, 0, qfalse },
+  { &g_bot_tagname, "g_bot_tagname", "1", 0, 0, qfalse },
+  { &g_bot_manual, "g_bot_manual", "0", 0, 0, qfalse },
+  { &g_bot_manual_nav, "g_bot_manual_nav", "0", 0, 0, qfalse },
+  { &g_bot_move_and_aim, "g_bot_move_and_aim", "0", 0, 0, qfalse },
+  { &g_bot_step_aim, "g_bot_step_aim", "0", 0, 0, qfalse },
+  { &g_bot_skins, "g_bot_skins", "0", CVAR_SYSTEMINFO, 0, qfalse },
   
   { &g_needpass, "g_needpass", "0", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse },
   { &g_dedicated, "dedicated", "0", 0, 0, qfalse  },
@@ -267,13 +269,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_debugMove, "g_debugMove", "0", 0, 0, qfalse },
   { &g_debugDamage, "g_debugDamage", "0", 0, 0, qfalse },
   { &g_motd, "g_motd", "", 0, 0, qfalse },
-  //LEPE
-  { &g_debugBots, "g_debugBots", "0", 0, 0, qfalse },
-  { &g_debugPaths, "g_debugPaths", "0", 0, 0, qfalse },
-  { &g_debugNodes, "g_debugNodes", "0", 0, 0, qfalse },
-  { &g_debugEssence, "g_debugEssence", "0", 0, 0, qfalse },
-  { &g_debugBotBuy, "g_debugBotBuy", "0", 0, 0, qfalse },
-  { &g_debugAnts, "g_debugAnts", "0", 0, 0, qfalse },
+  { &g_bot_debug_type, "", "0", 0, 0, qfalse },
+  { &g_bot_debug_verbosity, "", "0", 0, 0, qfalse },
 
   { &g_allowVote, "g_allowVote", "1", CVAR_ARCHIVE, 0, qfalse },
   { &g_voteLimit, "g_voteLimit", "5", CVAR_ARCHIVE, 0, qfalse },
@@ -377,6 +374,7 @@ Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, i
   {
     case GAME_INIT:
       G_InitGame( arg0, arg1, arg2 );
+	  trap_SendConsoleCommand( EXEC_APPEND, "exec bots.cfg\n" ); 
       return 0;
 
     case GAME_SHUTDOWN:
@@ -400,7 +398,7 @@ Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, i
 
     case GAME_CLIENT_BEGIN:
       ClientBegin( arg0 );
-      trap_SendServerCommand(arg0, "cp \"Please join to deploy bots!\"");
+      //trap_SendServerCommand(arg0, "cp \"Please join to deploy bots!\"");
       return 0;
 
     case GAME_CLIENT_COMMAND:
@@ -417,7 +415,11 @@ Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, i
 
   return -1;
 }
-
+/**
+ * Prints on admin console
+ * @param fmt
+ * @param ...
+ */
 void QDECL G_Printf( const char *fmt, ... )
 {
   va_list argptr;
@@ -429,7 +431,11 @@ void QDECL G_Printf( const char *fmt, ... )
 
   trap_Print( text );
 }
-
+/**
+ * Print it as error
+ * @param fmt
+ * @param ...
+ */
 void QDECL G_Error( const char *fmt, ... )
 {
   va_list argptr;
@@ -440,6 +446,110 @@ void QDECL G_Error( const char *fmt, ... )
   va_end( argptr );
 
   trap_Error( text );
+}
+/**
+ * Debug messages related to bots but not bots.
+ * @param verbosity
+ * @param type
+ * @param fmt
+ * @param ...
+ */
+void QDECL G_Debug(botDebugVerbosity verbosity, int type, const char *fmt, ... )
+{
+	int i;
+	qboolean isadmin = qfalse;
+	gentity_t *ent;
+	//Process the message:
+	va_list argptr;
+	char    text[ 1024 ];
+
+	va_start( argptr, fmt );
+	Q_vsnprintf( text, sizeof( text ), fmt, argptr );
+	va_end( argptr );
+	//Let it know to requested admins:
+	for( i = 0; i < level.maxclients; i++ )
+	{
+		if( level.clients[ i ].pers.connected != CON_DISCONNECTED )
+		{
+		  	if( level.clients[ i ].pers.admin ) {
+				if((level.clients[ i ].pers.botDebugTypeFlg == BOT_DEBUG_ALL) ||
+				   (level.clients[ i ].pers.botDebugTypeFlg & type)) {
+					if(level.clients[ i ].pers.botDebugVerbosityVal <= verbosity) {
+						isadmin = qtrue;
+    					ent = &g_entities[ i ];
+						G_admin_print( ent , text );
+					}
+				}
+			}
+		}
+	}
+	//It it was done by console:
+	if(!isadmin) {
+		if((g_bot_debug_type.integer == BOT_DEBUG_ALL) || 
+		  (g_bot_debug_type.integer & type)) {
+			if(g_bot_debug_verbosity.integer <= verbosity) {
+				G_Printf(text);
+			}
+		}
+	}
+}
+/**
+ * Debug messages for bots (requires entities)
+ * @param type [int] : (Bitwise AND) botDebugType
+ * @param fmt
+ * @param ...
+ * 
+ * BotDebugType works like tags to flag this debug message.
+ * It can contain one or more types
+ * 
+ */
+void QDECL G_BotDebug(gentity_t *self, botDebugVerbosity verbosity, int type, const char *fmt, ... )
+{
+	int i;
+	qboolean isadmin = qfalse;
+	gentity_t *ent;
+	//Process the message:
+	va_list argptr;
+	char    text[ 1024 ];
+	char    fulltext[ 1536 ] = "";
+	char    dfulltext[ 1536 ] = "";
+
+	if(self->bot->debug) {
+		va_start( argptr, fmt );
+		Q_vsnprintf( text, sizeof( text ), fmt, argptr );
+		va_end( argptr );
+		//Append bot name:
+		strcat(fulltext, self->client->pers.netname);
+		strcat(fulltext, " : ^7");
+		strcat(fulltext, text);
+		//Let it know to requested admins:
+		for( i = 0; i < level.maxclients; i++ )
+		{
+			if( level.clients[ i ].pers.connected != CON_DISCONNECTED )
+			{
+				if( level.clients[ i ].pers.admin ) {
+					if((level.clients[ i ].pers.botDebugTypeFlg == BOT_DEBUG_ALL) ||
+					   (level.clients[ i ].pers.botDebugTypeFlg & type)) {
+						if(level.clients[ i ].pers.botDebugVerbosityVal <= verbosity) {
+							isadmin = qtrue;
+							ent = &g_entities[ i ];
+							G_admin_print( ent , fulltext );
+						}
+					}
+				}
+			}
+		}
+		//It it was done by console:
+		if(!isadmin) {
+			G_DecolorString(fulltext, dfulltext, sizeof(fulltext));
+			if((g_bot_debug_type.integer == BOT_DEBUG_ALL) || 
+			  (g_bot_debug_type.integer & type)) {
+				if(g_bot_debug_verbosity.integer <= verbosity) {
+					G_Printf(dfulltext);
+				}
+			}
+		}
+	}
 }
 
 /*
@@ -617,25 +727,12 @@ void G_PathLoad( void )
 	fileHandle_t f;
 	int len;
 	char *path;
+	char *pathorigin;
 	char line[ MAX_STRING_CHARS ];
 	char map[ MAX_QPATH ];
+	int numPaths = 0;
 	level.numPaths = 0;
 	trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
-	for(i = 0; i < MAX_PATHS;i++)
-	{
-		level.paths[i].coord[0] = 0;
-		level.paths[i].coord[1] = 0;
-		level.paths[i].coord[2] = 0;
-		level.paths[i].nextid[0] = -1;
-		level.paths[i].nextid[1] = -1;
-		level.paths[i].nextid[2] = -1;
-		level.paths[i].nextid[3] = -1;
-		level.paths[i].nextid[4] = -1;
-		level.paths[i].random = -1;
-		level.paths[i].timeout = 10000;
-		level.paths[i].action = 0;
-		level.paths[i].essence= 50; //LEPE: default value for ant algorithm (below 50 is negative)
-	}
 	len = trap_FS_FOpenFile( va( "paths/%s/path.dat", map ), &f, FS_READ );
 	if( len < 0 )
 	{
@@ -643,9 +740,14 @@ void G_PathLoad( void )
 		return;
 	}
 	path = BG_Alloc( len + 1 );
+	pathorigin = path;
 	trap_FS_Read( path, len, f );
 	*( path + len ) = '\0';
 	trap_FS_FCloseFile( f );
+	/*
+	 * We perform 2 rounds. The first one will tell us how large our array will become.
+	 * The second one is to fill the array.
+	 */
 	i = 0;
 	while( *path )
 	{
@@ -659,7 +761,20 @@ void G_PathLoad( void )
 		if( *path == '\n' )
 		{
 			i = 0; 
-			if( level.numPaths >= MAX_PATHS ){G_Printf( "Reached path limit\n" );return;}
+			numPaths ++;
+		}
+	path++;
+	}
+	path = pathorigin; //reset pointer
+	level.paths = BG_Alloc( numPaths * sizeof(path) );
+	i = 0;
+	while( *path )
+	{
+		line[ i++ ] = *path;
+		line[ i ] = '\0';
+		if( *path == '\n' )
+		{
+			i = 0; 
 			sscanf( line, "%d %f %f %f %d %d %d %d %d %d %d %d\n", 
 						&level.numPaths,
 						&level.paths[level.numPaths].coord[0], 
@@ -672,22 +787,27 @@ void G_PathLoad( void )
 						&level.paths[level.numPaths].nextid[4],
 						&level.paths[level.numPaths].random,
 						&level.paths[level.numPaths].timeout,
-						&level.paths[level.numPaths].action ); 
-			if(level.paths[level.numPaths].timeout <= 0){level.paths[level.numPaths].timeout = 10000;}
+						&level.paths[level.numPaths].action 
+					); 
+			if(level.paths[level.numPaths].timeout <= 0){
+				level.paths[level.numPaths].timeout = 10000;
+			}
+			level.paths[level.numPaths].essence[ TEAM_ALIENS ]= 50; //LEPE: default value for ant algorithm (below 50 is negative)
+			level.paths[level.numPaths].essence[ TEAM_HUMANS ]= 50; //LEPE: default value for ant algorithm (below 50 is negative)
 			level.numPaths ++;
 		}
 	path++;
 	}
-	if(g_debugNodes.integer) G_Printf( va("Loaded %d paths\n", level.numPaths) );
+	G_Debug(BOT_VERB_NORMAL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH, "Loaded %d paths\n", level.numPaths);
 }
 /*
   Drawing nodes
 */
-gentity_t *spawnnode( gentity_t *self, long id )
+gentity_t *spawnnode(long id )
 {
   vec3_t temp;
   vec3_t start;
-  gentity_t *bolt;
+  gentity_t *ent;
   int weapon;
   start[0] = level.paths[id].coord[0];
   start[1] = level.paths[id].coord[1];
@@ -695,37 +815,37 @@ gentity_t *spawnnode( gentity_t *self, long id )
   temp[0] = 0;temp[1] = 0;temp[2] = 0;
   //VectorNormalize (temp);
   //LEPE
-        if (level.paths[id].essence > 80) weapon = WP_LUCIFER_CANNON;
-   else if (level.paths[id].essence > 60) weapon = WP_BLASTER;
-   else if (level.paths[id].essence < 40) weapon = WP_GRENADE;
+        if (level.paths[id].essence[ level.teampath ] > 80) weapon = WP_LUCIFER_CANNON;
+   else if (level.paths[id].essence[ level.teampath ] > 60) weapon = WP_BLASTER;
+   else if (level.paths[id].essence[ level.teampath ] < 40) weapon = WP_GRENADE;
    else weapon = WP_PULSE_RIFLE;
 
-  bolt = G_Spawn();
-  bolt->classname = "PathNode";
-  bolt->nextthink = level.time + 2000;
-  bolt->think = nodethink;
-  bolt->s.eType = ET_MISSILE;
-  bolt->r.svFlags = SVF_USE_CURRENT_ORIGIN;
-  bolt->s.weapon = weapon;
-  bolt->s.generic1 = WPM_PRIMARY; //weaponMode
-  bolt->r.ownerNum = self->r.ownerNum;
-  bolt->parent = self;
-  bolt->damage = 0;
-  bolt->splashDamage = 0;
-  bolt->splashRadius = 0;
-  bolt->methodOfDeath = MOD_GRENADE;
-  bolt->splashMethodOfDeath = MOD_GRENADE;
-  bolt->clipmask = 0;//MASK_SHOT; 
-  bolt->target_ent = NULL;
-  bolt->pathid = id;
-  bolt->s.pos.trType = TR_LINEAR;
-  bolt->s.pos.trTime = level.time - 50;   // move a bit on the very first frame
-  VectorCopy( start, bolt->s.pos.trBase );
-  VectorScale( temp, 0, bolt->s.pos.trDelta );
-  SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
+  ent = G_Spawn();
+  ent->flags |= FL_PATH_NODE;
+  ent->nextthink = level.time + 2000;
+  ent->think = nodethink;
+  ent->s.eType = ET_MISSILE;
+  ent->r.svFlags = SVF_USE_CURRENT_ORIGIN;
+  ent->s.weapon = weapon;
+  ent->s.generic1 = WPM_PRIMARY; //weaponMode
+  ent->r.ownerNum = 0;
+  ent->parent = NULL;
+  ent->damage = 0;
+  ent->splashDamage = 0;
+  ent->splashRadius = 0;
+  ent->methodOfDeath = MOD_GRENADE;
+  ent->splashMethodOfDeath = MOD_GRENADE;
+  ent->clipmask = 0;//MASK_SHOT; 
+  ent->target_ent = NULL;
+  ent->pathid = id;
+  ent->s.pos.trType = TR_LINEAR;
+  ent->s.pos.trTime = level.time - 50;   // move a bit on the very first frame
+  VectorCopy( start, ent->s.pos.trBase );
+  VectorScale( temp, 0, ent->s.pos.trDelta );
+  SnapVector( ent->s.pos.trDelta );      // save net bandwidth
 
-  VectorCopy( start, bolt->r.currentOrigin );
-  return bolt;
+  VectorCopy( start, ent->r.currentOrigin );
+  return ent;
 }
 /*
 ============
@@ -733,7 +853,7 @@ G_DrawNodes (LEPE: moved from g_admin.c)
 Draw Nodes for first time
 ============
 */
-void G_DrawNodes( gentity_t *ent ) 
+void G_DrawNodes( void ) 
 {
 	long i,i2;
 	qboolean draw;
@@ -749,7 +869,7 @@ void G_DrawNodes( gentity_t *ent )
         }
         if(draw == qtrue)
         {
-            spawnnode(ent,i);
+            spawnnode(i);
         }
     }
 }
@@ -759,24 +879,23 @@ G_RedrawNodes
 Refresh node status according to essence
 ============
 */
-void G_RedrawNodes( ) 
+void G_RedrawNodes( void ) 
 {
 	long i;
     int pid; //path_id
-    gentity_t *ent;
     //We need to remove the current ones first before adding them
     for( i = 0; i < MAX_GENTITIES; i++ )
     {
         if(g_entities[i].client){continue;}
-        if(!strcmp("PathNode",g_entities[i].classname))
+        if(g_entities[i].flags & FL_PATH_NODE)
         {
             pid = g_entities[i].pathid; 
-            if(level.paths[pid].essence != 50) {
-                if(ent == NULL) ent = g_entities[i].parent; //recover parent entity before removing node
+            if(level.paths[pid].essence[ level.teampath ] != 50) {
+                //if(ent == NULL) ent = g_entities[i].parent; //recover parent entity before removing node
                 if(g_entities[i].nextthink - 2000 < level.time - 1000) { //do not create it again if was created less than a sec before
-                    //G_Printf("Deleting entity: %i, to Update node %d with essence: %d\n", i, pid, level.paths[pid].essence);
+                    G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Deleting entity: %i, to Update node %d with essence: %d\n", i, pid, level.paths[pid].essence[ level.teampath ]);
                     G_FreeEntity(&g_entities[i]);
-                    spawnnode(ent, pid);
+                    spawnnode(pid);
                 }
             }
         }
@@ -792,11 +911,11 @@ remove nodes from rendering
 */
 void G_EraseNodes(void) 
 {
-	long i,i2;
+	long i;
     for( i = 0; i < MAX_GENTITIES; i++ )
     {
         if(g_entities[i].client){continue;}
-        if(!strcmp("PathNode",g_entities[i].classname))
+        if(g_entities[i].flags & FL_PATH_NODE)
         {
             G_FreeEntity(&g_entities[i]);
         }
@@ -818,8 +937,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   G_RegisterCvars( );
 
   G_Printf( "------- Game Initialization -------\n" );
-  G_Printf( "gamename: %s\n", GAME_VERSION );
-  G_Printf( "gamedate: %s\n", __DATE__ );
+  //G_Printf( "gamename: %s\n", GAME_VERSION );
+  //G_Printf( "gamedate: %s\n", __DATE__ );
 
   BG_InitMemory( );
 
@@ -846,14 +965,12 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
     {
       char serverinfo[ MAX_INFO_STRING ];
       qtime_t qt;
-      int t;
 
       trap_GetServerinfo( serverinfo, sizeof( serverinfo ) );
 
       G_LogPrintf( "------------------------------------------------------------\n" );
       G_LogPrintf( "InitGame: %s\n", serverinfo );
 
-      t = trap_RealTime( &qt );
       G_LogPrintf("RealTime: %04i/%02i/%02i %02i:%02i:%02i\n",
             qt.tm_year+1900, qt.tm_mon+1, qt.tm_mday,
             qt.tm_hour, qt.tm_min, qt.tm_sec );
@@ -989,7 +1106,7 @@ void G_ShutdownGame( int restart )
 {
   // in case of a map_restart
   G_ClearVotes( );
-  G_DeleteBots( );
+  G_BotDelAll( );
   G_RestoreCvars( );
 
   G_Printf( "==== ShutdownGame ====\n" );
@@ -1930,6 +2047,9 @@ void ExitLevel( void )
   level.changemap = NULL;
   level.intermissiontime = 0;
 
+  // remove paths
+  BG_Free( level.paths );
+
   // reset all the scores so we don't enter the intermission again
   for( i = 0; i < g_maxclients.integer; i++ )
   {
@@ -1965,7 +2085,7 @@ void G_AdminMessage( gentity_t *ent, const char *msg )
   char    string[ 1024 ];
   int     i;
 
-  Com_sprintf( string, sizeof( string ), "chat %d %d \"%s\"",
+  Com_sprintf( string, sizeof( string ), "chat %lu %d \"%s\"",
     ent ? ent - g_entities : -1,
     G_admin_permission( ent, ADMF_ADMINCHAT ) ? SAY_ADMINS : SAY_ADMINS_PUBLIC,
     msg );
@@ -2655,27 +2775,40 @@ void G_RunFrame( int levelTime )
   if( level.essenceFadeTimer > 1000 ) {
         level.essenceFadeTimer = 0;
         for( i = 0; i < level.numPaths; i++ ) {
-            max = level.paths[i].essence > max ? level.paths[i].essence : max; 
-            min = level.paths[i].essence < min ? level.paths[i].essence : min; 
-            if(level.paths[i].essence > (50 + essence_mod)) {
-                if(g_debugEssence.integer) G_Printf("Reducing Essence of path %i to %i\n", i, level.paths[i].essence);
-                level.paths[i].essence = level.paths[i].essence - essence_mod; //TODO: convert to sv_essence_rate or something like that
-            } else if(level.paths[i].essence < 50) { //for negative essence
-                level.paths[i].essence = level.paths[i].essence + essence_mod; 
+			//------------ ALIENS -------------
+            max = level.paths[i].essence[ TEAM_ALIENS ] > max ? level.paths[i].essence[ TEAM_ALIENS ] : max; 
+            min = level.paths[i].essence[ TEAM_ALIENS ] < min ? level.paths[i].essence[ TEAM_ALIENS ] : min; 
+            if(level.paths[i].essence[ TEAM_ALIENS ] > (50 + essence_mod)) {
+                G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Reducing ALIEN Essence of path %i to %i\n", i, level.paths[i].essence[ TEAM_ALIENS ]);
+                level.paths[i].essence[ TEAM_ALIENS ] = level.paths[i].essence[ TEAM_ALIENS ] - essence_mod; //TODO: convert to sv_essence_rate or something like that
+            } else if(level.paths[i].essence[ TEAM_ALIENS ] < 50) { //for negative essence
+                level.paths[i].essence[ TEAM_ALIENS ] = level.paths[i].essence[ TEAM_ALIENS ] + essence_mod; 
             } else {
-                level.paths[i].essence = 50;
+                level.paths[i].essence[ TEAM_ALIENS ] = 50;
+            }
+			//------------ HUMANS ----------------
+            max = level.paths[i].essence[ TEAM_HUMANS ] > max ? level.paths[i].essence[ TEAM_HUMANS ] : max; 
+            min = level.paths[i].essence[ TEAM_HUMANS ] < min ? level.paths[i].essence[ TEAM_HUMANS ] : min; 
+            if(level.paths[i].essence[ TEAM_HUMANS ] > (50 + essence_mod)) {
+                G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN + BOT_DEBUG_PATH,"Reducing HUMAN Essence of path %i to %i\n", i, level.paths[i].essence[ TEAM_HUMANS ]);
+                level.paths[i].essence[ TEAM_HUMANS ] = level.paths[i].essence[ TEAM_HUMANS ] - essence_mod; //TODO: convert to sv_essence_rate or something like that
+            } else if(level.paths[i].essence[ TEAM_HUMANS ] < 50) { //for negative essence
+                level.paths[i].essence[ TEAM_HUMANS ] = level.paths[i].essence[ TEAM_HUMANS ] + essence_mod; 
+            } else {
+                level.paths[i].essence[ TEAM_HUMANS ] = 50;
             }
         }
-        if(g_debugEssence.integer) {
-            G_Printf("Max essence: %i\n", max); 
-            G_Printf("Min essence: %i\n", min);
-        }
-        if(g_debugNodes.integer) {
-            G_RedrawNodes( );
-        }
+		if(level.drawpath) {
+        	G_RedrawNodes( );
+		}
   }
   level.essenceFadeTimer += (levelTime - level.time);
-
+  //LEPE: Perform GROUP logic
+  if( level.groupLogicTimer > 5000) { //TODO: set g_bot_group_think
+  	G_BotGroupThink( );
+  }
+  level.groupLogicTimer += (levelTime - level.time);
+  
   level.framenum++;
   level.previousTime = level.time;
   level.time = levelTime;
@@ -2802,27 +2935,51 @@ void G_RunFrame( int levelTime )
   level.frameMsec = trap_Milliseconds();
 }
 /**
- * Start bots //LEPE
+ * Called on event. (when someone joins or leaves)
+ * @param ent [gentity_t] player who enter or leaves the game.
 **/
-void G_Bots( gentity_t *ent ) 
+void G_DeployBotsExec( gentity_t *ent ) 
 {
     if(g_bot_join.integer) {
-        if(g_debugBots.integer) {
-            G_Printf("A Players: %d\nH Players: %d\n",level.numAlienClients,level.numHumanClients);
-        }
-        if(! (ent->r.svFlags & SVF_BOT)) { 
-            if(level.numAlienClients == 0 && level.numHumanClients == 0) {
-                trap_SendConsoleCommand( EXEC_APPEND, "exec bots/start.cfg\n" ); 
-            }
-            if(level.numAlienClients - level.alienBots >= 0) {
-                trap_SendConsoleCommand( EXEC_APPEND, va("exec bots/A%d.cfg\n", level.numAlienClients - level.alienBots) ); 
-            } 
-            if(level.numHumanClients - level.humanBots >= 0) {
-                trap_SendConsoleCommand( EXEC_APPEND, va("exec bots/H%d.cfg\n", level.numHumanClients - level.humanBots) ); 
-            }
-        }
-        if(g_debugBots.integer) {
-            G_Printf("A Bots: %d\nH Bots: %d\n",level.alienBots,level.humanBots);
-        }
+        if(! (ent->r.svFlags & SVF_BOT)) {
+			G_DeployBots( );
+		}
     }
+}
+
+/**
+ * Add bots or remove bots depending on how many players are in each team
+**/
+void G_DeployBots( void )  {
+	int i;
+	//Negative means more Humans than Aliens
+	int alien_players = level.numAlienClients - level.alienBots;
+	int human_players = level.numHumanClients - level.humanBots;
+	int alien_human_diff = alien_players - human_players;
+	int aliens = g_bot_minPerTeam.integer + level.extraAlienBots - (alien_human_diff < 0 ? alien_human_diff : 0);
+	int humans = g_bot_minPerTeam.integer + level.extraHumanBots + (alien_human_diff > 0 ? alien_human_diff : 0);
+	int aliens_add_rm = aliens - level.alienBots;
+	int humans_add_rm = humans - level.humanBots;
+	
+    G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN,"A Players: %d\nH Players: %d\n",alien_players,human_players);
+	
+	if(aliens_add_rm > 0) {
+		for(i = 0; i < aliens_add_rm; i++) {
+			G_BotAddRandom(TEAM_ALIENS);
+		}
+	} else if(aliens_add_rm < 0) {
+		for(i = 0; i < abs(aliens_add_rm); i++) {
+			G_BotDelRandom(TEAM_ALIENS);
+		}
+	}
+	if(humans_add_rm > 0) {
+		for(i = 0; i < humans_add_rm; i++) {
+			G_BotAddRandom(TEAM_HUMANS);
+		}
+	} else if(humans_add_rm < 0) {
+		for(i = 0; i < abs(humans_add_rm); i++) {
+			G_BotDelRandom(TEAM_HUMANS);
+		}
+	}
+	G_Debug(BOT_VERB_DETAIL, BOT_DEBUG_MAIN,"A Bots: %d\nH Bots: %d\n",level.alienBots,level.humanBots);
 }

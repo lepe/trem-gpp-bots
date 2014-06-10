@@ -166,59 +166,31 @@ alienBuildableBleedPS
   {
     particle
     {
-      shader sync gfx/damage/blood.tga
-      displacement          0 0 0 0
+      shader sync gfx/sprites/green_acid
 
-      velocityType          normal
+      displacement 0 0 0 ~0
 
-      velocityDir           linear
-
-      velocityMagnitude     15
-      velocity              0 0 0 ~35
-
-      accelerationType      static
-      accelerationDir       linear
-      acceleration          0 0 -1 ~5
-      accelerationMagnitude 25
-
-      radius                0 5 8
-      alpha                 250 .85 0
-      rotation              0 ~-15 ~15
-      bounce                0.0
-      color                 0 { 1.0 1.0 0.6 } -
-
-      lifeTime              400~100
-    }
-
-    particle
-    {
-      shader sync gfx/damage/blood.tga
-      displacement          0 0 0 0
-
-      velocityType          normal
-
-      velocityDir           linear
-
-      velocityMagnitude     15
-      velocity              0 0 0 ~35
+      velocityType      static
+      velocityDir       linear
+      velocityMagnitude 150~75%
+      velocity          0 0 1 ~50
 
       accelerationType      static
       accelerationDir       linear
-      acceleration          0 0 -1 ~5
-      accelerationMagnitude 25
+      accelerationMagnitude 800
+      acceleration          0 0 -1 0
 
-      radius                0 5 8
-      alpha                 250 .85 0
-      rotation              0 ~165 ~195
-      bounce                0.0
-      color                 0 { 1.0 1.0 0.6 } -
+      radius 0 5.0 30.0
+      alpha  0 0.3 0.0
+      rotation 0 ~360 -
+      bounce 0.2
 
-      lifeTime              400~100
+      lifeTime 200
     }
 
-    count   2
-    delay   0
-    period  0 - 0
+    count 2 
+    delay 0
+    period 5 - ~0%
   }
 }
 

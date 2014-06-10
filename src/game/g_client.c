@@ -821,8 +821,10 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   char      filename[ MAX_QPATH ];
   char      oldname[ MAX_NAME_LENGTH ];
   char      newname[ MAX_NAME_LENGTH ];
+  char      s_newname[ MAX_NAME_LENGTH ];
   char      err[ MAX_STRING_CHARS ];
   qboolean  revertName = qfalse;
+  qboolean  hasbotinname= qfalse;
   gclient_t *client;
   char      userinfo[ MAX_INFO_STRING ];
 
@@ -855,6 +857,10 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   s = Info_ValueForKey( userinfo, "name" );
   G_ClientCleanName( s, newname, sizeof( newname ) );
 
+  // check if the name contains [BOT]
+  G_DecolorString(newname, s_newname, sizeof(newname));
+  hasbotinname = Com_StringContains(s_newname, "[BOT]", 0) ? qtrue : qfalse;
+  
   if( strcmp( oldname, newname ) )
   {
     if( !forceName && client->pers.namelog->nameChangeTime &&
@@ -885,6 +891,15 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
       trap_SendServerCommand( ent - g_entities, va( "print \"%s\n\"", err ) );
       revertName = qtrue;
     }
+	//LEPE: Players are not allowed to have [BOT] or [bot] in names
+	if(!(ent->r.svFlags & SVF_BOT) && g_bot_tagname.integer == 1) {
+		if (hasbotinname) {
+		  trap_SendServerCommand( ent - g_entities,
+			"print \"You cannot use [BOT] in your name\n\"" );
+		  revertName = qtrue;
+		  hasbotinname = qfalse;
+		}
+	}
 
     if( revertName )
     {
@@ -924,8 +939,9 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   }
   else
   {
-    Com_sprintf( buffer, MAX_QPATH, "%s/%s",  BG_ClassConfig( client->pers.classSelection )->modelName,
-                                              BG_ClassConfig( client->pers.classSelection )->skinName );
+    Com_sprintf( buffer, MAX_QPATH, "%s/%s%s",  BG_ClassConfig( client->pers.classSelection )->modelName,
+                                              BG_ClassConfig( client->pers.classSelection )->skinName,
+											  g_bot_skins.integer && hasbotinname == qtrue ? "_bot" : "");
 
     //model segmentation
     Com_sprintf( filename, sizeof( filename ), "models/players/%s/animation.cfg",
@@ -1341,6 +1357,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, vec3_t origin, vec3_t angles
   ent->waterlevel = 0;
   ent->watertype = 0;
   ent->flags = 0;
+  ent->pathid = -1; //LEPE: 0 exists
 
   // calculate each client's acceleration
   ent->evaluateAcceleration = qtrue;

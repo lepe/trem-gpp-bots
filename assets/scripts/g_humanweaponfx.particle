@@ -1,0 +1,1153 @@
+models/weapons/blaster/missilePS // Blaster // Projectile
+{
+  ejector // projectile
+  {
+    particle
+    {
+      shader sync spark00
+
+      parentVelocityFraction 0
+
+      radius 0 4 4
+      alpha  0 1 1
+      bounce cull
+
+      lifeTime 40
+    }
+
+    count infinite
+    delay 0
+    period 1 - 0
+  }
+}
+
+models/weapons/blaster/impactPS // Blaster // Impact
+{
+  ejector
+  {
+    particle
+    {
+      shader sync spark00
+
+      displacement 0 0 0 ~2
+      normalDisplacement 7
+
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 100
+      velocity 0 0 0 ~90
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 600
+      acceleration 0 0 -1 ~10
+
+      radius 0 3~2 0
+      alpha 0 1 1
+      rotation 0 ~360 -
+      bounce 0.5
+
+      lifeTime 500
+    }
+
+    count 3
+    delay 0
+    period 0 - 0
+  }
+}
+
+models/weapons/chaingun/muzzlePS // Chaingun // Shell Casings
+{
+  ejector
+  {
+    particle
+    {
+      model models/weapons/shells/rifle-shell.md3
+
+      displacement -5 -3 0 ~0.0
+
+      parentVelocityFraction 0.85
+
+      velocityType      static_transform
+      velocityDir       linear
+      velocityMagnitude 200
+      velocity          0 -1 3 ~10
+
+      accelerationType      static
+      accelerationDir       linear
+      accelerationMagnitude 800
+      acceleration          0 0 -1 0
+
+						rotation 0 ~360 -
+      radius 4800 1.0 0
+      bounce 0.6
+
+      lifeTime 5000
+    }
+
+    count 1
+    delay 0
+    period 0 - ~0%
+  }
+}
+
+models/weapons/flamer/muzzlePS // Flamer
+{
+  ejector
+  {
+    particle
+    {
+      shader sync flame3 flame4 flame5 flame6 flame7 flame8 flame9 flame10 flame11 flame12 flame13 flame14 flame15 flame16 flame17 flame18 flame19 flame20 flame21 flame22 flame23 flame24 flame25
+      displacement 0 0 0 0
+
+      parentVelocityFraction 0.65
+
+      velocityType      cent
+      velocityDir       linear
+      velocityMagnitude 200
+      velocity          0 0 0 ~0
+
+      accelerationType      static
+      accelerationDir       linear
+      accelerationMagnitude 50
+      acceleration          0 0 1 ~0
+
+      radius 40 2 40
+      alpha 0 1 0
+      rotation 0 ~180 -
+      bounce 0.1
+
+      lifeTime 900
+    }
+    count infinite
+    delay 0
+    period 20 - 0
+  }
+}
+
+models/weapons/grenade/impactPS // Grenade
+{
+  ejector
+  {
+    particle
+    {
+      shader sync flame3 flame4 flame5 flame6 flame7 flame8 flame9 flame10 flame11 flame12 flame13 flame14 flame15 flame16 flame17 flame18 flame19 flame20 flame21 flame22 flame23 flame24 flame25
+
+      displacement 0 0 11 ~0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 200~75%
+      velocity 0 0 1 ~10
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 300
+      acceleration 0 0 -1 0
+
+      radius 0 20 120
+      alpha  0 1 0
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 500
+
+      childSystem models/weapons/grenade/impactTrailPS
+    }
+
+    count 5
+    delay 50
+    period 10 - ~0%
+  }
+
+  ejector
+  {
+		  particle // fast smoke
+    {
+      shader sync smoke01 smoke02 smoke03 smoke04 smoke05 smoke06 smoke07 smoke08 smoke09 smoke10 smoke11 smoke12 smoke13 smoke14 smoke15 smoke16
+
+      displacement ~20 ~20 ~20 10
+
+      parentVelocityFraction 0.5
+
+						velocityType static
+      velocityDir linear
+      velocityMagnitude 150
+      velocity ~1 ~1 0.2 ~50
+
+      radius 0 5~20 200~20
+      alpha  0 0.4 0
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 1000
+    }
+				
+    particle // ring 1
+    {
+      shader sync radialblast01 radialblast02 radialblast03 radialblast04 radialblast05
+
+      displacement 0 0 0 0
+
+      normalDisplacement 15
+
+      velocityType static
+      accelerationType static
+
+      radius 0 40 150
+      alpha 0 1 0
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 200
+    }
+
+		  particle // ring 2
+    {
+      shader sync radialblast03 radialblast03 radialblast03 radialblast03 radialblast04 radialblast05
+
+      displacement 0 0 0 0
+
+      normalDisplacement 15
+
+      velocityType static
+      accelerationType static
+
+      radius 0 0 100
+      alpha 0 1 0
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 100
+    }
+				
+				particle // explosion flash
+    {
+      shader sync explosionflash
+
+      displacement 0 0 0 0
+
+      normalDisplacement 100
+
+      velocityType static
+      accelerationType static
+
+      radius 0 100 0
+      alpha 80 1 0
+      rotation 0 ~360 -
+      bounce 0
+      
+      scaleWithCharge 0.1
+						onDeathSystem models/weapons/grenade/impactTrailPS
+
+      lifeTime 200
+    }
+
+    count 1
+    delay 0
+    period 0 - 0
+  }
+				
+		ejector // sparks
+  {
+    particle // spam some sparks
+    {
+      shader sync spark00
+
+      displacement 0 0 8 0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 350~75%
+      velocity 0 0 1 ~60
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -1 0
+
+      radius 0 2 0
+      alpha  0 1 0
+      rotation 0 ~360 -
+      bounce 0.4~100%
+
+      lifeTime 3000~90%
+    }
+
+    count 100
+    delay 0
+    period 0 - 0
+		}
+}
+
+models/weapons/grenade/impactTrailPS // Grenade
+{
+  ejector
+  {
+    particle
+    {
+      shader sync flame3 flame4 flame5 flame6 flame7 flame8 flame9 flame10 flame11 flame12 flame13 flame14 flame15 flame16 flame17 flame18 flame19 flame20 flame21 flame22 flame23 flame24 flame25
+
+      displacement 0 0 0 ~16
+
+      velocityType      static
+      velocityDir       linear
+      velocityMagnitude 30
+      velocity          0 0 -1 0
+
+      radius 0 30 10
+      alpha  0 1 0
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 500
+    }
+
+    count 5
+    delay 10
+    period 40 - 0
+  }
+}
+
+models/weapons/lasgun/impactPS // lasgun
+{
+  ejector
+  {
+				particle
+    {
+      shader sync gfx/lasgun/purple_particle
+
+      displacement 0 0 0 0
+						normalDisplacement 4
+
+      radius 100 8 0
+      alpha  0 1 1
+      rotation 0 - -
+      bounce 0.5
+						
+      lifeTime 300
+    }
+    count 1
+    delay 0
+    period - - 0
+		}
+		
+  ejector
+  {
+    particle
+    {
+      shader sync gfx/lasgun/purple_particle
+
+      displacement 0 0 0 ~2
+      normalDisplacement 7
+
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 100
+      velocity 0 0 0 ~90
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 600
+      acceleration 0 0 -1 ~10
+
+      radius 0 3~2 0
+      alpha 0 1 1
+      rotation 0 ~360 -
+      bounce 0.5
+
+      lifeTime 500
+    }
+
+    count 3
+    delay 0
+    period 0 - 0
+  }
+		
+		ejector
+  {
+    particle
+    {
+      shader sync gfx/sprites/smoke
+
+      displacement 0 0 0 0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 25
+      velocity 0 0 1 ~60
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 25
+      acceleration  0 0 1 0
+
+      radius 0 5 25
+      alpha  0 0.3 0
+      rotation 0 ~360 -
+      bounce 0.5
+
+      lifeTime 600~25%
+    }
+
+    count 4
+    delay 0
+    period 50 - 0
+  }
+}
+
+models/weapons/lcannon/missilePS // Lucifer Cannon // Primary Projectile
+{
+  ejector
+  {
+    particle
+    {
+      shader sync gfx/blaster/orange_particle
+
+      displacement 0 0 0 ~3
+
+      parentVelocityFraction  1
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 120
+      velocity 0 0 1 ~360
+
+      radius 0 6~20% 1
+      alpha  0 1 1
+      bounce cull
+
+      lifeTime 1000
+    }
+
+    count infinite
+    delay 0
+    period 50 - 0
+  }
+}
+
+models/weapons/lcannon/secondaryMissilePS // Lucifer Cannon // Secondary Projectile
+{
+  ejector
+  {
+    particle
+    {
+      shader sync gfx/blaster/orange_particle
+
+      displacement 0 0 0 ~3
+
+      parentVelocityFraction  0.5
+
+      radius 0 2 0
+      alpha 0 1 0
+      bounce cull
+
+      lifeTime 400
+    }
+
+    count infinite
+    delay 0
+    period 25 - 0
+  }
+}
+
+models/weapons/lcannon/impactPS // Lucifer Cannon // Primary Impact
+{
+  ejector // air particles
+  {
+    particle
+    {
+      shader sync spark00
+
+      displacement 0 0 0 ~2
+
+      normalDisplacement 20
+
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 300
+      velocity 0 0 0 ~160
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 1
+      acceleration 0 0 0 0
+
+      radius 0 5~75% 0
+      alpha 0 1 0
+      rotation 0 ~360 -
+      bounce 0.8
+
+      lifeTime 1200
+    }
+
+    count 20
+    delay 0
+    period 0 - 0
+  }
+	 ejector // blast fx
+  {
+    particle // ring 1
+    {
+      shader sync radialblast01 radialblast02 radialblast03 radialblast04 radialblast05
+
+      displacement 0 0 0 0
+
+      normalDisplacement 15
+
+      velocityType static
+      accelerationType static
+
+      radius 0 40 150
+      alpha 0 1 0
+      rotation 0 ~360 -
+      bounce 0
+      
+      scaleWithCharge 0.1
+
+      lifeTime 200
+    }
+
+		  particle // ring 2
+    {
+      shader sync radialblast03 radialblast03 radialblast03 radialblast03 radialblast04 radialblast05
+
+      displacement 0 0 0 0
+
+      normalDisplacement 15
+
+      velocityType static
+      accelerationType static
+
+      radius 0 0 100
+      alpha  0 1 0
+      rotation 0 ~360 -
+      bounce 0
+      
+      scaleWithCharge 0.10
+
+      lifeTime 100
+    }
+				
+				particle // flash
+    {
+      shader sync explosionflash
+
+      displacement 0 0 0 0
+
+      normalDisplacement 100
+
+      velocityType static
+      accelerationType static
+
+      radius 0 100 0
+      alpha  80 1 0
+      rotation 0 ~360 -
+      bounce 0
+      
+      scaleWithCharge 0.1
+				
+      lifeTime 200
+    }
+
+    count 1
+    delay 0
+    period 0 - 0
+  }
+}
+
+models/weapons/lcannon/secondaryImpactPS // Lucifer Cannon // Secondary Impact
+{
+  ejector // air particles
+  {
+    particle
+    {
+      shader sync spark00
+
+      displacement 0 0 0 ~2
+
+      normalDisplacement 20
+
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 300
+      velocity 0 0 0 ~160
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 1
+      acceleration 0 0 0 0
+
+      radius 0 4~75% 0
+      alpha 0 1 0
+      rotation 0 ~360 -
+      bounce 0.8
+
+      lifeTime 800
+    }
+    count 10
+    delay 0
+    period 0 - 0
+  }
+		
+	 ejector // blast fx
+  {
+    particle // ring 1
+    {
+      shader sync radialblast01 radialblast02 radialblast03 radialblast04 radialblast05
+
+      displacement 0 0 0 0
+
+      normalDisplacement 15
+
+      velocityType static
+      accelerationType static
+
+      radius 0 20 75
+      alpha 0 1 0
+      rotation 0 ~360 -
+      bounce 0
+      
+      scaleWithCharge 0.1
+
+      lifeTime 200
+    }
+
+		  particle // ring 2
+    {
+      shader sync radialblast03 radialblast03 radialblast03 radialblast03 radialblast04 radialblast05
+
+      displacement 0 0 0 0
+
+      normalDisplacement 15
+
+      velocityType static
+      accelerationType static
+
+      radius 0 0 50
+      alpha  0 1 0
+      rotation 0 ~360 -
+      bounce 0
+      
+      scaleWithCharge 0.10
+
+      lifeTime 100
+    }
+				
+				particle // flash
+    {
+      shader sync explosionflash
+
+      displacement 0 0 0 0
+
+      normalDisplacement 100
+
+      velocityType static
+      accelerationType static
+
+      radius 0 50 0
+      alpha  80 1 0
+      rotation 0 ~360 -
+      bounce 0
+      
+      scaleWithCharge 0.1
+				
+      lifeTime 200
+    }
+
+    count 1
+    delay 0
+    period 0 - 0
+  }
+}
+
+models/weapons/mdriver/impactPS // Mass Driver
+{
+  ejector
+  {
+    particle // floor
+    {
+      shader sync gfx/mdriver/green_particle2
+
+      displacement 0 0 0 0
+						normalDisplacement 4
+
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 100~50
+      velocity 0 0 1 ~300
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 600~20%
+      acceleration 0 0 -1 0
+
+      radius 0 3~1 0
+      alpha  0 1 1
+      rotation 0 360~360 360~360
+      bounce 0.7
+						
+      lifeTime 1200~90%
+    }
+    particle // bumpy
+    {
+      shader sync gfx/mdriver/green_particle2
+
+      displacement 0 0 0 0
+						normalDisplacement 10
+
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 200
+      velocity 0 0 10 ~40
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -8 0
+
+      radius 0 4~1 0
+      alpha  0 1 1
+      rotation 0 360 360~100%
+      bounce 0.8
+						
+      lifeTime 400~50%
+    }
+//				particle // center trail (looks nice but crappy on AABB with alwaysImpact)
+//    {
+//      shader sync gfx/mdriver/green_particle
+//
+//      displacement 0 0 0 0
+//						normalDisplacement 6
+//
+//      velocityType normal
+//      velocityDir linear
+//      velocityMagnitude 600
+//      velocity 0 0 1 0
+//
+//      accelerationType static
+//      accelerationDir linear
+//      accelerationMagnitude 100
+//      acceleration 0 0 -1 0
+//
+//      radius 0 8 0
+//      alpha  0 1 1
+//      rotation 0 - -
+//     bounce 0.5
+//						
+//      lifeTime 120~50%
+//    }
+
+    count 4
+    delay 0
+    period 15~80% - 0
+  }
+		
+		ejector // flash
+  {
+    particle
+    {
+      shader sync gfx/mdriver/green_particle
+						normalDisplacement 10
+
+      radius 0 32 24
+						alpha 0 0.5 0
+      rotation 0 ~360 -
+      bounce 0
+						
+						dynamicLight 0 128 0 { 0.5 1.0 0.1 }
+						
+      lifeTime 60
+    }
+
+    count 1
+    delay 0
+    period 0 - 0
+  }
+		
+		ejector
+  {
+    particle
+    {
+      shader sync smoke08 smoke09 smoke10 smoke11 smoke12 smoke14 smoke15 smoke16
+
+      normalDisplacement ~100
+
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 30
+      velocity 0 0 1 0
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 30
+      acceleration 0 0 -1 0
+
+      radius 0 16 32
+      alpha 0 1 0
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 500
+    }
+
+    count 3
+    delay 0
+    period 5 - 0
+  }
+}
+
+models/weapons/psaw/impactPS // Painsaw // Blue Particles
+{
+  ejector
+  {
+    particle
+    {
+      shader sync gfx/psaw/blue_particle
+
+      displacement 0 0 10 ~2
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 300
+      velocity 0 0 1 ~300
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -1 ~10
+
+      radius 0 5~2 0
+      alpha 0 1 1
+      rotation 0 ~360 -
+      bounce 0.5
+
+      lifeTime 1750
+    }
+
+    count 1
+    delay 0
+    period 0 - 0
+  }
+}
+
+models/weapons/prifle/missilePS // Pulse Rifle // Projectile
+{
+  ejector
+  {
+    particle
+    {
+    }
+    count infinite
+    delay 0
+    period 500 - 0
+  }
+}
+
+models/weapons/prifle/impactPS // Pulse Rifle // Impact
+{
+  ejector // sparks
+  {
+    particle
+    {
+      shader sync gfx/prifle/red_blob2
+
+      displacement 0 0 0 0
+						normalDisplacement 10
+
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 100
+      velocity 0 0 1 ~300
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 600
+      acceleration 0 0 -1 0
+
+      radius 0 2 0
+      alpha  0 1 1
+      rotation 0 - -
+      bounce 0.5
+						
+      lifeTime 800					
+    }
+
+    count 4~2
+    delay 0
+    period 0 - 0
+  }
+		
+		ejector // smokepuff
+  {
+    particle
+    {
+      shader sync redsmoke08 redsmoke09 redsmoke10 redsmoke11 redsmoke12 redsmoke14 redsmoke15 redsmoke16
+
+      normalDisplacement ~100
+
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 30
+      velocity 0 0 1 0
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 60
+      acceleration 0 0 -1 0
+
+      radius 0 16 32
+      alpha 0 0.4 0
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 300
+    }
+
+    count 4
+    delay 0
+    period 5 - 0
+  }
+		
+		ejector // flash
+  {
+    particle
+    {
+      shader sync gfx/prifle/red_blob2
+						normalDisplacement 20
+
+      radius 0 16 0
+						alpha 0 0.2 0
+      rotation 0 ~360 -
+      bounce 0
+						
+						dynamicLight 0 128 0 { 1.0 0.0 0.0 }
+						
+      lifeTime 50
+    }
+
+    count 1
+    delay 0
+    period 0 - 0
+  }
+		
+		ejector // flash
+  {
+    particle
+    {
+      shader sync gfx/prifle/red_flash
+						normalDisplacement 20
+
+      radius 0 24 0
+						alpha 0 1 1
+      rotation 0 ~360 -
+      bounce 0
+						
+						dynamicLight 0 128 0 { 1.0 0.0 0.0 }
+						
+      lifeTime 50
+    }
+
+    count 2
+    delay 0
+    period 0 - 0
+  }
+}
+
+models/weapons/rifle/impactPS // Rifle // Impact FX
+{
+  ejector
+  {
+    particle
+    {
+      shader sync gfx/rifle/verysmallrock
+
+      displacement 0 0 0 ~4
+
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 100
+      velocity 0 0 1 ~20
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 600
+      acceleration 0 0 -1 0
+
+      radius 0 1 1
+      alpha  0 1 0
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 350
+    }
+
+    count 0~2
+    delay ~100
+    period 0 - 0
+  }
+
+  ejector
+  {
+    particle
+    {
+      shader sync smoke08 smoke09 smoke10 smoke11 smoke12 smoke14 smoke15 smoke16
+
+      normalDisplacement ~100
+
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 30
+      velocity 0 0 1 0
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 30
+      acceleration 0 0 -1 0
+
+      radius 0 6 12
+      alpha 0 0.5 0
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 500
+    }
+
+    count 4
+    delay 0
+    period 5 - 0
+  }
+}
+
+models/weapons/rifle/muzzlePS // Rifle
+{
+  ejector
+  {
+    particle
+    {
+      shader sync gfx/sprites/smoke
+
+      displacement 0 0 0 0
+
+      parentVelocityFraction 0.9
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 20
+      velocity 0 0 0 0
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 300
+      acceleration 0 0 1 0
+
+      radius 0 2 4
+      alpha 0 0.4 0
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 200
+    }
+
+    count 1
+    delay 0
+    period 0 - 0
+  }
+
+  ejector // shell casings
+  {
+    particle
+    {
+      model models/weapons/shells/rifle-shell.md3
+
+      displacement -5 -3 0 0
+
+      parentVelocityFraction 0.85
+
+      velocityType static_transform
+      velocityDir linear
+      velocityMagnitude 200
+      velocity 0 -1 3 ~10
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -1 0
+
+      radius 0 1.0 -
+      bounce 0.5
+
+      lifeTime 5000
+    }
+
+    count 1
+    delay 0
+    period 0 - 0
+  }
+}
+
+models/weapons/shotgun/muzzlePS // Shotgun
+{
+  ejector
+  {
+    particle
+    {
+      shader sync gfx/sprites/smoke
+
+      displacement 0 0 0 0
+
+      parentVelocityFraction 0.9
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 20
+      velocity 0 0 0 0
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 300
+      acceleration 0 0 1 0
+
+      radius 0 2 4
+      alpha  0 0.4 0
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 200
+    }
+
+    count 1
+    delay 0
+    period 0 - 0
+  }
+
+  ejector // shell casings
+  {
+    particle
+    {
+      model models/weapons/shells/shotgun-shell.md3
+
+      displacement -5 -3 0 ~0.0
+
+      parentVelocityFraction 0.85
+
+      velocityType static_transform
+      velocityDir linear
+      velocityMagnitude 200
+      velocity 0 -1 3 ~10
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -1 0
+
+      radius 0 1 -
+      bounce 0.5
+
+      lifeTime 5000
+    }
+
+    count 1
+    delay 0
+    period 0 - 0
+  }
+}

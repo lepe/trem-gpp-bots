@@ -387,7 +387,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
   pmove_t pm;
   gclient_t *client;
   int clientNum;
-  qboolean attack1, attack3, following, queued;
+  qboolean attack1, following, queued;
 
   client = ent->client;
 
@@ -396,8 +396,6 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
 
   attack1 = ( client->buttons & BUTTON_ATTACK ) &&
             !( client->oldbuttons & BUTTON_ATTACK );
-  attack3 = ( client->buttons & BUTTON_USE_HOLDABLE ) &&
-            !( client->oldbuttons & BUTTON_USE_HOLDABLE );
   
   // We are in following mode only if we are following a non-spectating client           
   following = client->sess.spectatorState == SPECTATOR_FOLLOW;
@@ -410,13 +408,6 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
       following = qfalse;
   }
   
-  //ROTAX
-	//if bot
-  if( ent->r.svFlags & SVF_BOT && g_bot.integer ) {
-    	G_BotSpectatorThink( ent );
-    	//return;
-  }
-  
   // Check to see if we are in the spawn queue
   if( client->pers.teamSelection == TEAM_ALIENS )
     queued = G_SearchSpawnQueue( &level.alienSpawnQueue, ent - g_entities );
@@ -424,6 +415,18 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     queued = G_SearchSpawnQueue( &level.humanSpawnQueue, ent - g_entities );
   else
     queued = qfalse;
+ 
+  //LEPE: BOT Spawn
+  if( ent->r.svFlags & SVF_BOT && g_bot.integer ) {
+	  if(ent->bot &&! queued) { 
+		  if(ent->bot->funcs.base.spec) {
+			ent->bot->funcs.base.spec( ent ); 
+		  }
+		  if(ent->bot->funcs.team.spec) {
+			ent->bot->funcs.team.spec( ent ); 
+		  }
+	  }
+  }
 
   // Wants to get out of spawn queue
   if( attack1 && queued )
@@ -572,8 +575,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
   usercmd_t *ucmd;
   int       aForward, aRight;
   qboolean  walking = qfalse, stopped = qfalse,
-            crouched = qfalse, jumping = qfalse,
-            strafing = qfalse;
+            crouched = qfalse;
   int       i;
 
   ucmd = &ent->client->pers.cmd;
@@ -586,40 +588,18 @@ void ClientTimerActions( gentity_t *ent, int msec )
   else if( aForward <= 64 && aRight <= 64 )
     walking = qtrue;
 
-  if( aRight > 0 )
-    strafing = qtrue;
-
-  if( ucmd->upmove > 0 )
-    jumping = qtrue;
-  else if( ent->client->ps.pm_flags & PMF_DUCKED )
+  if( ent->client->ps.pm_flags & PMF_DUCKED )
     crouched = qtrue;
 
   client = ent->client;
   client->time100 += msec;
   client->time1000 += msec;
   client->time10000 += msec;
-  client->bottime += msec;
-
+  
   while ( client->time100 >= 100 )
   {
     weapon_t weapon = BG_GetPlayerWeapon( &client->ps );
     
-    //ROTAX
-	if( ent->r.svFlags & SVF_BOT )
-	{
-	  if( g_bot.integer )
-		{
-			G_FastThink( ent );
-		}
-		else
-		{
-			ent->client->pers.cmd.buttons = 0;
-			ent->client->pers.cmd.forwardmove = 0;
-			ent->client->pers.cmd.upmove = 0;
-			ent->client->pers.cmd.rightmove = 0;
-		}
-	}
-  
     client->time100 -= 100;
 
     // Restore or subtract stamina
@@ -725,14 +705,116 @@ void ClientTimerActions( gentity_t *ent, int msec )
     }
   }
 
-  while ( client->bottime >= 300 )
-  {
-	//ROTAX
-	if( ent->r.svFlags & SVF_BOT )
-	{
-		if(g_bot.integer)
+  //Camera Shake
+    ent->client->ps.stats[ STAT_SHAKE ] *= 0.77f;
+    if( ent->client->ps.stats[ STAT_SHAKE ] < 0 )
+      ent->client->ps.stats[ STAT_SHAKE ] = 0;
+
+  //---------------- BOTS THINK -----------------------
+  if(ent->r.svFlags & SVF_BOT && ent->bot) {
+	    int t;
+		int state;
+		if(g_bot.integer && ent->client->ps.stats[ STAT_CLASS ] != PCL_NONE && ent->health > 0) 
 		{
-		  G_BotThink( ent );
+			//Increase all timers
+			ent->bot->timer.aim	   += msec;
+			ent->bot->timer.nav	   += msec;
+			ent->bot->timer.action += msec;
+			for(t = 0; t < THINK_LEVEL_MAX + 1; t++) {
+				ent->bot->timer.think[t] += msec;
+			}
+			
+			//Call think functions
+			ent->bot->funcs.base.think( ent );
+			ent->bot->funcs.team.think( ent );
+			
+			//Reset timers which are over time.
+			for(t = 0; t < THINK_LEVEL_MAX + 1; t++) {
+				if(ent->bot->timer.think[t] >= BOT_TIMER[t]) {
+					ent->bot->timer.think[t] = 0;
+				}
+			}
+			//Perform states
+			if(ent->bot->timer.action >= BOT_TIMER_ACTION) {
+				//Reset timer
+				ent->bot->timer.action = 0;
+
+				//Keep current state, so we can debug when it changes
+				state = ent->bot->state; 
+
+				//Perform timed decisions
+				//We check every level suggestion and apply the higher possible level
+				for(t = THINK_LEVEL_MAX; t >= 0; t--) {
+					ent->bot->state = ent->bot->think.state[ t ];
+					if(ent->bot->state) break;
+				}
+				//in case nothing is set, just stand there
+				if(ent->bot->state == UNDEFINED) ent->bot->state = IDLE;
+				
+				if(state != ent->bot->state) {
+					G_BotDebug(ent, BOT_VERB_NORMAL, BOT_DEBUG_ACTIVE + BOT_DEBUG_STATE, "State %d -> %d\n", state, ent->bot->state);
+				}
+				//We execute state. First, we ensure we don't get garbage. 
+				//Then execute idle status and finally the status.
+				if(ent->bot->state >= EXPLORE && ent->bot->state <= IDLE) {
+					if(ent->bot->state != IDLE) {
+						//We always call IDLE to perform common decisions
+						ent->bot->funcs.base.status[IDLE]( ent ); //common code
+						ent->bot->funcs.team.status[IDLE]( ent ); //team code
+					}
+					if(ent->bot->funcs.base.status[ent->bot->state]) {
+						ent->bot->funcs.base.status[ent->bot->state]( ent ); //common code
+					}
+					if(ent->bot->funcs.team.status[ent->bot->state]) {
+						ent->bot->funcs.team.status[ent->bot->state]( ent ); //team code
+					}
+				} else {
+					G_Printf("Trying to access invalid state: %d\n",ent->bot->state);
+					ent->bot->state = IDLE;
+				}
+			}
+			//Perform aim 
+			if(ent->bot->timer.aim >= BOT_TIMER_AIM) {
+				//Reset aim timer
+				ent->bot->timer.aim = 0;
+				ent->bot->funcs.base.aim( ent );
+				if(ent->bot->var.angleToTarget > 1) {
+					ent->bot->var.angleToTarget -= 4; //around 2 seconds for 180 degrees
+				} else {
+					ent->bot->var.angleToTarget = 0;
+				}
+			}
+			//Perform navigation (some states)
+			if(ent->bot->state != ATTACK && ent->bot->timer.nav >= BOT_TIMER_NAV) {
+				//Reset nav timer
+				ent->bot->timer.nav = 0;
+				//Keep current state, so we can debug when it changes
+				state = ent->bot->path.state; 
+				//Execute navigation
+				if(ent->bot->path.state > IDLENAV && ent->bot->path.state <= LOST) {
+					if(ent->bot->funcs.base.nav[ent->bot->path.state]) {
+						ent->bot->funcs.base.nav[ent->bot->path.state]( ent ); //common code
+					}
+					if(ent->bot->funcs.team.nav[ent->bot->path.state]) {
+						ent->bot->funcs.team.nav[ent->bot->path.state]( ent ); //team code
+					}
+				} else if(ent->bot->path.state != IDLENAV) {
+					G_Printf("Trying to access invalid NAV state: %d\n",state);
+				}
+				if(state != ent->bot->path.state) {
+					G_BotDebug(ent, BOT_VERB_NORMAL, BOT_DEBUG_ACTIVE + BOT_DEBUG_NAVSTATE, "NAV State %d -> %d\n", state, ent->bot->path.state);
+				}
+				//Move to point gradually without aiming
+				if(g_bot_move_and_aim.integer) {
+					BotMoveToPointExec( ent );
+				}
+				//Adjust AIM gradually
+				if(g_bot_step_aim.integer) {
+					BotAimToPointExec( ent );
+				}
+			}
+			//execute movements (uses a separate variable timer)
+			ent->bot->funcs.base.move( ent , msec );
 		}
 		else
 		{
@@ -741,14 +823,15 @@ void ClientTimerActions( gentity_t *ent, int msec )
 			ent->client->pers.cmd.upmove = 0;
 			ent->client->pers.cmd.rightmove = 0;
 		}
-	}
-	client->bottime -= 300;
   }
-  
+
+  //--------------------------------------------------
+
   while( client->time1000 >= 1000 )
   {
     client->time1000 -= 1000;
-
+	//for bots analysis //LEPE
+	ent->lastHealth = ent->health;
     //client is poisoned
     if( client->ps.stats[ STAT_STATE ] & SS_POISONED )
     {
@@ -1336,10 +1419,13 @@ void ClientThink_real( gentity_t *ent )
   //
   if( level.intermissiontime )
   {
-    if( ent->r.svFlags & SVF_BOT )
-      G_BotIntermissionThink( client );
-    else
+    if( ent->r.svFlags & SVF_BOT ) {
+		if(ent->bot) {
+    		client->readyToExit = qtrue; //Set them ready
+		}
+  	} else {
       ClientIntermissionThink( client );
+	}
     return;
   }
 
@@ -1358,22 +1444,6 @@ void ClientThink_real( gentity_t *ent )
   // check for inactivity timer, but never drop the local client of a non-dedicated server
   if( !ClientInactivityTimer( ent ) )
     return;
-  
-  if( ent->r.svFlags & SVF_BOT )
-	{
-		if(g_bot.integer > 0)
-		{
-			G_FrameAim( ent );
-		}
-		else
-		{
-			ent->client->pers.cmd.buttons = 0;
-			ent->client->pers.cmd.forwardmove = 0;
-			ent->client->pers.cmd.upmove = 0;
-			ent->client->pers.cmd.rightmove = 0;
-		}
-	}
-	
 
   // calculate where ent is currently seeing all the other active clients
   G_UnlaggedCalc( ent->client->unlaggedTime, ent );
@@ -1892,15 +1962,11 @@ while a slow client may have multiple ClientEndFrame between ClientThink.
 */
 void ClientEndFrame( gentity_t *ent )
 {
-  clientPersistant_t  *pers;
-
   if( ent->client->sess.spectatorState != SPECTATOR_NOT )
   {
     SpectatorClientEndFrame( ent );
     return;
   }
-
-  pers = &ent->client->pers;
 
   //
   // If the end of unit layout is displayed, don't give

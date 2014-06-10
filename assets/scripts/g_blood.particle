@@ -1,0 +1,436 @@
+alienBleedPS // alien blood
+{
+  ejector
+  {
+				particle
+    {
+      shader sync acid00
+      
+	     displacement 0 0 0 0
+
+      radius 100 3~1 0
+      alpha 0 1 1
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 400
+    }
+    count 4
+    delay 0
+    period 20 - 0
+  }
+		
+  ejector
+  {
+    particle
+    {
+      shader sync	acid101 acid102 acid103 acid104 acid105 acid106 acid107 acid108 
+      
+	     displacement 0 0 0 0
+
+      radius 0 6~2 9~2
+      alpha 0 1 0
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 250~50
+    }
+    count   1
+    delay   0
+    period  0 - 0
+  }
+  thirdPersonOnly
+}
+
+alienBuildableBleedPS // alien building blood
+{
+  ejector
+  {
+    particle
+    {
+      shader sync	acid101 acid102 acid103 acid104 acid105 acid106 acid107 acid108 
+      
+	     displacement 0 0 0 ~8
+
+      radius 0 6~2 9~2
+      alpha 0 1 0
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 250~50
+    }
+    count   1
+    delay   0
+    period  0 - 0
+  }
+  thirdPersonOnly
+}
+
+alienBuildableDamagedPS // alien building almost destroyed
+{
+  ejector
+  {
+    particle
+    {
+      shader sync acid201 acid202 acid203 acid204 acid205 acid206 acid207
+
+	     displacement 0 0 0 ~4
+	  
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 100
+      velocity 0 0 0 ~20
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 200
+      acceleration 0 0 -2 0
+
+      radius 0 4 12~6
+      alpha 0 1 1
+      rotation 0 ~360 -
+	  
+      lifeTime 300~50%
+    }
+				
+				particle
+    {
+      shader sync acid101 acid102 acid103 acid104 acid105 acid106 acid107 acid108
+
+	     displacement 0 0 0 ~6
+	  
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 100
+      velocity 0 0 0 ~20
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 200
+      acceleration 0 0 -2 0
+
+      radius				0 4 12~4
+      alpha  				0 1 1
+      rotation				0 ~360 -
+	  
+      lifeTime 300~50%
+    }
+    count infinite
+    delay 0
+    period 600 - 0
+  }
+  
+		ejector
+		{
+    particle
+    {
+      shader sync acid101 acid102 acid103 acid104 acid105 acid106 acid107 acid108
+
+	     displacement 0 0 0 ~20
+	  
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 100
+      velocity 0 0 0 ~20
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 200
+      acceleration 0 0 -2 0
+
+      radius 0 4.0 4.0
+      alpha 0 1 1
+      rotation 0 ~360 -
+	  
+      lifeTime 300~50%
+    }
+				
+				particle
+    {
+      shader sync acid101 acid102 acid103 acid104 acid105 acid106 acid107 acid108
+
+	     displacement 0 0 0 ~20
+	  
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 100
+      velocity 0 0 0 ~20
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 200
+      acceleration 0 0 -2 0
+
+      radius 0 4 4
+      alpha 0 1 1
+      rotation 0 ~360 -
+	  
+      lifeTime 300~50%
+    }
+				count infinite
+    delay 300
+    period 600 - 0
+  }
+}
+
+alienBuildableDestroyedPS // alien building destroyed
+{
+  ejector // poof
+  {
+    particle
+    {
+      shader sync acid101 acid102 acid103 acid104 acid105 acid106 acid107 acid108
+
+      displacement 0 0 0 ~0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 300~75%
+      velocity 0 0 0.05 ~40
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -2 0
+
+      radius 0 10 15
+      alpha 0 1 1
+      rotation 0 ~360 -
+      bounce cull
+
+      lifeTime 600
+    }
+
+    count 32
+    delay 0
+    period 0 - 0
+  }
+		ejector // splat
+  {
+    particle
+    {
+      shader sync acid00
+
+      displacement 0 0 30 0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 300~75%
+      velocity 0 0 1 ~40
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -2 0
+
+      radius 600 4 0
+      alpha 0 1 1
+      rotation 0 ~360 -
+      bounce 0.1
+						bouncemark 1 8~50% acidsplat2
+
+      lifeTime 1200
+    }
+				
+				particle // splat
+    {
+      shader sync acid00
+
+      displacement 0 0 30 0
+						
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 300~75%
+      velocity 0 0 1 ~40
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -2 0
+
+      radius 600 5 0
+      alpha 0 1 1
+      rotation 0 ~360 -
+      bounce 0.1
+						bouncemark 1 24~8 acidsplat3
+
+      lifeTime 1200
+    }
+				
+				particle // splat
+    {
+      shader sync acid00
+
+      displacement 0 0 30 0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 300~75%
+      velocity 0 0 1 ~40
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -2 0
+
+      radius 500 3 0
+      alpha 0 1 1
+      rotation 0 ~360 -
+      bounce 0.1
+						bouncemark 1 10~33% acidsplat4
+
+      lifeTime 1000
+    }
+
+    count 3
+    delay 0
+    period 0 - 0
+  }
+  ejector // gibs
+  {
+    particle
+    {
+      model models/fx/alien_gibs/a_gib1.md3 models/fx/alien_gibs/a_gib2.md3 models/fx/alien_gibs/a_gib3.md3 models/fx/alien_gibs/a_gib4.md3
+
+      displacement 0~20 0~20 40~10 0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 300~75%
+      velocity 0 0 1 ~60
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -1 0
+
+      radius 4000 1 0
+      bounce 0.2
+      bounceMark 1~1 24 acidsplat3
+      bounceSound ~1 sound/misc/organic_bounce.wav
+
+      lifeTime 5000~2000
+    }
+
+    count 3
+    delay 0
+    period 0 - 0
+  }
+}
+
+alienEvolvePS // alien evolution blood
+{
+  ejector
+  {
+    particle
+    {
+      shader sync acid101 acid102 acid103 acid104 acid105 acid106 acid107 acid108 
+
+      displacement 0 0 0 ~0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 150~75%
+      velocity 0 0 1 ~50
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -1 0
+
+      radius 0 5 30
+      alpha 0 1 0
+      rotation 0 ~360 -
+      bounce 0.2
+
+      lifeTime 1000
+    }
+
+    count 30
+    delay 0
+    period 5 - 0
+  }
+		thirdPersonOnly
+}
+
+humanBleedPS
+{
+  ejector
+  {
+    particle
+    {
+      shader sync gfx/damage/blood.tga
+      displacement 0 0 0 0
+
+      velocityType normal
+
+      velocityDir linear
+
+      velocityMagnitude 15
+      velocity 0 0 0 ~35
+
+      accelerationType static
+      accelerationDir linear
+      acceleration 0 0 -1 ~5
+      accelerationMagnitude 25
+
+      radius 0 5 8
+      alpha 250 0.75 0
+      rotation 0 ~-15 ~15
+      bounce 0.0
+      color 0 { 0.8 0.2 0.2 } -
+
+      lifeTime 400~100
+    }
+
+    particle
+    {
+      shader sync gfx/damage/blood.tga
+      displacement 0 0 0 0
+
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 15
+      velocity 0 0 0 ~35
+
+      accelerationType static
+      accelerationDir linear
+      acceleration 0 0 -1 ~5
+      accelerationMagnitude 25
+
+      radius 0 5 8
+      alpha 250 0.75 0
+      rotation 0 ~-15 ~15
+      bounce 0
+      color 0 { 0.8 0.2 0.2 } -
+
+      lifeTime 400~100
+    }
+
+    count   2
+    delay   0
+    period  0 - 0
+  }
+
+  thirdPersonOnly
+}
+
+dragoonBarbPS // Goon barb
+{
+		ejector
+		{
+				particle
+    {
+      shader sync acid101 acid102 acid103 acid104 acid105 acid106 acid107 acid108
+
+      radius 0 4 4
+      alpha 0 1 1
+      rotation 0 ~360 -
+	  
+      lifeTime 300~50%
+    }
+				count infinite
+    delay 0
+    period 5 - 0
+  }
+}

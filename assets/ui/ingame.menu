@@ -60,8 +60,8 @@
       decoration
       backcolor 0 0 0 1
     }
-
-    itemdef
+    
+    itemDef
     {
       name game
       text "Game"
@@ -102,13 +102,13 @@
     itemDef
     {
       name leave
-      text "Help"
+      text "Manual"
       type ITEM_TYPE_BUTTON
       style WINDOW_STYLE_EMPTY
       rect (BUTT_BAR_X+(2*BUTT_W)) BUTT_BAR_Y BUTT_W BUTT_H
       textalign ALIGN_CENTER
       textvalign VALIGN_CENTER
-      textscale .4
+      textscale .388
       forecolor 1 1 1 1
       visible MENU_TRUE
       action

@@ -33,8 +33,7 @@
 #define BOTBUTT_W   (BOT_W/5)
 #define BOTBUTT_H   BOT_H
 
-#define SERVER_C    0.45
-#define GAME_C      0.15
+#define SERVER_C    0.6
 #define MAP_C       0.2
 #define PLAYERS_C   0.1
 #define PING_C      0.1
@@ -199,7 +198,7 @@
     {
       name legend
       type ITEM_TYPE_TEXT
-      text "[official] = Official Server\n[featured] = Featured Server"
+      text "[official] = Offical Server\n[featured] = Featured Server"
       style WINDOW_STYLE_EMPTY
       textstyle ITEM_TEXTSTYLE_NORMAL
       textscale .25
@@ -275,57 +274,13 @@
 
     itemDef
     {
-      name game
-      group grpTabs
-      type ITEM_TYPE_BUTTON
-      text "Game Type"
-      textscale .33
-      style WINDOW_STYLE_FILLED
-      rect (LIST_X+(SERVER_C*LIST_W)) LIST_Y (GAME_C*LIST_W) HEADFOOT_H
-      textalign ALIGN_LEFT
-      textvalign VALIGN_CENTER
-      textalignx LIST_TOFF
-      border WINDOW_BORDER_FULL
-      bordercolor   0.5 0.5 0.5 1
-      forecolor     1   1   1   1
-      backcolor     0   0   0   0
-      outlinecolor  0.1 0.1 0.1 0.5
-      visible MENU_TRUE
-      action
-      {
-        play "sound/misc/menu1.wav";
-        uiScript ServerSort 4;
-
-        setitemcolor grpColumn backcolor 0 0 0 0;
-        setitemcolor grpTabs backcolor 0 0 0 0;
-        setitemcolor game backcolor 0.3 1 1 0.3;
-        setitemcolor gameColumn backcolor 0.2 0.6 0.6 0.1;
-      }
-    }
-
-    itemDef
-    {
-      name gameColumn
-      group grpColumn
-      rect (LIST_X+(SERVER_C*LIST_W)) (LIST_Y+HEADFOOT_H) (GAME_C*LIST_W) (LIST_H-(2*HEADFOOT_H))
-      style WINDOW_STYLE_FILLED
-      border WINDOW_BORDER_FULL
-      backcolor 0 0 0 0
-      bordersize 1
-      bordercolor .5 .5 .5 1
-      visible MENU_TRUE
-      decoration
-    }
-
-    itemDef
-    {
       name map
       group grpTabs
       type ITEM_TYPE_BUTTON
       text "Map Name"
       textscale .33
       style WINDOW_STYLE_FILLED
-      rect (LIST_X+((SERVER_C+GAME_C)*LIST_W)) LIST_Y (MAP_C*LIST_W) HEADFOOT_H
+      rect (LIST_X+(SERVER_C*LIST_W)) LIST_Y (MAP_C*LIST_W) HEADFOOT_H
       textalign ALIGN_LEFT
       textvalign VALIGN_CENTER
       textalignx LIST_TOFF
@@ -351,7 +306,7 @@
     {
       name mapColumn
       group grpColumn
-      rect (LIST_X+((SERVER_C+GAME_C)*LIST_W)) (LIST_Y+HEADFOOT_H) (MAP_C*LIST_W) (LIST_H-(2*HEADFOOT_H))
+      rect (LIST_X+(SERVER_C*LIST_W)) (LIST_Y+HEADFOOT_H) (MAP_C*LIST_W) (LIST_H-(2*HEADFOOT_H))
       style WINDOW_STYLE_FILLED
       border WINDOW_BORDER_FULL
       backcolor 0 0 0 0
@@ -369,7 +324,7 @@
       type ITEM_TYPE_BUTTON
       textscale .33
       style WINDOW_STYLE_FILLED
-      rect (LIST_X+((SERVER_C+GAME_C+MAP_C)*LIST_W)) LIST_Y (PLAYERS_C*LIST_W) HEADFOOT_H
+      rect (LIST_X+((SERVER_C+MAP_C)*LIST_W)) LIST_Y (PLAYERS_C*LIST_W) HEADFOOT_H
       textalign ALIGN_LEFT
       textvalign VALIGN_CENTER
       textalignx LIST_TOFF
@@ -395,7 +350,7 @@
     {
       name playerColumn
       group grpColumn
-      rect (LIST_X+((SERVER_C+GAME_C+MAP_C)*LIST_W)) (LIST_Y+HEADFOOT_H) (PLAYERS_C*LIST_W) (LIST_H-(2*HEADFOOT_H))
+      rect (LIST_X+((SERVER_C+MAP_C)*LIST_W)) (LIST_Y+HEADFOOT_H) (PLAYERS_C*LIST_W) (LIST_H-(2*HEADFOOT_H))
       style WINDOW_STYLE_FILLED
       border WINDOW_BORDER_FULL
       backcolor 0 0 0 0
@@ -413,7 +368,7 @@
       type ITEM_TYPE_BUTTON
       textscale .33
       style WINDOW_STYLE_FILLED
-      rect (LIST_X+((SERVER_C+GAME_C+MAP_C+PLAYERS_C)*LIST_W)) LIST_Y (PING_C*LIST_W) HEADFOOT_H
+      rect (LIST_X+((SERVER_C+MAP_C+PLAYERS_C)*LIST_W)) LIST_Y (PING_C*LIST_W) HEADFOOT_H
       textalign ALIGN_LEFT
       textvalign VALIGN_CENTER
       textalignx LIST_TOFF
@@ -439,7 +394,7 @@
     {
       name pingColumn
       group grpColumn
-      rect (LIST_X+((SERVER_C+GAME_C+MAP_C+PLAYERS_C)*LIST_W)) (LIST_Y+HEADFOOT_H) (PING_C*LIST_W) (LIST_H-(2*HEADFOOT_H))
+      rect (LIST_X+((SERVER_C+MAP_C+PLAYERS_C)*LIST_W)) (LIST_Y+HEADFOOT_H) (PING_C*LIST_W) (LIST_H-(2*HEADFOOT_H))
       style WINDOW_STYLE_FILLED
       border WINDOW_BORDER_FULL
       backcolor 0.2 0.6 0.6 0.1
@@ -468,12 +423,11 @@
       backcolor     0.2 0.2 0.2 1
       outlinecolor  0.1 0.3 0.3 0.4
       visible MENU_TRUE
-      columns 5
-        LIST_TOFF                                              ((SERVER_C*LIST_W)-(3*LIST_TOFF))   ALIGN_LEFT
-        (LIST_TOFF+((SERVER_C+GAME_C)*LIST_W))                 ((MAP_C*LIST_W)-(3*LIST_TOFF))      ALIGN_LEFT
-        (LIST_TOFF+((SERVER_C+GAME_C+MAP_C)*LIST_W))           ((PLAYERS_C*LIST_W)-(3*LIST_TOFF))  ALIGN_LEFT
-        (LIST_TOFF+((SERVER_C+GAME_C+MAP_C+PLAYERS_C)*LIST_W)) ((PING_C*LIST_W)-(3*LIST_TOFF))     ALIGN_LEFT
-        (LIST_TOFF+((SERVER_C)*LIST_W))                        ((GAME_C*LIST_W)-(3*LIST_TOFF))     ALIGN_LEFT
+      columns 4
+        LIST_TOFF                                       ((SERVER_C*LIST_W)-(3*LIST_TOFF))   ALIGN_LEFT
+        (LIST_TOFF+((SERVER_C)*LIST_W))                 ((MAP_C*LIST_W)-(3*LIST_TOFF))      ALIGN_LEFT
+        (LIST_TOFF+((SERVER_C+MAP_C)*LIST_W))           ((PLAYERS_C*LIST_W)-(3*LIST_TOFF))  ALIGN_LEFT
+        (LIST_TOFF+((SERVER_C+MAP_C+PLAYERS_C)*LIST_W)) ((PING_C*LIST_W)-(3*LIST_TOFF))     ALIGN_LEFT
 
       doubleClick { uiScript JoinServer }
     }

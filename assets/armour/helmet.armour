@@ -10,7 +10,7 @@
 
 {
   name "helmet crouch"
-  minHeight 0.7
+  minHeight 0.72
   maxHeight 1.0
   minAngle  0
   maxAngle  360

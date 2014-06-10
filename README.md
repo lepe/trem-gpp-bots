@@ -5,6 +5,49 @@ The current code was based on a P-Bot 2.x GPP port from Tremulous 1.1 P-Bot (htt
 
 CHANGE LOG
 
+v.2.0
+* GPP-Bot mod was created based in pbot (most of the pbot code was removed, recoded or translated, and divided in several files and functions)
+* practically everything about bots, is controlled throught bot-> struct
+* bots have their own skins (activated by: g_bot_skins command)
+* enhanced weapons animations
+* bot thinking process now happens in levels at different times
+* bots control functions to simplify code, like: BotJump()
+* bot States were added
+* Action queue which allows sequence of movements
+* Paths are not limited in size
+* Paths now use -1 to represent NULL nodes
+* bots can join on password protected servers
+* bots have their own skin
+* bots ping was added
+* /callbot commands to add and remove bots
+* all alien bots now attack based on their own capabilities (range constants)
+* new debug system which allow administrators to debug specific parts of the code (botdbg BOTNAME TAG VERBOSITY or botdbg BOTNAME read INFO)
+* "dnodes" does not depend on users anymore
+* bots can be controlled manually (botcmd BOT move ...)
+* bots states can be controlled manually (botcmd BOT state/nav )
+* "listplayer" shows score
+* Fully charged lucis at tyrants and structures
+* Basilisks and Dretches attack improved
+* Humans use medipads when are low in HP
+* Aliens use boosters and follow basiliks when are low in HP
+* Strafe is now random (but consistent)
+* Blocked-State code for both, aliens and humans recoded
+* Bots are able to follow and create leaderships in groups (need to be fixed)
+* Bots do something on maps without nodes (nothing great yet)
+* Bots can walk and aim at two different directions (experimental: off)
+* Bots aim is not instant (experimental: off)
+* Human bots now have basic repair capabilities
+* Human bots try to keep a distance when attacking structures (except saw and flame weapons)
+* teams are not locked anymore and 2 bots by team are deployed by default
+* [BOT] tag in names is reserved only for bots
+* bots/start.cfg is executed on map load
+* gas affects bots aim
+* Essence is now divided by team. dnodes have new parameters: [aliens|humans|off]
+* Bots will use target prioritization to choose between enemies
+* FriendFire awareness implemented.
+* Hit detection which prevent humans to hit the wall for long time.
+* Introduced (but not fully implemented): profiles, range behavior, group thinking, hit detection, some bot states as RUSH,PATROL,etc
+
 v.16
 * goons pounce and rants rush to move faster, maras jump more.
 * aliens were not able to evolve to adv. marauder (since original code).

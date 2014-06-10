@@ -759,6 +759,7 @@ void Com_ClientListAdd( clientList_t *list, int clientNum );
 void Com_ClientListRemove( clientList_t *list, int clientNum );
 char *Com_ClientListString( const clientList_t *list );
 void Com_ClientListParse( clientList_t *list, const char *s );
+char *Com_StringContains(char *str1, char *str2, int casesensitive);
 
 // mode parm for FS_FOpenFile
 typedef enum {

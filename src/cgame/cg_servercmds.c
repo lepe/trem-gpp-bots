@@ -412,6 +412,8 @@ static void CG_MapRestart( void )
   // we really should clear more parts of cg here and stop sounds
 
   trap_Cvar_Set( "cg_thirdPerson", "0" );
+
+  cg.splashTime = cg.time;
 }
 
 /*
@@ -1069,7 +1071,7 @@ static void CG_ParseVoice( void )
     return;
 
   vChan = atoi( CG_Argv( 2 ) );
-  if( vChan < 0 || vChan >= VOICE_CHAN_NUM_CHANS )
+  if( vChan >= VOICE_CHAN_NUM_CHANS )
     return;
 
   if( cg_teamChatsOnly.integer && vChan != VOICE_CHAN_TEAM )

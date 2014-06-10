@@ -1,0 +1,1999 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="94">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df root="src" name="0">
+      <df name="cgame">
+        <in>cg_animation.c</in>
+        <in>cg_animmapobj.c</in>
+        <in>cg_attachment.c</in>
+        <in>cg_buildable.c</in>
+        <in>cg_consolecmds.c</in>
+        <in>cg_draw.c</in>
+        <in>cg_drawtools.c</in>
+        <in>cg_ents.c</in>
+        <in>cg_event.c</in>
+        <in>cg_main.c</in>
+        <in>cg_marks.c</in>
+        <in>cg_particles.c</in>
+        <in>cg_players.c</in>
+        <in>cg_playerstate.c</in>
+        <in>cg_predict.c</in>
+        <in>cg_scanner.c</in>
+        <in>cg_servercmds.c</in>
+        <in>cg_snapshot.c</in>
+        <in>cg_syscalls.c</in>
+        <in>cg_trails.c</in>
+        <in>cg_tutorial.c</in>
+        <in>cg_view.c</in>
+        <in>cg_weapons.c</in>
+      </df>
+      <df name="client">
+        <in>cl_avi.c</in>
+        <in>cl_cgame.c</in>
+        <in>cl_cin.c</in>
+        <in>cl_console.c</in>
+        <in>cl_curl.c</in>
+        <in>cl_input.c</in>
+        <in>cl_keys.c</in>
+        <in>cl_main.c</in>
+        <in>cl_net_chan.c</in>
+        <in>cl_parse.c</in>
+        <in>cl_scrn.c</in>
+        <in>cl_ui.c</in>
+        <in>libmumblelink.c</in>
+        <in>qal.c</in>
+        <in>snd_adpcm.c</in>
+        <in>snd_codec.c</in>
+        <in>snd_codec_ogg.c</in>
+        <in>snd_codec_wav.c</in>
+        <in>snd_dma.c</in>
+        <in>snd_main.c</in>
+        <in>snd_mem.c</in>
+        <in>snd_mix.c</in>
+        <in>snd_openal.c</in>
+        <in>snd_wavelet.c</in>
+      </df>
+      <df name="game">
+        <in>bg_alloc.c</in>
+        <in>bg_lib.c</in>
+        <in>bg_misc.c</in>
+        <in>bg_pmove.c</in>
+        <in>bg_slidemove.c</in>
+        <in>bg_voice.c</in>
+        <in>g_active.c</in>
+        <in>g_admin.c</in>
+        <in>g_bot.c</in>
+        <in>g_bot_alien.c</in>
+        <in>g_bot_common.c</in>
+        <in>g_bot_control.c</in>
+        <in>g_bot_human.c</in>
+        <in>g_bot_nav.c</in>
+        <in>g_bot_say.c</in>
+        <in>g_bot_util.c</in>
+        <in>g_buildable.c</in>
+        <in>g_client.c</in>
+        <in>g_cmds.c</in>
+        <in>g_combat.c</in>
+        <in>g_main.c</in>
+        <in>g_maprotation.c</in>
+        <in>g_misc.c</in>
+        <in>g_missile.c</in>
+        <in>g_mover.c</in>
+        <in>g_namelog.c</in>
+        <in>g_physics.c</in>
+        <in>g_session.c</in>
+        <in>g_spawn.c</in>
+        <in>g_svcmds.c</in>
+        <in>g_syscalls.c</in>
+        <in>g_target.c</in>
+        <in>g_team.c</in>
+        <in>g_trigger.c</in>
+        <in>g_utils.c</in>
+        <in>g_weapon.c</in>
+      </df>
+      <df name="jpeg-8c">
+        <in>jaricom.c</in>
+        <in>jcapimin.c</in>
+        <in>jcapistd.c</in>
+        <in>jcarith.c</in>
+        <in>jccoefct.c</in>
+        <in>jccolor.c</in>
+        <in>jcdctmgr.c</in>
+        <in>jchuff.c</in>
+        <in>jcinit.c</in>
+        <in>jcmainct.c</in>
+        <in>jcmarker.c</in>
+        <in>jcmaster.c</in>
+        <in>jcomapi.c</in>
+        <in>jcparam.c</in>
+        <in>jcprepct.c</in>
+        <in>jcsample.c</in>
+        <in>jctrans.c</in>
+        <in>jdapimin.c</in>
+        <in>jdapistd.c</in>
+        <in>jdarith.c</in>
+        <in>jdatadst.c</in>
+        <in>jdatasrc.c</in>
+        <in>jdcoefct.c</in>
+        <in>jdcolor.c</in>
+        <in>jddctmgr.c</in>
+        <in>jdhuff.c</in>
+        <in>jdinput.c</in>
+        <in>jdmainct.c</in>
+        <in>jdmarker.c</in>
+        <in>jdmaster.c</in>
+        <in>jdmerge.c</in>
+        <in>jdpostct.c</in>
+        <in>jdsample.c</in>
+        <in>jdtrans.c</in>
+        <in>jerror.c</in>
+        <in>jfdctflt.c</in>
+        <in>jfdctfst.c</in>
+        <in>jfdctint.c</in>
+        <in>jidctflt.c</in>
+        <in>jidctfst.c</in>
+        <in>jidctint.c</in>
+        <in>jmemmgr.c</in>
+        <in>jmemnobs.c</in>
+        <in>jquant1.c</in>
+        <in>jquant2.c</in>
+        <in>jutils.c</in>
+      </df>
+      <df name="libspeex">
+        <in>bits.c</in>
+        <in>buffer.c</in>
+        <in>cb_search.c</in>
+        <in>echo_diagnostic.m</in>
+        <in>exc_10_16_table.c</in>
+        <in>exc_10_32_table.c</in>
+        <in>exc_20_32_table.c</in>
+        <in>exc_5_256_table.c</in>
+        <in>exc_5_64_table.c</in>
+        <in>exc_8_128_table.c</in>
+        <in>fftwrap.c</in>
+        <in>filterbank.c</in>
+        <in>filters.c</in>
+        <in>gain_table.c</in>
+        <in>gain_table_lbr.c</in>
+        <in>hexc_10_32_table.c</in>
+        <in>hexc_table.c</in>
+        <in>high_lsp_tables.c</in>
+        <in>jitter.c</in>
+        <in>kiss_fft.c</in>
+        <in>kiss_fftr.c</in>
+        <in>lpc.c</in>
+        <in>lsp.c</in>
+        <in>lsp_tables_nb.c</in>
+        <in>ltp.c</in>
+        <in>mdf.c</in>
+        <in>modes.c</in>
+        <in>modes_wb.c</in>
+        <in>nb_celp.c</in>
+        <in>preprocess.c</in>
+        <in>quant_lsp.c</in>
+        <in>resample.c</in>
+        <in>sb_celp.c</in>
+        <in>smallft.c</in>
+        <in>speex.c</in>
+        <in>speex_callbacks.c</in>
+        <in>speex_header.c</in>
+        <in>stereo.c</in>
+        <in>testdenoise.c</in>
+        <in>testecho.c</in>
+        <in>testenc.c</in>
+        <in>testenc_uwb.c</in>
+        <in>testenc_wb.c</in>
+        <in>vbr.c</in>
+        <in>vq.c</in>
+        <in>window.c</in>
+      </df>
+      <df name="master">
+        <in>master.c</in>
+        <in>messages.c</in>
+        <in>servers.c</in>
+        <in>stats.c</in>
+      </df>
+      <df name="null">
+        <in>mac_net.c</in>
+        <in>null_client.c</in>
+        <in>null_glimp.c</in>
+        <in>null_input.c</in>
+        <in>null_main.c</in>
+        <in>null_net.c</in>
+        <in>null_snddma.c</in>
+      </df>
+      <df name="qcommon">
+        <in>cm_load.c</in>
+        <in>cm_patch.c</in>
+        <in>cm_polylib.c</in>
+        <in>cm_test.c</in>
+        <in>cm_trace.c</in>
+        <in>cmd.c</in>
+        <in>common.c</in>
+        <in>cvar.c</in>
+        <in>files.c</in>
+        <in>huffman.c</in>
+        <in>ioapi.c</in>
+        <in>md4.c</in>
+        <in>md5.c</in>
+        <in>msg.c</in>
+        <in>net_chan.c</in>
+        <in>net_ip.c</in>
+        <in>parse.c</in>
+        <in>puff.c</in>
+        <in>q_math.c</in>
+        <in>q_shared.c</in>
+        <in>unzip.c</in>
+        <in>vm.c</in>
+        <in>vm_interpreted.c</in>
+        <in>vm_none.c</in>
+        <in>vm_powerpc.c</in>
+        <in>vm_powerpc_asm.c</in>
+        <in>vm_sparc.c</in>
+        <in>vm_x86.c</in>
+        <in>vm_x86_64.c</in>
+        <in>vm_x86_64_assembler.c</in>
+      </df>
+      <df name="renderer">
+        <in>tr_animation.c</in>
+        <in>tr_backend.c</in>
+        <in>tr_bsp.c</in>
+        <in>tr_cmds.c</in>
+        <in>tr_curve.c</in>
+        <in>tr_flares.c</in>
+        <in>tr_font.c</in>
+        <in>tr_image.c</in>
+        <in>tr_image_bmp.c</in>
+        <in>tr_image_jpg.c</in>
+        <in>tr_image_pcx.c</in>
+        <in>tr_image_png.c</in>
+        <in>tr_image_tga.c</in>
+        <in>tr_init.c</in>
+        <in>tr_light.c</in>
+        <in>tr_main.c</in>
+        <in>tr_marks.c</in>
+        <in>tr_mesh.c</in>
+        <in>tr_model.c</in>
+        <in>tr_noise.c</in>
+        <in>tr_scene.c</in>
+        <in>tr_shade.c</in>
+        <in>tr_shade_calc.c</in>
+        <in>tr_shader.c</in>
+        <in>tr_shadows.c</in>
+        <in>tr_sky.c</in>
+        <in>tr_surface.c</in>
+        <in>tr_world.c</in>
+      </df>
+      <df name="sdl">
+        <in>sdl_gamma.c</in>
+        <in>sdl_glimp.c</in>
+        <in>sdl_input.c</in>
+        <in>sdl_snd.c</in>
+      </df>
+      <df name="server">
+        <in>sv_ccmds.c</in>
+        <in>sv_client.c</in>
+        <in>sv_game.c</in>
+        <in>sv_init.c</in>
+        <in>sv_main.c</in>
+        <in>sv_net_chan.c</in>
+        <in>sv_snapshot.c</in>
+        <in>sv_world.c</in>
+      </df>
+      <df name="sys">
+        <in>con_log.c</in>
+        <in>con_passive.c</in>
+        <in>con_tty.c</in>
+        <in>con_win32.c</in>
+        <in>sys_main.c</in>
+        <in>sys_osx.m</in>
+        <in>sys_unix.c</in>
+        <in>sys_win32.c</in>
+      </df>
+      <df name="tools">
+        <df name="asm">
+          <in>cmdlib.c</in>
+          <in>q3asm.c</in>
+        </df>
+        <df name="lcc">
+          <df name="cpp">
+            <in>cpp.c</in>
+            <in>eval.c</in>
+            <in>getopt.c</in>
+            <in>hideset.c</in>
+            <in>include.c</in>
+            <in>lex.c</in>
+            <in>macro.c</in>
+            <in>nlist.c</in>
+            <in>tokens.c</in>
+            <in>unix.c</in>
+          </df>
+          <df name="etc">
+            <in>bytecode.c</in>
+            <in>lcc.c</in>
+          </df>
+          <df name="lburg">
+            <in>gram.c</in>
+            <in>lburg.c</in>
+          </df>
+          <df name="src">
+            <in>alloc.c</in>
+            <in>bind.c</in>
+            <in>bytecode.c</in>
+            <in>dag.c</in>
+            <in>decl.c</in>
+            <in>enode.c</in>
+            <in>error.c</in>
+            <in>event.c</in>
+            <in>expr.c</in>
+            <in>gen.c</in>
+            <in>init.c</in>
+            <in>inits.c</in>
+            <in>input.c</in>
+            <in>lex.c</in>
+            <in>list.c</in>
+            <in>main.c</in>
+            <in>null.c</in>
+            <in>output.c</in>
+            <in>prof.c</in>
+            <in>profio.c</in>
+            <in>simp.c</in>
+            <in>stmt.c</in>
+            <in>string.c</in>
+            <in>sym.c</in>
+            <in>symbolic.c</in>
+            <in>trace.c</in>
+            <in>tree.c</in>
+            <in>types.c</in>
+          </df>
+        </df>
+      </df>
+      <df name="ui">
+        <in>ui_atoms.c</in>
+        <in>ui_gameinfo.c</in>
+        <in>ui_main.c</in>
+        <in>ui_shared.c</in>
+        <in>ui_syscalls.c</in>
+      </df>
+      <df name="zlib">
+        <in>adler32.c</in>
+        <in>crc32.c</in>
+        <in>inffast.c</in>
+        <in>inflate.c</in>
+        <in>inftrees.c</in>
+        <in>zutil.c</in>
+      </df>
+    </df>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
+  <sourceRootList>
+    <Elem>src</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>false</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <flagsDictionary>
+        <element flagsID="0" commonFlags="-fPIC -O3"/>
+      </flagsDictionary>
+      <codeAssistance>
+      </codeAssistance>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>.</buildCommandWorkingDir>
+          <buildCommand>${MAKE} -f Makefile</buildCommand>
+          <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
+          <executablePath></executablePath>
+          <cTool>
+            <standard>3</standard>
+          </cTool>
+        </makeTool>
+      </makefileType>
+      <folder path="0/cgame">
+        <cTool>
+          <incDir>
+            <pElem>src/jpeg-8c</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>CGAME</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>NO_GZIP</Elem>
+            <Elem>PRODUCT_VERSION="gpp1"</Elem>
+            <Elem>SVN_VERSION=""</Elem>
+            <Elem>USE_ICON</Elem>
+            <Elem>USE_INTERNAL_JPEG</Elem>
+            <Elem>USE_LOCAL_HEADERS</Elem>
+          </preprocessorList>
+        </cTool>
+      </folder>
+      <folder path="0/client">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </folder>
+      <folder path="0/jpeg-8c">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </folder>
+      <folder path="0/libspeex">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </folder>
+      <folder path="0/master">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </folder>
+      <folder path="0/null">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </folder>
+      <folder path="0/renderer">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </folder>
+      <folder path="0/sdl">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </folder>
+      <folder path="0/server">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </folder>
+      <folder path="0/sys">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </folder>
+      <folder path="0/tools">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </folder>
+      <folder path="0/zlib">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </folder>
+      <item path="src/cgame/cg_animation.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_animmapobj.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_attachment.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_buildable.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_consolecmds.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_draw.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_drawtools.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_ents.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_event.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_main.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_marks.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_particles.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_players.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_playerstate.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_predict.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_scanner.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_servercmds.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_snapshot.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_syscalls.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_trails.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_tutorial.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_view.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/cgame/cg_weapons.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/client/cl_avi.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/cl_cgame.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/cl_cin.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/cl_console.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/cl_curl.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/cl_input.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/cl_keys.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/cl_main.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/cl_net_chan.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/cl_parse.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/cl_scrn.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/cl_ui.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/libmumblelink.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/qal.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/snd_adpcm.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/snd_codec.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/snd_codec_ogg.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/snd_codec_wav.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/snd_dma.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/snd_main.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/snd_mem.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/snd_mix.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/snd_openal.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/client/snd_wavelet.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/game/bg_alloc.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
+            <pElem>src/jpeg-8c</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>CGAME</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>NO_GZIP</Elem>
+            <Elem>PRODUCT_VERSION="gpp1"</Elem>
+            <Elem>SVN_VERSION=""</Elem>
+            <Elem>USE_ICON</Elem>
+            <Elem>USE_INTERNAL_JPEG</Elem>
+            <Elem>USE_LOCAL_HEADERS</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/bg_lib.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
+            <pElem>src/jpeg-8c</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>CGAME</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>NO_GZIP</Elem>
+            <Elem>PRODUCT_VERSION="gpp1"</Elem>
+            <Elem>SVN_VERSION=""</Elem>
+            <Elem>USE_ICON</Elem>
+            <Elem>USE_INTERNAL_JPEG</Elem>
+            <Elem>USE_LOCAL_HEADERS</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/bg_misc.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
+            <pElem>src/jpeg-8c</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>CGAME</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>NO_GZIP</Elem>
+            <Elem>PRODUCT_VERSION="gpp1"</Elem>
+            <Elem>SVN_VERSION=""</Elem>
+            <Elem>USE_ICON</Elem>
+            <Elem>USE_INTERNAL_JPEG</Elem>
+            <Elem>USE_LOCAL_HEADERS</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/bg_pmove.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
+            <pElem>src/jpeg-8c</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>CGAME</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>NO_GZIP</Elem>
+            <Elem>PRODUCT_VERSION="gpp1"</Elem>
+            <Elem>SVN_VERSION=""</Elem>
+            <Elem>USE_ICON</Elem>
+            <Elem>USE_INTERNAL_JPEG</Elem>
+            <Elem>USE_LOCAL_HEADERS</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/bg_slidemove.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
+            <pElem>src/jpeg-8c</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>CGAME</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>NO_GZIP</Elem>
+            <Elem>PRODUCT_VERSION="gpp1"</Elem>
+            <Elem>SVN_VERSION=""</Elem>
+            <Elem>USE_ICON</Elem>
+            <Elem>USE_INTERNAL_JPEG</Elem>
+            <Elem>USE_LOCAL_HEADERS</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/bg_voice.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
+            <pElem>src/jpeg-8c</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>CGAME</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>NO_GZIP</Elem>
+            <Elem>PRODUCT_VERSION="gpp1"</Elem>
+            <Elem>SVN_VERSION=""</Elem>
+            <Elem>USE_ICON</Elem>
+            <Elem>USE_INTERNAL_JPEG</Elem>
+            <Elem>USE_LOCAL_HEADERS</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_active.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_admin.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_bot.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_bot_alien.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_bot_common.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/game/g_bot_control.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/game/g_bot_human.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_bot_nav.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_bot_say.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/game/g_bot_util.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_buildable.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_client.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_cmds.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_combat.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_main.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
+            <pElem>src/jpeg-8c</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>GAME</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>NO_GZIP</Elem>
+            <Elem>PRODUCT_VERSION="gpp1"</Elem>
+            <Elem>SVN_VERSION=""</Elem>
+            <Elem>USE_ICON</Elem>
+            <Elem>USE_INTERNAL_JPEG</Elem>
+            <Elem>USE_LOCAL_HEADERS</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_maprotation.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_misc.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_missile.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_mover.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_namelog.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_physics.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_session.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_spawn.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_svcmds.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_syscalls.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_target.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_team.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_trigger.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_utils.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/game/g_weapon.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/jpeg-8c/jaricom.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jcapimin.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jcapistd.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jcarith.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jccoefct.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jccolor.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jcdctmgr.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jchuff.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jcinit.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jcmainct.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jcmarker.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jcmaster.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jcomapi.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jcparam.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jcprepct.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jcsample.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jctrans.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jdapimin.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jdapistd.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jdarith.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jdatadst.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jdatasrc.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jdcoefct.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jdcolor.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jddctmgr.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jdhuff.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jdinput.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jdmainct.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jdmarker.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jdmaster.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jdmerge.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jdpostct.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jdsample.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jdtrans.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jerror.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jfdctflt.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jfdctfst.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jfdctint.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jidctflt.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jidctfst.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jidctint.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jmemmgr.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jmemnobs.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jquant1.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jquant2.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/jpeg-8c/jutils.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/bits.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/buffer.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/cb_search.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/echo_diagnostic.m" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/exc_10_16_table.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/exc_10_32_table.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/exc_20_32_table.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/exc_5_256_table.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/exc_5_64_table.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/exc_8_128_table.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/fftwrap.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/filterbank.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/filters.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/gain_table.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/gain_table_lbr.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/hexc_10_32_table.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/hexc_table.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/high_lsp_tables.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/jitter.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/kiss_fft.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/kiss_fftr.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/lpc.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/lsp.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/lsp_tables_nb.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/ltp.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/mdf.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/modes.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/modes_wb.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/nb_celp.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/preprocess.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/quant_lsp.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/resample.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/sb_celp.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/smallft.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/speex.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/speex_callbacks.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/speex_header.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/stereo.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/testdenoise.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/testecho.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/testenc.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/testenc_uwb.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/testenc_wb.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/vbr.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/vq.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/libspeex/window.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/master/master.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/master/messages.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/master/servers.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/master/stats.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/null/mac_net.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/null/null_client.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/null/null_glimp.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/null/null_input.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/null/null_main.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/null/null_net.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/null/null_snddma.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/qcommon/cm_load.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/cm_patch.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/cm_polylib.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/cm_test.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/cm_trace.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/cmd.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/common.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/cvar.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/files.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/huffman.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/ioapi.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/md4.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/md5.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/msg.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/net_chan.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/net_ip.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/parse.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/puff.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/q_math.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
+            <pElem>src/jpeg-8c</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>NDEBUG</Elem>
+            <Elem>NO_GZIP</Elem>
+            <Elem>PRODUCT_VERSION="gpp1"</Elem>
+            <Elem>SVN_VERSION=""</Elem>
+            <Elem>USE_ICON</Elem>
+            <Elem>USE_INTERNAL_JPEG</Elem>
+            <Elem>USE_LOCAL_HEADERS</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/q_shared.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
+            <pElem>src/jpeg-8c</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>NDEBUG</Elem>
+            <Elem>NO_GZIP</Elem>
+            <Elem>PRODUCT_VERSION="gpp1"</Elem>
+            <Elem>SVN_VERSION=""</Elem>
+            <Elem>USE_ICON</Elem>
+            <Elem>USE_INTERNAL_JPEG</Elem>
+            <Elem>USE_LOCAL_HEADERS</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/unzip.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/vm.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/vm_interpreted.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/vm_none.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/vm_powerpc.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/vm_powerpc_asm.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/vm_sparc.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/vm_x86.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/vm_x86_64.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/qcommon/vm_x86_64_assembler.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/renderer/tr_animation.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_backend.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_bsp.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_cmds.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_curve.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_flares.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_font.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_image.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_image_bmp.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_image_jpg.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_image_pcx.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_image_png.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_image_tga.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_init.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_light.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_main.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_marks.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_mesh.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_model.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_noise.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_scene.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_shade.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_shade_calc.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_shader.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_shadows.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_sky.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_surface.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/renderer/tr_world.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/sdl/sdl_gamma.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/sdl/sdl_glimp.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/sdl/sdl_input.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/sdl/sdl_snd.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/server/sv_ccmds.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/server/sv_client.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/server/sv_game.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/server/sv_init.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/server/sv_main.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/server/sv_net_chan.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/server/sv_snapshot.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/server/sv_world.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/sys/con_log.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/sys/con_passive.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/sys/con_tty.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/sys/con_win32.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/sys/sys_main.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/sys/sys_osx.m" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/sys/sys_unix.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/sys/sys_win32.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/asm/cmdlib.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/asm/q3asm.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/cpp/cpp.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/cpp/eval.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/cpp/getopt.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/cpp/hideset.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/cpp/include.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/cpp/lex.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/cpp/macro.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/cpp/nlist.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/cpp/tokens.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/cpp/unix.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/etc/bytecode.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/etc/lcc.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/lburg/gram.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/lburg/lburg.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/alloc.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/bind.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/bytecode.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/dag.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/decl.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/enode.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/error.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/event.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/expr.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/gen.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/init.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/inits.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/input.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/lex.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/list.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/main.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/null.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/output.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/prof.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/profio.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/simp.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/stmt.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/string.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/sym.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/symbolic.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/trace.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/tree.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/tools/lcc/src/types.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/ui/ui_atoms.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/ui/ui_gameinfo.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/ui/ui_main.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/ui/ui_shared.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="0">
+          <incDir>
+            <pElem>src/jpeg-8c</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>NDEBUG</Elem>
+            <Elem>NO_GZIP</Elem>
+            <Elem>PRODUCT_VERSION="gpp1"</Elem>
+            <Elem>SVN_VERSION=""</Elem>
+            <Elem>UI</Elem>
+            <Elem>USE_ICON</Elem>
+            <Elem>USE_INTERNAL_JPEG</Elem>
+            <Elem>USE_LOCAL_HEADERS</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/ui/ui_syscalls.c" ex="false" tool="0" flavor2="3">
+        <cTool>
+          <incDir>
+            <pElem>src/tools/lcc/src</pElem>
+            <pElem>src/tools/lcc/lburg</pElem>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>SYSTEM=""</Elem>
+            <Elem>TEMPDIR="/tmp"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="src/zlib/adler32.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/zlib/crc32.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/zlib/inffast.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/zlib/inflate.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/zlib/inftrees.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="src/zlib/zutil.c" ex="false" tool="0" flavor2="3">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

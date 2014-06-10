@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // big ugly global buffer for use with buffered printing of long outputs
 static char g_bfb[ 32000 ];
 
-// note: list ordered alphabetically
+// note: list ordered alphabetically !IMPORTANT (if not, it will fail!)
 g_admin_cmd_t g_admin_cmds[ ] =
   {
     {"adjustban", G_admin_adjustban, qfalse, "ban",
@@ -78,12 +78,23 @@ g_admin_cmd_t g_admin_cmds[ ] =
     //ROTAX
     {"bot", G_admin_bot, qfalse, "bot",
       "Add or delete bot(s)",
-      "[^3add/del^7] [name] [^5aliens/humans^7] (skill)"
+      "[^3add/del^7] [name] [^5aliens/humans^7]"
     },
     
     {"botcmd", G_admin_botcmd, qfalse, "botcmd",
       "Change bot behavior.",
-      "[^3name^7] [^5regular/idle/standground/followattack/followidle | skill | give | kill ^7]"
+      "[botname] [command] [value]"
+    },
+	
+	//LEPE
+	{"botdbg", G_admin_botdbg, qfalse, "botdbg",
+		"Debug bot information",
+		"[^3name^7] [^5think | state | navstate | path | profile | general | main | admin | active | alien | human | control | util | common | say | nav ] ^7[ normal | verbose | quiet | off ]"
+	},
+	
+    {"botjoin", G_admin_botjoin, qfalse, "botjoin",
+      "Add or delete random bots",
+      "[^5aliens/humans/both^7] [-#|+#]"
     },
 
     {"builder", G_admin_builder, qtrue, "builder",
@@ -105,6 +116,12 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "load a map (and optionally force layout)",
       "[^3mapname^7] (^5layout^7)"
     },
+	
+	//LEPE
+	{"dbgcmd", G_admin_dbgcmd, qfalse, "dbgcmd",
+		"Debug functions",
+		"[findpath]"
+	},
 
     {"denybuild", G_admin_denybuild, qfalse, "denybuild",
       "take away a player's ability to build",
@@ -113,9 +130,9 @@ g_admin_cmd_t g_admin_cmds[ ] =
     
     {"dnodes", G_drawnodes, qfalse, "drawnodes",
       "turn nodes on / off",
-      ""
+      "[ aliens | humans | off ]"
     },
-
+    
     {"kick", G_admin_kick, qfalse, "kick",
       "kick a player with an optional reason",
       "[^3name|slot#^7] (^5reason^7)"
@@ -155,12 +172,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "go to the next map in the cycle",
       ""
     },
-    
-    {"rnodes", G_reloadnodes, qfalse, "redrawnodes",
-      "Reload nodes from file",
-      ""
-    },
-
+	
     {"passvote", G_admin_endvote, qfalse, "passvote",
       "pass a vote currently taking place",
       "(^5a|h^7)"
@@ -178,6 +190,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
 
     {"readconfig", G_admin_readconfig, qfalse, "readconfig",
       "reloads the admin config file and refreshes permission flags",
+      ""
+    },
+
+    {"register", G_admin_register, qfalse, "register",
+      "register your name",
       ""
     },
 
@@ -642,7 +659,7 @@ static void admin_default_levels( void )
   l->level = level++;
   Q_strncpyz( l->name, "^4Unknown Player", sizeof( l->name ) );
   Q_strncpyz( l->flags,
-    "listplayers admintest adminhelp time",
+    "listplayers admintest adminhelp time register",
     sizeof( l->flags ) );
 
   l = l->next = BG_Alloc( sizeof( g_admin_level_t ) );
@@ -740,7 +757,7 @@ static void admin_log_abort( void )
 static void admin_log_end( const qboolean ok )
 {
   if( adminLog[ 0 ] )
-    G_LogPrintf( "AdminExec: %s: %s\n", ok ? "ok" : "fail", adminLog );
+    if(!ok) G_LogPrintf( "AdminExec Failed: %s\n", adminLog );
   admin_log_abort( );
 }
 
@@ -2280,7 +2297,7 @@ qboolean G_admin_listplayers( gentity_t *ent )
         colorlen += 2;
     }
 
-    ADMBP( va( "%2i ^%c%c^7 %-2i^2%c^7 %*s^7 ^1%c%c^7 %s^7 %s%s%s\n",
+    ADMBP( va( "%2i ^%c%c^7 %-2i^2%c^7 %*s^7 ^1%c%c^7 %5i %s^7 %s%s%s\n",
               i,
               c,
               t,
@@ -2290,6 +2307,7 @@ qboolean G_admin_listplayers( gentity_t *ent )
               lname,
               muted,
               denied,
+			  p->ps.persistant[ PERS_SCORE ], //LEPE: player's score
               p->pers.netname,
               ( registeredname ) ? "(a.k.a. " : "",
               ( registeredname ) ? registeredname : "",
@@ -3310,22 +3328,14 @@ qboolean G_admin_bot( gentity_t *ent ) {
         char name2_s[ MAX_NAME_LENGTH ];
         char team[10];
         team_t team_int;
-        char skill[2];
-        int skill_int;
         qboolean success = qfalse;
-        int i, j;
+        int j;
         namelog_t *namelog;
-
-        //char s2[ MAX_NAME_LENGTH ];
-        //char n2[ MAX_NAME_LENGTH ];
-        //int logmatch = -1, logmatches = 0;
-        //int i, j;
-        //qboolean exactmatch = qfalse;
 
         minargc = 3;
         if( trap_Argc() < minargc )     {
                 ADMP( "^7Please have at least command and name.\n" );
-                ADMP( "^3!bot: ^7usage: !bot [add/del] [name] (team) (skill)\n" );
+                ADMP( "^3!bot: ^7usage: !bot [add/del] [name] (team) \n" );
                 return qfalse;
         }
 
@@ -3334,11 +3344,10 @@ qboolean G_admin_bot( gentity_t *ent ) {
         G_SanitiseString( name, name_s, sizeof(name_s) );
 
         if(!Q_stricmp(command,"add")) {
-                // add [name] [team] (skill)
                 minargc = 4;
                 if( trap_Argc() < minargc )     {
                         ADMP( "^7Please have at least name and team.\n" );
-                        ADMP( "^3!bot: ^7usage: !bot [add/del] [name] [humans/aliens] (skill)\n" );
+                        ADMP( "^3!bot: ^7usage: !bot [add/del] [name] [humans/aliens]\n" );
                         return qfalse;
                 }
 
@@ -3350,40 +3359,115 @@ qboolean G_admin_bot( gentity_t *ent ) {
                         team_int = TEAM_ALIENS;
                 } else {
                         ADMP( "^7Invalid bot team.\n" );
-                        ADMP( "^3!bot: ^7usage: !bot add [name] [humans/aliens] (skill)\n" );
+                        ADMP( "^3!bot: ^7usage: !bot add [name] [humans/aliens]\n" );
                         return qfalse;
                 }
 
-                minargc = 5;
-                if(trap_Argc() < minargc) {
-                        skill_int = 0;
-                } else {
-                        trap_Argv( 4, skill, sizeof( skill ) );
-                        skill_int = atoi(skill);
-                }
-
                 // got name, team_int and skill_int
-                G_BotAdd(name, team_int, skill_int, -1);
+                G_BotAdd(name, team_int);
                 return qtrue;
         } else if(!Q_stricmp(command,"del")) {
                 // del [name]
                 success = qfalse;
+				
+                trap_Argv( 3, team, sizeof( team ) );
 //               for( i = 0; i < MAX_NAMELOG_NAMES && namelog[ i ];i++ ) {
-                 for( namelog = level.namelogs; namelog; namelog = namelog->next )
+                 for( namelog = level.namelogs; namelog; namelog = namelog->next ) {
                         if( namelog->slot >= 0 ) {
                                 for( j = 0; j < MAX_NAMELOG_NAMES && namelog->name[ j ][ 0 ]; j++ ) {
                                         G_SanitiseString(namelog->name[ j ], name2_s, sizeof(name2_s) );
-                                        if( strstr( name2_s, name_s ) ) {
-                                                G_BotDel(namelog->slot);
-                                                success = qtrue;
-                                        }
-                                }
-                        }
-                }
-
+										if(!Q_stricmp(team,"except")) { 
+											if(!strstr( name2_s, name_s )) {
+													G_BotDel(namelog->slot);
+													success = qtrue;
+											}
+										} else {
+											if(strstr( name2_s, name_s )) {
+													G_BotDel(namelog->slot);
+													success = qtrue;
+											}
+										}
+                        		}
+                		}
+        		}
                 return success;
-                //ADMP( "delete not implemented yet\n" );
-                //return qfalse;
+		}
+		return qfalse;
+}
+
+qboolean G_admin_botjoin( gentity_t *ent ) {
+	//botjoin [humans|aliens] +/-#
+        char team[10];
+        char qty[ 3 ];
+		int qty_int, i, minargc;
+        team_t team_int;
+		int botsinteam;
+		int reservedSlots = trap_Cvar_VariableIntegerValue( "sv_privateclients" );
+		int totalbots = level.humanBots + level.alienBots;
+		
+        minargc = 2;
+        if( trap_Argc() < minargc )     {
+			  //LEPE: start bots
+			  G_DeployBots( );
+              return qtrue;
+        }
+
+        trap_Argv( 1, team, sizeof( team ) );
+        trap_Argv( 2, qty, sizeof( qty ) );
+
+		if(!Q_stricmp(team,"humans")) {
+				team_int = TEAM_HUMANS;
+				botsinteam = level.humanBots;
+		} else if(!Q_stricmp(team,"aliens")) {
+				team_int = TEAM_ALIENS;
+				botsinteam = level.alienBots;
+		} else if(!Q_stricmp(team,"both")) {
+				team_int = TEAM_NONE;
+				botsinteam = level.alienBots > level.humanBots ? level.alienBots : level.humanBots;
+		} else {
+				ADMP( "^7Invalid bot team.\n" );
+                ADMP( "^3!botjoin: ^7usage: !botjoin (team) (qty)\n" );
+				return qfalse;
+		}
+
+		qty_int = atoi(qty);
+		if(qty_int > 0) {
+			//if we are about to exceed our capacity, limit it
+			if(qty_int > reservedSlots - totalbots) {
+				qty_int = reservedSlots - totalbots;
+			}
+			for(i = 0; i < qty_int; i++) {
+				if(team_int == TEAM_NONE) {
+	        		G_BotAddRandom(TEAM_HUMANS);
+	        		G_BotAddRandom(TEAM_ALIENS);
+				} else {
+	        		G_BotAddRandom(team_int);
+				}
+			}
+			if(team_int == TEAM_ALIENS) {
+				level.extraAlienBots += qty_int;
+			} else {
+				level.extraHumanBots += qty_int;
+			}
+		} else if(qty_int < 0) {
+			if(qty_int > botsinteam) {
+				qty_int = botsinteam;
+			}
+			for(i = 0; i < abs(qty_int); i++) {
+				if(team_int == TEAM_NONE) {
+	        		G_BotDelRandom(TEAM_HUMANS);
+	        		G_BotDelRandom(TEAM_ALIENS);
+				} else {
+        			G_BotDelRandom(team_int);
+				}
+			}
+			if(team_int == TEAM_ALIENS) {
+				level.extraAlienBots += qty_int;
+			} else {
+				level.extraHumanBots += qty_int;
+			}
+		}
+        return qtrue;
 }
 
 qboolean G_admin_botcmd( gentity_t *ent ) {
@@ -3391,9 +3475,10 @@ qboolean G_admin_botcmd( gentity_t *ent ) {
         char name[ MAX_NAME_LENGTH ];
         char name_s[ MAX_NAME_LENGTH ];
         char name2_s[ MAX_NAME_LENGTH ];
-        char value[ 100 ];
+        char value[ 5 ];
+        char value2[ 5 ];
         char command[ 32 ];
-        int i, j;
+        int j;
         qboolean success = qfalse;
         namelog_t *namelog;
 
@@ -3407,45 +3492,261 @@ qboolean G_admin_botcmd( gentity_t *ent ) {
         trap_Argv( 1, name, sizeof( name ) );
         trap_Argv( 2, command, sizeof( command ) );
         trap_Argv( 3, value, sizeof( value ) );
-        trap_SendServerCommand(ent - g_entities, va("print \"%s %s %s\n\"", name, command, value ) );
+        trap_Argv( 4, value2, sizeof( value2 ) );
+        trap_SendServerCommand(ent - g_entities, va("print \"%s %s %s %s\n\"", name, command, value, value2 ) );
         G_SanitiseString( name, name_s, sizeof(name_s) );
 
         success = qfalse;
-        //for( i = 0; i < MAX_NAMELOG_NAMES && namelog[ i ];i++ ) {
-          for( namelog = level.namelogs; namelog; namelog = namelog->next )
+          for( namelog = level.namelogs; namelog; namelog = namelog->next ) {
                 if( namelog->slot >= 0 ) {
                         for( j = 0; j < MAX_NAMELOG_NAMES && namelog->name[ j ][ 0 ]; j++ ) {
                                 G_SanitiseString(namelog->name[ j ], name2_s, sizeof(name2_s) );
                                 if( strstr( name2_s, name_s ) ) {
-                                        G_BotCmd(ent, namelog->slot,command, atoi(value) );
+                                        G_BotCmd(namelog->slot, command, atoi(value), atoi(value2) );
                                         success = qtrue;
                                 }
                         }
                 }
-        
-
+		  }
         return success;
 
 }
 
-qboolean G_reloadnodes( gentity_t *ent )
+qboolean G_admin_dbgcmd( gentity_t *ent )
 {
-    ADMP( "^3Reloading Paths\n" );
-    G_PathLoad();
+    int minargc;
+
+    char command[ 32 ];
+    char value1[ 3 ];
+    char value2[ 3 ];
+	
+    minargc = 3;
+    if( trap_Argc() < minargc )     {
+        ADMP( "^3!botcmd: ^7usage: !dbgcmd [command] [value1] [value2]\n" );
+        return qfalse;
+    }
+	trap_Argv( 1, command, sizeof( command ) );
+	trap_Argv( 2, value1, sizeof( value1 ) );
+	trap_Argv( 3, value2, sizeof( value2 ) );
+	trap_SendServerCommand(ent - g_entities, va("print \"%s %s %s\n\"", command, value1, value2 ) );
+	
+	if( !Q_stricmp( command, "findpath" ) ) { 
+		int i, path[ BOT_FIND_PATH_MAX ];
+		
+		path[ 0 ] = atoi(value1);
+		//reset possible path to -1
+		for(i = 1; i < BOT_FIND_PATH_MAX; i++) {
+			path[ i ] = -1;
+		}
+		if(botFindPath( path, atoi(value2), 1 )) {
+			for(i = 1; i < BOT_FIND_PATH_MAX; i++) {
+				if(path[i] > -1) {
+					G_Printf("%d : %d\n",i,path[i]);
+				}
+			}
+		} else {
+			G_Printf("No path found!\n");
+		}
+	}
     return qtrue;
+}
+
+qboolean G_admin_botdbg( gentity_t *ent )
+{
+	int minargc;
+	int flag;
+    int j;
+	char name[ MAX_NAME_LENGTH ];
+	char name_s[ MAX_NAME_LENGTH ];
+	char name2_s[ MAX_NAME_LENGTH ];
+	char type[ MAX_NAME_LENGTH ];
+	char type_s[ MAX_NAME_LENGTH ];
+	char verb[ MAX_NAME_LENGTH ];
+	char verb_s[ MAX_NAME_LENGTH ];
+  	gentity_t *botent;
+	qboolean turnoff = qfalse;
+	qboolean success = qfalse;
+	qboolean read	 = qfalse;
+    namelog_t *namelog;
+
+	minargc = 1;
+	if( trap_Argc() < minargc )     {
+			ADMP( "^7usage: !botdbg [botname] type [verbosity=normal]\n" );
+			return qfalse;
+	}
+    trap_Argv( 1, name, sizeof( name ) );
+	trap_Argv( 2, type, sizeof( type) );
+	trap_Argv( 3, verb , sizeof( verb ) );
+	trap_SendServerCommand(ent - g_entities, va("print \"%s %s\n\"", type, verb ) );
+	G_SanitiseString( type, type_s, sizeof(type_s) );
+	G_SanitiseString( verb, verb_s, sizeof(verb_s) );
+    G_SanitiseString( name, name_s, sizeof(name_s) );
+	
+	turnoff  = !Q_stricmp( verb_s, "off" );
+	success = qfalse;
+		   if( !Q_stricmp( type_s, "think" ) ) { 	flag = BOT_DEBUG_THINK;
+	} else if( !Q_stricmp( type_s, "state" ) ) { 	flag = BOT_DEBUG_STATE;
+	} else if( !Q_stricmp( type_s, "navstate" ) ) { flag = BOT_DEBUG_NAVSTATE;
+	} else if( !Q_stricmp( type_s, "path" ) ) { 	flag = BOT_DEBUG_PATH;
+	} else if( !Q_stricmp( type_s, "profile" ) ) { 	flag = BOT_DEBUG_PROFILE;
+	} else if( !Q_stricmp( type_s, "target" ) ) { 	flag = BOT_DEBUG_TARGET;
+	} else if( !Q_stricmp( type_s, "general" ) ) { 	flag = BOT_DEBUG_GENERAL;
+	} else if( !Q_stricmp( type_s, "main" ) ) { 	flag = BOT_DEBUG_MAIN;
+	} else if( !Q_stricmp( type_s, "admin" ) ) { 	flag = BOT_DEBUG_ADMIN;
+	} else if( !Q_stricmp( type_s, "active" ) ) { 	flag = BOT_DEBUG_ACTIVE;
+	} else if( !Q_stricmp( type_s, "alien" ) ) { 	flag = BOT_DEBUG_ALIEN;
+	} else if( !Q_stricmp( type_s, "human" ) ) { 	flag = BOT_DEBUG_HUMAN;
+	} else if( !Q_stricmp( type_s, "control" ) ) { 	flag = BOT_DEBUG_CONTROL;
+	} else if( !Q_stricmp( type_s, "util" ) ) { 	flag = BOT_DEBUG_UTIL;
+	} else if( !Q_stricmp( type_s, "common" ) ) { 	flag = BOT_DEBUG_COMMON;
+	} else if( !Q_stricmp( type_s, "say" ) ) { 		flag = BOT_DEBUG_SAY;
+	} else if( !Q_stricmp( type_s, "nav" ) ) {  	flag = BOT_DEBUG_NAV;
+	} else if( !Q_stricmp( type_s, "all" ) ) {  	flag = BOT_DEBUG_ALL;
+	} else if( !Q_stricmp( type_s, "read" ) ) {  	read = qtrue;
+	} else {
+		ADMP( "^1Unknown debug type\n");
+		return qfalse;
+	}
+	for( namelog = level.namelogs; namelog; namelog = namelog->next ) {
+		if( namelog->slot >= 0 ) {
+			for( j = 0; j < MAX_NAMELOG_NAMES && namelog->name[ j ][ 0 ]; j++ ) {
+				G_SanitiseString(namelog->name[ j ], name2_s, sizeof(name2_s) );
+				if( strstr( name2_s, name_s ) ) {
+					botent = &g_entities[namelog->slot];
+					if(botent->r.svFlags & SVF_BOT) {
+						botent->bot->debug = turnoff ? qfalse : qtrue;
+						success = qtrue;
+						if(read) {  	
+							if( !Q_stricmp( verb_s, "state") ) {
+								ADMP(va("[%s] State: %d\n", name2_s, botent->bot->state));
+							} else if( !Q_stricmp( verb_s, "navstate") ) {
+								ADMP(va("[%s] NavState: %d\n", name2_s, botent->bot->path.state));
+							} else if( !Q_stricmp( verb_s, "enemy") ) {
+								if(botent->bot->Enemy) {
+									ADMP(va("[%s] Enemy: %s (Visible: %d)\n", 
+											name2_s, 
+											botent->bot->Enemy->client ? botent->bot->Enemy->client->pers.netname : botent->bot->Enemy->classname,
+											(int)G_Visible(botent, botent->bot->Enemy, CONTENTS_SOLID)
+											));
+								} else {
+									ADMP(va("[%s] Enemy: NONE\n", name2_s));
+								}
+							} else if( !Q_stricmp( verb_s, "struct") ) {
+								if(botent->bot->Struct) {
+									ADMP(va("[%s] Struct: %s (Visible: %d)\n", 
+											name2_s, 
+											botent->bot->Struct->classname,
+											(int)G_Visible(botent, botent->bot->Struct, CONTENTS_SOLID)
+											));
+								} else {
+									ADMP(va("[%s] Struct: NONE\n", name2_s));
+								}
+							} else if( !Q_stricmp( verb_s, "friend") ) {
+								if(botent->bot->Friend) {
+									ADMP(va("[%s] Friend: %s (Visible: %d)\n", 
+											name2_s, 
+											botent->bot->Friend->client->pers.netname,
+											(int)G_Visible(botent, botent->bot->Friend, CONTENTS_SOLID)
+											));
+								} else {
+									ADMP(va("[%s] Friend: NONE\n", name2_s));
+								}
+							} else if( !Q_stricmp( verb_s, "xyz") ) {
+								ADMP(va("[%s] XYZ: %f2,%f2,%f2\n", name2_s, botent->s.pos.trBase[0],botent->s.pos.trBase[1],botent->s.pos.trBase[2]));
+							} else if( !Q_stricmp( verb_s, "angles") ) {
+								ADMP(va("[%s] Angles: Pitch %f2, Yaw %f2\n", name2_s, SHORT2ANGLE(botent->client->ps.delta_angles[ PITCH ]), 
+																			 SHORT2ANGLE(botent->client->ps.delta_angles[ YAW ])));
+							} else if( !Q_stricmp( verb_s, "think") ) {
+								ADMP( va("[%s] THINK: LVL1:%d, LVL2:%d, LVL3:%d, MAX:%d \n",  name2_s, 
+										botent->bot->think.state[ THINK_LEVEL_1 ],
+										botent->bot->think.state[ THINK_LEVEL_2 ],
+										botent->bot->think.state[ THINK_LEVEL_3 ],
+										botent->bot->think.state[ THINK_LEVEL_MAX ])
+										);
+							} else if( !Q_stricmp( verb_s, "targetnode") ) {
+								ADMP(va("[%s] Target Node: %d\n", name2_s, botent->bot->path.targetNode));
+							} else if( !Q_stricmp( verb_s, "health") ) {
+								ADMP(va("[%s] Health PCT : %d\n", name2_s, botGetHealthPct( botent )));
+							} else {
+								ADMP( "^1Unknown read type\n");
+								return qfalse;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	if(!read) {
+		if(turnoff) {
+			ADMP( "^3Disabling Debug\n" );
+			g_bot_debug_type.integer &= ~flag;
+			if(ent) {
+				ent->client->pers.botDebugTypeFlg &= ~flag;
+			}
+		} else {
+			ADMP( "^3Enabling Debug\n" );
+			g_bot_debug_type.integer |= flag;
+			if(ent) {
+				ent->client->pers.botDebugTypeFlg |= flag;
+			}
+			//Verbosity
+			if( !Q_stricmp( verb_s, "verbose" ) ) {	
+				g_bot_debug_verbosity.integer = BOT_VERB_DETAIL;
+			} else if( !Q_stricmp( verb_s, "quiet" ) ) {	
+				g_bot_debug_verbosity.integer = BOT_VERB_IMPORTANT;
+			} else { //normal
+				g_bot_debug_verbosity.integer = BOT_VERB_NORMAL;
+			}
+			if(ent) {
+				ent->client->pers.botDebugVerbosityVal = g_bot_debug_verbosity.integer;
+			}
+		}
+	}
+	return success;
 }
 
 qboolean G_drawnodes( gentity_t *ent )
 {
-    if(level.drawpath == qtrue) {
-        ADMP( "^1Hiding Paths\n" );
-        G_EraseNodes( ent );
-        level.drawpath = qfalse;
-    } else {
-        ADMP( "^2Drawing Paths\n" );
-        G_DrawNodes();
-        level.drawpath = qtrue;
-    }
+	char command[ MAX_ADMIN_CMD_LEN ];
+	team_t team = ent->client ? ent->client->pers.teamSelection : TEAM_NONE;
+	
+	trap_Argv( 1, command, sizeof( command ) );
+	if(team == TEAM_NONE) {
+		if(!Q_stricmp( command, "off" )) {
+			team = TEAM_NONE;
+		} else if(!Q_stricmp( command, "aliens" )) {
+			team = TEAM_ALIENS;
+		} else if(!Q_stricmp( command, "humans" )) {
+			team = TEAM_HUMANS;
+		} else {
+			ADMP( va( "^3%s: ^7usage: %s [aliens|humans|off]\n", command, command ) );
+			return qfalse;
+		}
+	} else if(!Q_stricmp( command, "off" )) {
+		team = TEAM_NONE;
+	}
+    level.teampath = team;
+	switch(team) {
+		default:
+		case TEAM_NONE:
+			level.drawpath = qfalse;
+			ADMP( "^1Hiding Paths\n" );
+			G_EraseNodes();
+			break;
+		case TEAM_ALIENS:
+			G_EraseNodes();
+			level.drawpath = qtrue;
+			ADMP( "^2Drawing Paths for aliens\n" );
+			G_DrawNodes();
+			break;
+		case TEAM_HUMANS:
+			G_EraseNodes();
+			level.drawpath = qtrue;
+			ADMP( "^2Drawing Paths for humans\n" );
+			G_DrawNodes();
+			break;
+	}
     return qtrue;
 }
 
@@ -3473,4 +3774,41 @@ void nodethink(gentity_t *ent)
 	VectorCopy(pos,ent->r.currentOrigin );
 }
 
+/*
+================
+G_admin_register
+================
+*/
+qboolean G_admin_register( gentity_t *ent )
+{
+  if( !ent )
+    return qfalse;
 
+  if( !ent->client->pers.admin || !ent->client->pers.admin->level )
+  {
+    g_admin_admin_t *a;
+    
+    for( a = g_admin_admins; a && a->next; a = a->next );
+    
+    if( a )
+      a = a->next = BG_Alloc( sizeof( g_admin_admin_t ) );
+    else
+      a = g_admin_admins = BG_Alloc( sizeof( g_admin_admin_t ) );
+    
+    ent->client->pers.admin = a;
+    Q_strncpyz( a->guid, ent->client->pers.guid, sizeof( a->guid ) );
+    a->level = g_adminRegisterLevel.integer;
+    
+    AP( va( "print \"^3register: ^7'%s^7' is now LEVEL 1\n\"", ent->client->pers.netname ) );
+  }
+  else
+    ADMP( "^3register: ^7you are now LEVEL 1 (read -Manual- for commands you can use now)\n" );
+  
+  Q_strncpyz( ent->client->pers.admin->name, 
+              ent->client->pers.netname, 
+              sizeof( ent->client->pers.admin->name ) );
+
+  admin_writeconfig( );
+
+  return qtrue;
+}

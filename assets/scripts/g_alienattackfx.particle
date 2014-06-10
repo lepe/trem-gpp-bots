@@ -1,0 +1,135 @@
+// Basilisk Gas
+
+models/weapons/level1upg/muzzlePS
+{
+  ejector
+  {
+    particle
+    {
+      shader sync gas01 gas02 gas03 gas04 gas05 gas06 gas07 gas08 gas09 gas10 gas11 gas12 gas13 gas14 gas15 gas16
+
+      displacement 0 0 0 0
+
+      parentVelocityFraction 0.5
+
+      velocityType cent
+      velocityDir linear
+      velocityMagnitude 80
+      velocity 0 0 0 ~50
+
+      radius 0 5 35
+      alpha  150 0.5 0
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 1200
+    }
+
+    count 40
+    delay 0
+    period 10 - 0
+  }
+}
+
+poisonCloudedPS
+{
+  ejector
+  {
+    particle
+    {
+      shader sync gas01 gas02 gas03 gas04 gas05 gas06 gas07 gas08 gas09 gas10 gas11 gas12 gas13 gas14 gas15 gas16
+
+      displacement 0 0 0 ~6
+
+      velocityType      static
+      velocityDir       linear
+      velocityMagnitude 60
+      velocity          0 0 0 ~50
+
+      radius 0 4 12
+      alpha  100 0.25 0
+      rotation 0 ~360 -
+
+      lifeTime 800
+    }
+
+    count 100
+    delay 0
+    period 50 200 0
+  }
+}
+
+firstPersonPoisonCloudPS
+{
+  ejector
+  {
+    particle
+    {
+      shader sync gas01 gas02 gas03 gas04 gas05 gas06 gas07 gas08 gas09 gas10 gas11 gas12 gas13 gas14 gas15 gas16
+
+      displacement 0 0 0 ~32
+
+      parentVelocityFraction 1.0
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 16
+      velocity 0 0 1 0
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 300
+      acceleration 0 0 1 0
+
+      radius 0 10 40
+      alpha  0 0.5 0
+      rotation 0 ~360 -
+      bounce 0.5
+
+      lifeTime 1000
+    }
+
+    count 400
+    delay 0
+    period 20 - 0
+  }
+}
+
+
+
+
+
+// Dragoon Barb
+
+models/weapons/level3upg/impactPS
+{
+  ejector
+  {
+    particle
+    {
+      shader sync gfx/level3upg/barb_splash
+
+      displacement 0 0 0 ~8
+
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 800
+      velocity 0 0 1 ~80
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -1 0
+
+      radius 0 3~2 0
+      alpha 0 10 1
+      rotation 0 ~360 -
+      bounce 0.4~100%
+
+      lifeTime 175
+    }
+
+    count 12
+    delay 0
+    period 0 - 0
+  }
+}

@@ -229,7 +229,8 @@ typedef enum
   STAT_MISC,      // for uh...misc stuff (pounce, trample, lcannon)
   STAT_BUILDABLE, // which ghost model to display for building
   STAT_FALLDIST,  // the distance the player fell
-  STAT_VIEWLOCK   // direction to lock the view in
+  STAT_VIEWLOCK,   // direction to lock the view in
+  STAT_SHAKE      // camera shake
   // netcode has space for 3 more
 } statIndex_t;
 
@@ -289,6 +290,7 @@ typedef enum
 #define EF_DEAD             0x0001    // don't draw a foe marker over players with EF_DEAD
 #define EF_TELEPORT_BIT     0x0002    // toggled every time the origin abruptly changes
 #define EF_PLAYER_EVENT     0x0004    // only used for eType > ET_EVENTS
+#define EF_ISBOT		    0x0008    // identify its a bot //LEPE
 
 // for missiles:
 #define EF_BOUNCE           0x0008    // for missiles

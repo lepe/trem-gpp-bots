@@ -598,7 +598,7 @@ qboolean  ConsoleCommand( void )
       return qtrue;
 
     if( g_dedicated.integer )
-      G_Printf( "unknown command: %s\n", cmd );
+      G_Printf( "unknown console command: %s\n", cmd );
 
     return qfalse;
   }

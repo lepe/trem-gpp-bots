@@ -894,7 +894,7 @@ static qboolean G_SayTo( gentity_t *ent, gentity_t *other, saymode_t mode, const
   }
 
   trap_SendServerCommand( other-g_entities, va( "chat %d %d \"%s\"",
-    ent ? ent-g_entities : -1,
+    (int)ent ? (int)(ent - g_entities) : -1,
     mode,
     message ) );
 
@@ -1129,12 +1129,12 @@ void Cmd_VSay_f( gentity_t *ent )
     case VOICE_CHAN_LOCAL:
       trap_SendServerCommand( -1, va(
         "voice %d %d %d %d \"%s\"\n",
-        ent-g_entities, vchan, cmdNum, trackNum, text ) );
+        (int)(ent - g_entities), vchan, cmdNum, trackNum, text ) );
       break;
     case VOICE_CHAN_TEAM:
       G_TeamCommand( ent->client->pers.teamSelection, va(
         "voice %d %d %d %d \"%s\"\n",
-        ent-g_entities, vchan, cmdNum, trackNum, text ) );
+        (int)(ent - g_entities), vchan, cmdNum, trackNum, text ) );
       break;
     default:
       break;
@@ -1173,6 +1173,7 @@ void Cmd_CallVote_f( gentity_t *ent )
   int    clientNum = -1;
   int    id = -1;
   team_t team;
+  qboolean callbot = qfalse;
 
   trap_Argv( 0, cmd, sizeof( cmd ) );
   trap_Argv( 1, vote, sizeof( vote ) );
@@ -1180,10 +1181,14 @@ void Cmd_CallVote_f( gentity_t *ent )
   creason = ConcatArgs( 3 );
   G_DecolorString( creason, reason, sizeof( reason ) );
 
-  if( !Q_stricmp( cmd, "callteamvote" ) )
+  if( !Q_stricmp( cmd, "callteamvote" ) ) {
     team = ent->client->pers.teamSelection;
-  else
+  } else {
     team = TEAM_NONE;
+	if(!Q_stricmp( cmd, "callbot" )) {
+		callbot = qtrue;
+	}
+  }
 
   if( !g_allowVote.integer )
   {
@@ -1298,130 +1303,184 @@ void Cmd_CallVote_f( gentity_t *ent )
   }
   else if( team == TEAM_NONE )
   {
-    if( !Q_stricmp( vote, "mute" ) )
-    {
-      if( level.clients[ clientNum ].pers.namelog->muted )
-      {
-        trap_SendServerCommand( ent-g_entities,
-          va( "print \"%s: player is already muted\n\"", cmd ) );
-        return;
-      }
+	  //-------------- CALLBOT ---------------
+	if(callbot) {
+		int addel;
+		if( !vote[ 0 ] ) {
+			  trap_SendServerCommand( ent-g_entities,
+				va( "print \"%s: no team specified\n\"", cmd ) );
+			  return;
+		}
+		if( !Q_stricmp( vote, "humans" ) || !Q_stricmp( vote, "aliens" ) || !Q_stricmp( vote, "both" )) {
+			//TODO: this is a bad implementation. I should use atoi() ,
+			//for now, I will leave this ugly code here:
+			if( !arg[ 0 ] || !Q_stricmp( arg, "1" ) || !Q_stricmp( arg, "+1" )) {
+				addel = 1;
+			} else if(!Q_stricmp( arg, "2" ) || !Q_stricmp( arg, "+2" )) {
+				addel = 2;
+			} else if(!Q_stricmp( arg, "3" ) || !Q_stricmp( arg, "+3" )) {
+				addel = 3;
+			} else if(!Q_stricmp( arg, "4" ) || !Q_stricmp( arg, "+4" )) {
+				addel = 4;
+			} else if(!Q_stricmp( arg, "-4" )) {
+				addel = -4;
+			} else if(!Q_stricmp( arg, "-3" )) {
+				addel = -3;
+			} else if(!Q_stricmp( arg, "-2" )) {
+				addel = -2;
+			} else if(!Q_stricmp( arg, "-1" )) {
+				addel = -1;
+			} else {
+				trap_SendServerCommand( ent-g_entities,
+					va( "print \"%s: a maximum of 4 bots are allowed to be added or removed at the same time.\n\"", cmd ) );
+				return;
+			}
+			Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
+				"botjoin %s %d", vote, addel);
+			Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
+				"%s" S_COLOR_CYAN " %d " S_COLOR_WHITE "%s %s %s", 
+					addel > 0 ? "Deploy" : "Withdraw", 
+					abs(addel), 
+					abs(addel) == 1 ? "bot" : "bots",
+					addel > 0 ? "into" : "from", 
+					!Q_stricmp( vote, "humans" ) ? S_COLOR_BLUE "HUMAN" S_COLOR_WHITE " team" : 
+						(!Q_stricmp( vote, "aliens" ) ?  S_COLOR_RED "ALIEN" S_COLOR_WHITE " team" :
+							S_COLOR_YELLOW "BOTH" S_COLOR_WHITE " teams"));
+		
+		}
+		else {
+			trap_SendServerCommand( ent-g_entities,
+				va( "print \"%s: no such team (choose: humans or aliens).\n\"", cmd ) );
+			return;
+		}
+	}	  
+	else 
+	{
+		if( !Q_stricmp( vote, "mute" ) )
+		{
+		  if( level.clients[ clientNum ].pers.namelog->muted )
+		  {
+			trap_SendServerCommand( ent-g_entities,
+			  va( "print \"%s: player is already muted\n\"", cmd ) );
+			return;
+		  }
 
-      Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
-        "mute %d", id );
-      Com_sprintf( level.voteDisplayString[ team ],
-        sizeof( level.voteDisplayString[ team ] ),
-        "Mute player '%s'", name );
-      if( reason[ 0 ] )
-      {
-        Q_strcat( level.voteDisplayString[ team ],
-          sizeof( level.voteDisplayString[ team ] ), va( " for '%s'", reason ) );
-      }
-    }
-    else if( !Q_stricmp( vote, "unmute" ) )
-    {
-      if( !level.clients[ clientNum ].pers.namelog->muted )
-      {
-        trap_SendServerCommand( ent-g_entities,
-          va( "print \"%s: player is not currently muted\n\"", cmd ) );
-        return;
-      }
+		  Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
+			"mute %d", id );
+		  Com_sprintf( level.voteDisplayString[ team ],
+			sizeof( level.voteDisplayString[ team ] ),
+			"Mute player '%s'", name );
+		  if( reason[ 0 ] )
+		  {
+			Q_strcat( level.voteDisplayString[ team ],
+			  sizeof( level.voteDisplayString[ team ] ), va( " for '%s'", reason ) );
+		  }
+		}
+		else if( !Q_stricmp( vote, "unmute" ) )
+		{
+		  if( !level.clients[ clientNum ].pers.namelog->muted )
+		  {
+			trap_SendServerCommand( ent-g_entities,
+			  va( "print \"%s: player is not currently muted\n\"", cmd ) );
+			return;
+		  }
 
-      Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
-        "unmute %d", id );
-      Com_sprintf( level.voteDisplayString[ team ],
-        sizeof( level.voteDisplayString[ team ] ),
-        "Unmute player '%s'", name );
-    }
-    else if( !Q_stricmp( vote, "map_restart" ) )
-    {
-      strcpy( level.voteString[ team ], vote );
-      strcpy( level.voteDisplayString[ team ], "Restart current map" );
-      // map_restart comes with a default delay
-    }
-    else if( !Q_stricmp( vote, "map" ) )
-    {
-      if( !G_MapExists( arg ) )
-      {
-        trap_SendServerCommand( ent-g_entities,
-          va( "print \"%s: 'maps/%s.bsp' could not be found on the server\n\"",
-            cmd, arg ) );
-        return;
-      }
+		  Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
+			"unmute %d", id );
+		  Com_sprintf( level.voteDisplayString[ team ],
+			sizeof( level.voteDisplayString[ team ] ),
+			"Unmute player '%s'", name );
+		}
+		else if( !Q_stricmp( vote, "map_restart" ) )
+		{
+		  strcpy( level.voteString[ team ], vote );
+		  strcpy( level.voteDisplayString[ team ], "Restart current map" );
+		  // map_restart comes with a default delay
+		}
+		else if( !Q_stricmp( vote, "map" ) )
+		{
+		  if( !G_MapExists( arg ) )
+		  {
+			trap_SendServerCommand( ent-g_entities,
+			  va( "print \"%s: 'maps/%s.bsp' could not be found on the server\n\"",
+				cmd, arg ) );
+			return;
+		  }
 
-      Com_sprintf( level.voteString[ team ], sizeof( level.voteString ),
-        "%s \"%s\"", vote, arg );
-      Com_sprintf( level.voteDisplayString[ team ],
-        sizeof( level.voteDisplayString[ team ] ),
-        "Change to map '%s'", arg );
-      level.voteDelay[ team ] = 3000;
-    }
-    else if( !Q_stricmp( vote, "nextmap" ) )
-    {
-      if( G_MapExists( g_nextMap.string ) )
-      {
-        trap_SendServerCommand( ent-g_entities,
-          va( "print \"%s: the next map is already set to '%s'\n\"",
-            cmd, g_nextMap.string ) );
-        return;
-      }
+		  Com_sprintf( level.voteString[ team ], sizeof( level.voteString ),
+			"%s \"%s\"", vote, arg );
+		  Com_sprintf( level.voteDisplayString[ team ],
+			sizeof( level.voteDisplayString[ team ] ),
+			"Change to map '%s'", arg );
+		  level.voteDelay[ team ] = 3000;
+		}
+		else if( !Q_stricmp( vote, "nextmap" ) )
+		{
+		  if( G_MapExists( g_nextMap.string ) )
+		  {
+			trap_SendServerCommand( ent-g_entities,
+			  va( "print \"%s: the next map is already set to '%s'\n\"",
+				cmd, g_nextMap.string ) );
+			return;
+		  }
 
-      if( !G_MapExists( arg ) )
-      {
-        trap_SendServerCommand( ent-g_entities,
-          va( "print \"%s: 'maps/%s.bsp' could not be found on the server\n\"",
-            cmd, arg ) );
-        return;
-      }
+		  if( !G_MapExists( arg ) )
+		  {
+			trap_SendServerCommand( ent-g_entities,
+			  va( "print \"%s: 'maps/%s.bsp' could not be found on the server\n\"",
+				cmd, arg ) );
+			return;
+		  }
 
-      Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
-        "set g_nextMap \"%s\"", arg );
-      Com_sprintf( level.voteDisplayString[ team ],
-        sizeof( level.voteDisplayString[ team ] ),
-        "Set the next map to '%s'", arg );
-    }
-    else if( !Q_stricmp( vote, "draw" ) )
-    {
-      strcpy( level.voteString[ team ], "evacuation" );
-      strcpy( level.voteDisplayString[ team ], "End match in a draw" );
-      level.voteDelay[ team ] = 3000;
-    }
-    else if( !Q_stricmp( vote, "sudden_death" ) )
-    {
-      if(!g_suddenDeathVotePercent.integer)
-      {
-        trap_SendServerCommand( ent-g_entities,
-              "print \"Sudden Death votes have been disabled\n\"" );
-        return;
-      }
-      if( G_TimeTilSuddenDeath( ) <= 0 )
-      {
-        trap_SendServerCommand( ent - g_entities,
-              va( "print \"callvote: Sudden Death has already begun\n\"") );
-        return;
-      }
-      if( level.suddenDeathBeginTime > 0 &&
-          G_TimeTilSuddenDeath() <= g_suddenDeathVoteDelay.integer * 1000 )
-      {
-        trap_SendServerCommand( ent - g_entities,
-              va( "print \"callvote: Sudden Death is imminent\n\"") );
-        return;
-      }
-      level.voteThreshold[ team ] = g_suddenDeathVotePercent.integer;
-      Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
-        "suddendeath %d", g_suddenDeathVoteDelay.integer );
-      Com_sprintf( level.voteDisplayString[ team ],
-                   sizeof( level.voteDisplayString[ team ] ),
-                   "Begin sudden death in %d seconds",
-                   g_suddenDeathVoteDelay.integer );
-    }
-    else
-    {
-      trap_SendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
-      trap_SendServerCommand( ent-g_entities, "print \"Valid vote commands are: "
-        "map, nextmap, map_restart, draw, sudden_death, kick, mute and unmute\n" );
-      return;
-    }
+		  Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
+			"set g_nextMap \"%s\"", arg );
+		  Com_sprintf( level.voteDisplayString[ team ],
+			sizeof( level.voteDisplayString[ team ] ),
+			"Set the ^1next^7 map to '%s'", arg );
+		}
+		else if( !Q_stricmp( vote, "draw" ) )
+		{
+		  strcpy( level.voteString[ team ], "evacuation" );
+		  strcpy( level.voteDisplayString[ team ], "End match in a draw" );
+		  level.voteDelay[ team ] = 3000;
+		}
+		else if( !Q_stricmp( vote, "sudden_death" ) )
+		{
+		  if(!g_suddenDeathVotePercent.integer)
+		  {
+			trap_SendServerCommand( ent-g_entities,
+				  "print \"Sudden Death votes have been disabled\n\"" );
+			return;
+		  }
+		  if( G_TimeTilSuddenDeath( ) <= 0 )
+		  {
+			trap_SendServerCommand( ent - g_entities,
+				  va( "print \"callvote: Sudden Death has already begun\n\"") );
+			return;
+		  }
+		  if( level.suddenDeathBeginTime > 0 &&
+			  G_TimeTilSuddenDeath() <= g_suddenDeathVoteDelay.integer * 1000 )
+		  {
+			trap_SendServerCommand( ent - g_entities,
+				  va( "print \"callvote: Sudden Death is imminent\n\"") );
+			return;
+		  }
+		  level.voteThreshold[ team ] = g_suddenDeathVotePercent.integer;
+		  Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
+			"suddendeath %d", g_suddenDeathVoteDelay.integer );
+		  Com_sprintf( level.voteDisplayString[ team ],
+					   sizeof( level.voteDisplayString[ team ] ),
+					   "Begin sudden death in %d seconds",
+					   g_suddenDeathVoteDelay.integer );
+		}
+		else
+		{
+		  trap_SendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
+		  trap_SendServerCommand( ent-g_entities, "print \"Valid vote commands are: "
+			"map, nextmap, map_restart, draw, sudden_death, kick, mute and unmute\n" );
+		  return;
+		}
+	}
   }
   else if( !Q_stricmp( vote, "denybuild" ) )
   {
@@ -1599,7 +1658,7 @@ void Cmd_SetViewpos_f( gentity_t *ent )
 
 #define AS_OVER_RT3         ((ALIENSENSE_RANGE*0.5f)/M_ROOT3)
 
-static qboolean G_RoomForClassChange( gentity_t *ent, class_t class,
+qboolean G_RoomForClassChange( gentity_t *ent, class_t class,
                                       vec3_t newOrigin )
 {
   vec3_t    fromMins, fromMaxs;
@@ -3124,7 +3183,7 @@ void Cmd_Node_f( gentity_t *ent )
 	char fileName[ MAX_OSPATH ];
 	int i,i2,distance,Ax,Ay,Az,Bx,By,Bz = 0;
 	int timeout2 = 0;
-	int nearbynodeid[ MAX_PATHS ];
+	int nearbynodeid[ 5 ]; //no more than 5 near nodes to show
 	int numnearby = 0;
 	qboolean delpath = qfalse;
 	qboolean pathfound = qfalse;
@@ -3138,8 +3197,9 @@ void Cmd_Node_f( gentity_t *ent )
 			"print \"g_pathediting is off.\n\"");
 		return;
 	}
+	G_Printf("pathid value is: %d\n",ent->pathid);
 	trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
-	for(i = 0; i < level.numPaths; i++ )
+	for(i = 0; i < level.numPaths && numnearby < 5; i++ )
 	{
 		Ax = level.paths[i].coord[0];
 		Ay = level.paths[i].coord[1];
@@ -3169,7 +3229,7 @@ void Cmd_Node_f( gentity_t *ent )
 	if(trap_Argc( ) != 2 && trap_Argc( ) != 3)
 	{
 		trap_SendServerCommand( ent-g_entities,
-			"print \"Usage: node [add|connect|disconnect|random|move|cancel|timeout|action|clear|delete|save]\n\"");
+			"print \"Usage: node [add|connect|disconnect|random|move|cancel|timeout|action|clear|delete|save|load]\n\"");
 		for(i = 0;i < numnearby; i++)
 		{
 			trap_SendServerCommand( ent-g_entities,
@@ -3223,6 +3283,7 @@ void Cmd_Node_f( gentity_t *ent )
 				return;
 			}
 			trap_Argv( 2, action, sizeof( action ) );
+			/* DEPRECATED
 			if(!Q_stricmp( action, "jump" ))
 			{level.paths[nearbynodeid[0]].action = BOT_JUMP;}
 			else if(!Q_stricmp( action, "wallclimb" ))
@@ -3234,8 +3295,11 @@ void Cmd_Node_f( gentity_t *ent )
 			else if(!Q_stricmp( action, "none" ))
 			{level.paths[nearbynodeid[0]].action = 0;}
 			else
-			{trap_SendServerCommand( ent-g_entities,
-				"print \"Unknown action (jump,wallclimb,\n\"");return;}
+			{
+			 */
+			level.paths[nearbynodeid[0]].action = 0;
+			//trap_SendServerCommand( ent-g_entities,
+			//"print \"Unknown action (jump,wallclimb,\n\"");return;}
 			trap_SendServerCommand( ent-g_entities,
 				"print \"Node action set.\n\"");
 			return;	
@@ -3246,12 +3310,6 @@ void Cmd_Node_f( gentity_t *ent )
 			{
 				trap_SendServerCommand( ent-g_entities,
 					"print \"Too close to another node.\n\"");
-				return;
-			}
-			if(level.numPaths >= MAX_PATHS)
-			{
-				trap_SendServerCommand( ent-g_entities,
-					"print \"Reached Max amount of nodes.\n\"" );
 				return;
 			}
 			for(i = 0; i < level.numPaths; i++ )
@@ -3269,11 +3327,11 @@ void Cmd_Node_f( gentity_t *ent )
 				level.paths[i].coord[0] = ent->s.pos.trBase[0];
 				level.paths[i].coord[1] = ent->s.pos.trBase[1];
 				level.paths[i].coord[2] = ent->s.pos.trBase[2];
-				level.paths[i].nextid[0] = 1000 + MAX_PATHS;
-				level.paths[i].nextid[1] = 1000 + MAX_PATHS;
-				level.paths[i].nextid[2] = 1000 + MAX_PATHS;
-				level.paths[i].nextid[3] = 1000 + MAX_PATHS;
-				level.paths[i].nextid[4] = 1000 + MAX_PATHS;
+				level.paths[i].nextid[0] = -1;
+				level.paths[i].nextid[1] = -1;
+				level.paths[i].nextid[2] = -1;
+				level.paths[i].nextid[3] = -1;
+				level.paths[i].nextid[4] = -1;
 				level.paths[i].random = 0;
 				level.paths[i].timeout = 10000;
 				level.paths[i].action = 0;
@@ -3281,7 +3339,7 @@ void Cmd_Node_f( gentity_t *ent )
 					va("print \"Saved Node #%d.\n\"", i));
 				if(level.drawpath == qtrue)
 				{
-					node = (gentity_t *)spawnnode( ent, i );
+					node = (gentity_t *)spawnnode( i );
 				}
 			}
 			else
@@ -3289,11 +3347,11 @@ void Cmd_Node_f( gentity_t *ent )
 				level.paths[level.numPaths].coord[0] = ent->s.pos.trBase[0];
 				level.paths[level.numPaths].coord[1] = ent->s.pos.trBase[1];
 				level.paths[level.numPaths].coord[2] = ent->s.pos.trBase[2];
-				level.paths[level.numPaths].nextid[0] = 1000 + MAX_PATHS;
-				level.paths[level.numPaths].nextid[1] = 1000 + MAX_PATHS;
-				level.paths[level.numPaths].nextid[2] = 1000 + MAX_PATHS;
-				level.paths[level.numPaths].nextid[3] = 1000 + MAX_PATHS;
-				level.paths[level.numPaths].nextid[4] = 1000 + MAX_PATHS;
+				level.paths[level.numPaths].nextid[0] = -1;
+				level.paths[level.numPaths].nextid[1] = -1;
+				level.paths[level.numPaths].nextid[2] = -1;
+				level.paths[level.numPaths].nextid[3] = -1;
+				level.paths[level.numPaths].nextid[4] = -1;
 				level.paths[level.numPaths].random = 0;
 				level.paths[level.numPaths].timeout = 10000;
 				level.paths[level.numPaths].action = 0;
@@ -3301,7 +3359,7 @@ void Cmd_Node_f( gentity_t *ent )
 					va("print \"Saved Node #%d.\n\"", level.numPaths));
 				if(level.drawpath == qtrue)
 				{
-					node = (gentity_t *)spawnnode(ent,level.numPaths);
+					node = (gentity_t *)spawnnode(level.numPaths);
 				}
 				level.numPaths++;
 			}
@@ -3373,6 +3431,7 @@ void Cmd_Node_f( gentity_t *ent )
 				}
 				countz = 0;
 				countz2 = 0;
+				/* No MAX_PATH limit (left here in case there are problems)
 				for(i = 0;i < 5;i++)
 				{
 					if(level.paths[nearbynodeid[0]].nextid[i] >= MAX_PATHS)
@@ -3383,6 +3442,7 @@ void Cmd_Node_f( gentity_t *ent )
 					if(level.paths[ent->pathid].nextid[i] >= MAX_PATHS)
 					{countz2 = i; i = 5; break;}
 				}
+				 */
 				if(linked == qtrue)
 				{
 					trap_SendServerCommand( ent-g_entities,
@@ -3424,11 +3484,11 @@ void Cmd_Node_f( gentity_t *ent )
 					"print \"No nearby nodes.\n\"");
 				return;
 			}
-			level.paths[nearbynodeid[0]].nextid[0] = 1000 + MAX_PATHS;
-			level.paths[nearbynodeid[0]].nextid[1] = 1000 + MAX_PATHS;
-			level.paths[nearbynodeid[0]].nextid[2] = 1000 + MAX_PATHS;
-			level.paths[nearbynodeid[0]].nextid[3] = 1000 + MAX_PATHS;
-			level.paths[nearbynodeid[0]].nextid[4] = 1000 + MAX_PATHS;
+			level.paths[nearbynodeid[0]].nextid[0] = -1;
+			level.paths[nearbynodeid[0]].nextid[1] = -1;
+			level.paths[nearbynodeid[0]].nextid[2] = -1;
+			level.paths[nearbynodeid[0]].nextid[3] = -1;
+			level.paths[nearbynodeid[0]].nextid[4] = -1;
 			level.paths[nearbynodeid[0]].random = 0;
 			level.paths[nearbynodeid[0]].timeout = 0;
 			level.paths[nearbynodeid[0]].action = 0;
@@ -3489,7 +3549,7 @@ void Cmd_Node_f( gentity_t *ent )
 				{
 					if(level.paths[i].nextid[i2] == nearbynodeid[0])
 					{
-						level.paths[i].nextid[i2] = 1000 + MAX_PATHS;
+						level.paths[i].nextid[i2] = -1;
 					}
 				}
 			}
@@ -3531,11 +3591,11 @@ void Cmd_Node_f( gentity_t *ent )
 				{
 					if(level.paths[nearbynodeid[0]].nextid[i] == ent->discpathid)
 					{
-						level.paths[nearbynodeid[0]].nextid[i] = 1000 + MAX_PATHS;
+						level.paths[nearbynodeid[0]].nextid[i] = -1;
 					}
 					if(level.paths[ent->discpathid].nextid[i] == nearbynodeid[0])
 					{
-						level.paths[ent->discpathid].nextid[i] = 1000 + MAX_PATHS;
+						level.paths[ent->discpathid].nextid[i] = -1;
 					}
 				}
 				trap_SendServerCommand( ent-g_entities,
@@ -3621,11 +3681,18 @@ void Cmd_Node_f( gentity_t *ent )
 			trap_SendServerCommand( -1,
 				"print \"Saved Path.\n\"");
 			return;
+		} 
+		else if( !Q_stricmp( cmd, "load" ) ) 
+		{
+			trap_SendServerCommand( -1,
+				"print \"Paths Loaded.\n\"");
+			G_PathLoad();
+			return;
 		}
 		else
 		{
 			trap_SendServerCommand( ent-g_entities,
-			"print \"Usage: node [add|connect|disconnect|random|move|cancel|timeout|action|clear|delete|save]\n\"");
+			"print \"Usage: node [add|connect|disconnect|random|move|cancel|timeout|action|clear|delete|save|load]\n\"");
 			trap_SendServerCommand( ent-g_entities,
 				"print \"Unknown option\n\"");
 			return;
@@ -3634,11 +3701,12 @@ void Cmd_Node_f( gentity_t *ent )
 	return;
 }
 
-
+//NOTE: MUST be in alphabetical order!
 commands_t cmds[ ] = {
   { "a", CMD_MESSAGE|CMD_INTERMISSION, Cmd_AdminMessage_f },
   { "build", CMD_TEAM|CMD_LIVING, Cmd_Build_f },
   { "buy", CMD_HUMAN|CMD_LIVING, Cmd_Buy_f },
+  { "callbot", CMD_MESSAGE, Cmd_CallVote_f },
   { "callteamvote", CMD_MESSAGE|CMD_TEAM, Cmd_CallVote_f },
   { "callvote", CMD_MESSAGE, Cmd_CallVote_f },
   { "class", CMD_TEAM, Cmd_Class_f },

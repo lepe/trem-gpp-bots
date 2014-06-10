@@ -190,6 +190,7 @@ vmCvar_t  cg_disableBuildDialogs;
 vmCvar_t  cg_disableCommandDialogs;
 vmCvar_t  cg_disableScannerPlane;
 vmCvar_t  cg_tutorial;
+vmCvar_t  cg_botsskin; //LEPE
 
 vmCvar_t  cg_painBlendUpRate;
 vmCvar_t  cg_painBlendDownRate;
@@ -219,6 +220,8 @@ vmCvar_t  cg_projectileNudge;
 vmCvar_t  cg_voice;
 
 vmCvar_t  cg_emoticons;
+
+vmCvar_t  cg_cameraShakeMagnitude;
 
 vmCvar_t  cg_chatTeamPrefix;
 
@@ -347,6 +350,7 @@ static cvarTable_t cvarTable[ ] =
   { &cg_timescale, "timescale", "1", 0},
   { &cg_smoothClients, "cg_smoothClients", "0", CVAR_USERINFO | CVAR_ARCHIVE},
   { &cg_cameraMode, "com_cameraMode", "0", CVAR_CHEAT},
+  { &cg_botsskin, "g_bot_skins", "0", 0 },// communicated by systeminfo
 
   { &pmove_fixed, "pmove_fixed", "0", 0},
   { &pmove_msec, "pmove_msec", "8", 0},
@@ -355,6 +359,8 @@ static cvarTable_t cvarTable[ ] =
   { &cg_voice, "voice", "default", CVAR_USERINFO|CVAR_ARCHIVE},
 
   { &cg_emoticons, "cg_emoticons", "1", CVAR_LATCH|CVAR_ARCHIVE},
+
+  { &cg_cameraShakeMagnitude, "cg_cameraShakeMagnitude", "1", CVAR_ARCHIVE },
 
   { &cg_chatTeamPrefix, "cg_chatTeamPrefix", "1", CVAR_ARCHIVE}
 };
@@ -639,6 +645,8 @@ static void CG_RegisterSounds( void )
   cgs.media.watrUnSound           = trap_S_RegisterSound( "sound/player/watr_un.wav", qfalse );
 
   cgs.media.disconnectSound       = trap_S_RegisterSound( "sound/misc/disconnect.wav", qfalse );
+  
+  cgs.media.splashMusic			  = trap_S_RegisterSound( "sound/intro.wav", qfalse );
 
   for( i = 0; i < 4; i++ )
   {
@@ -773,6 +781,7 @@ static void CG_RegisterGraphics( void )
   for( i = 0; i < 8; i++ )
     cgs.media.buildWeaponTimerPie[ i ] = trap_R_RegisterShader( buildWeaponTimerPieShaders[ i ] );
 
+  cgs.media.splashLogo				  = trap_R_RegisterShader( "ui/assets/logo.tga" );
   // player health cross shaders
   cgs.media.healthCross               = trap_R_RegisterShader( "ui/assets/neutral/cross.tga" );
   cgs.media.healthCross2X             = trap_R_RegisterShader( "ui/assets/neutral/cross2.tga" );
@@ -929,6 +938,9 @@ static void CG_RegisterClients( void )
   cgs.media.larmourHeadSkin    = trap_R_RegisterSkin( "models/players/human_base/head_light.skin" );
   cgs.media.larmourLegsSkin    = trap_R_RegisterSkin( "models/players/human_base/lower_light.skin" );
   cgs.media.larmourTorsoSkin   = trap_R_RegisterSkin( "models/players/human_base/upper_light.skin" );
+  cgs.media.BotlarmourHeadSkin    = trap_R_RegisterSkin( "models/players/human_base/head_light_bot.skin" );
+  cgs.media.BotlarmourLegsSkin    = trap_R_RegisterSkin( "models/players/human_base/lower_light_bot.skin" );
+  cgs.media.BotlarmourTorsoSkin   = trap_R_RegisterSkin( "models/players/human_base/upper_light_bot.skin" );
 
   cgs.media.jetpackModel       = trap_R_RegisterModel( "models/players/human_base/jetpack.md3" );
   cgs.media.jetpackFlashModel  = trap_R_RegisterModel( "models/players/human_base/jetpack_flash.md3" );

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <code-assistance-data xmlns="http://www.netbeans.org/ns/make-project-private/1">
+        <code-model-enabled>true</code-model-enabled>
+    </code-assistance-data>
+    <data xmlns="http://www.netbeans.org/ns/make-project-private/1">
+        <activeConfTypeElem>0</activeConfTypeElem>
+        <activeConfIndexElem>0</activeConfIndexElem>
+    </data>
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group name="Trem">
+            <file>file:/home/kaname/Projects/trem-gpp-bots/src/game/g_bot_nav.c</file>
+            <file>file:/home/kaname/Projects/trem-gpp-bots/src/game/g_local.h</file>
+            <file>file:/home/kaname/Projects/trem-gpp-bots/src/game/g_admin.h</file>
+            <file>file:/home/kaname/Projects/trem-gpp-bots/src/game/g_bot_control.c</file>
+            <file>file:/home/kaname/Projects/trem-gpp-bots/src/game/g_admin.c</file>
+            <file>file:/home/kaname/Projects/trem-gpp-bots/src/game/g_bot.h</file>
+            <file>file:/home/kaname/Projects/trem-gpp-bots/src/game/g_bot_human.c</file>
+            <file>file:/home/kaname/Projects/trem-gpp-bots/src/game/g_bot_common.c</file>
+            <file>file:/home/kaname/Projects/trem-gpp-bots/src/game/g_bot_say.c</file>
+            <file>file:/home/kaname/Projects/trem-gpp-bots/src/game/g_bot.c</file>
+            <file>file:/home/kaname/Projects/trem-gpp-bots/src/game/g_main.c</file>
+            <file>file:/home/kaname/Projects/trem-gpp-bots/src/game/g_bot_util.c</file>
+            <file>file:/home/kaname/Projects/trem-gpp-bots/src/game/g_active.c</file>
+            <file>file:/home/kaname/Projects/trem-gpp-bots/src/game/g_client.c</file>
+            <file>file:/home/kaname/Projects/trem-gpp-bots/src/game/g_bot_alien.c</file>
+        </group>
+        <group>
+            <file>file:/home/lepe/Projects/git/trem-gpp-bots/src/game/g_cmds.c</file>
+            <file>file:/home/lepe/Projects/git/trem-gpp-bots/src/game/g_bot.h</file>
+            <file>file:/home/lepe/Projects/git/trem-gpp-bots/src/game/g_bot.c</file>
+            <file>file:/home/lepe/Projects/git/trem-gpp-bots/src/game/g_bot_util.c</file>
+            <file>file:/home/lepe/Projects/git/trem-gpp-bots/src/game/g_bot_control.c</file>
+            <file>file:/home/lepe/Projects/git/trem-gpp-bots/src/game/g_bot_human.c</file>
+            <file>file:/home/lepe/Projects/git/trem-gpp-bots/src/game/g_bot_alien.c</file>
+            <file>file:/home/lepe/Projects/git/trem-gpp-bots/src/game/g_local.h</file>
+            <file>file:/home/lepe/Projects/git/trem-gpp-bots/src/game/g_buildable.c</file>
+            <file>file:/home/lepe/Projects/git/trem-gpp-bots/src/game/g_active.c</file>
+            <file>file:/home/lepe/Projects/git/trem-gpp-bots/src/game/g_admin.c</file>
+            <file>file:/home/lepe/Projects/git/trem-gpp-bots/src/game/g_main.c</file>
+            <file>file:/home/lepe/Projects/git/trem-gpp-bots/Makefile</file>
+            <file>file:/home/lepe/Projects/git/trem-gpp-bots/src/game/g_bot_nav.c</file>
+            <file>file:/home/lepe/Projects/git/trem-gpp-bots/src/game/g_bot_common.c</file>
+        </group>
+    </open-files>
+</project-private>

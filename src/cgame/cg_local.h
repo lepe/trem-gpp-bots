@@ -947,6 +947,8 @@ typedef struct
 
   int           physicsTime;                        // either cg.snap->time or cg.nextSnap->time
 
+  int           splashTime;                         // cg.time when loading ended
+  
   int           timelimitWarnings;                  // 5 min, 1 min, overtime
   int           fraglimitWarnings;
 
@@ -1258,6 +1260,11 @@ typedef struct
   qhandle_t jetpackModel;
   qhandle_t jetpackFlashModel;
   qhandle_t battpackModel;
+  
+  //bot light armour
+  qhandle_t BotlarmourHeadSkin;
+  qhandle_t BotlarmourLegsSkin;
+  qhandle_t BotlarmourTorsoSkin;
 
   sfxHandle_t repeaterUseSound;
 
@@ -1281,7 +1288,8 @@ typedef struct
   qhandle_t   alienBuildableBleedPS;
   qhandle_t   humanBuildableBleedPS;
 
-
+  qhandle_t	  splashLogo;
+  qhandle_t	  splashMusic;
   qhandle_t   teslaZapTS;
 
   sfxHandle_t lCannonWarningSound;
@@ -1503,6 +1511,7 @@ extern  vmCvar_t    cg_disableBuildDialogs;
 extern  vmCvar_t    cg_disableCommandDialogs;
 extern  vmCvar_t    cg_disableScannerPlane;
 extern  vmCvar_t    cg_tutorial;
+extern  vmCvar_t    cg_botsskin;
 
 extern  vmCvar_t    cg_painBlendUpRate;
 extern  vmCvar_t    cg_painBlendDownRate;
@@ -1532,6 +1541,8 @@ extern  vmCvar_t    cg_projectileNudge;
 extern  vmCvar_t    cg_voice;
 
 extern  vmCvar_t    cg_emoticons;
+
+extern  vmCvar_t    cg_cameraShakeMagnitude;
 
 extern  vmCvar_t    cg_chatTeamPrefix;
 

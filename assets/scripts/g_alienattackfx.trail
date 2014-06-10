@@ -1,0 +1,14 @@
+dragoonBarbTS
+{
+  beam
+  {
+    shader dragoonBarbTrail
+
+    segments 20
+    width 15 15
+    alpha 1.0 1.0
+    fadeOutTime 9000
+
+    textureType repeat front 15
+  }
+}

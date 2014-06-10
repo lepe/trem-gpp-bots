@@ -1989,10 +1989,15 @@ void CG_Player( centity_t *cent )
   {
     legs.hModel = ci->legsModel;
 
-    if( held & ( 1 << UP_LIGHTARMOUR ) )
-      legs.customSkin = cgs.media.larmourLegsSkin;
-    else
+    if( held & ( 1 << UP_LIGHTARMOUR ) ) {
+		if(cg_botsskin.integer && Com_StringContains(ci->name, "[BOT]", 1))	{
+	      legs.customSkin = cgs.media.BotlarmourLegsSkin;
+		} else {
+	      legs.customSkin = cgs.media.larmourLegsSkin;
+		}
+    } else {
       legs.customSkin = ci->legsSkin;
+	}
   }
   else
   {
@@ -2063,10 +2068,15 @@ void CG_Player( centity_t *cent )
     //
     torso.hModel = ci->torsoModel;
 
-    if( held & ( 1 << UP_LIGHTARMOUR ) )
-      torso.customSkin = cgs.media.larmourTorsoSkin;
-    else
+    if( held & ( 1 << UP_LIGHTARMOUR ) ) {
+		if(cg_botsskin.integer && Com_StringContains(ci->name, "[BOT]", 1))	{
+	      torso.customSkin = cgs.media.BotlarmourTorsoSkin;
+		} else {
+	      torso.customSkin = cgs.media.larmourTorsoSkin;
+	  	}
+    } else {
       torso.customSkin = ci->torsoSkin;
+	}
 
     if( !torso.hModel )
       return;
@@ -2085,10 +2095,15 @@ void CG_Player( centity_t *cent )
     //
     head.hModel = ci->headModel;
 
-    if( held & ( 1 << UP_HELMET ) )
-      head.customSkin = cgs.media.larmourHeadSkin;
-    else
+    if( held & ( 1 << UP_HELMET ) ) {
+		if(cg_botsskin.integer && Com_StringContains(ci->name, "[BOT]", 1))	{
+    		head.customSkin = cgs.media.BotlarmourHeadSkin;
+		} else {
+      		head.customSkin = cgs.media.larmourHeadSkin;
+		}
+    } else {
       head.customSkin = ci->headSkin;
+	}
 
     if( !head.hModel )
       return;

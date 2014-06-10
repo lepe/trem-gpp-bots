@@ -1,0 +1,200 @@
+make[1]: Entering directory `/home/kaname/Projects/trem-gpp-bots/trem-gpp-bots'
+
+Building Tremulous in build/release-linux-x86_64:
+  PLATFORM: linux
+  ARCH: x86_64
+  VERSION: gpp1_SVN2279M
+  COMPILE_PLATFORM: linux
+  COMPILE_ARCH: x86_64
+  CC: cc
+
+  CFLAGS:
+    -Wall
+    -fno-strict-aliasing
+    -Wimplicit
+    -Wstrict-prototypes
+    -pipe
+    -DUSE_ICON
+    -DNO_GZIP
+    -DUSE_INTERNAL_JPEG
+    -Isrc/jpeg-8c
+    -DUSE_LOCAL_HEADERS
+    -DPRODUCT_VERSION="gpp1_SVN2279M"
+    -DSVN_VERSION="svn2279M"
+    -MMD
+    -DNDEBUG
+    -O3
+    -fomit-frame-pointer
+    -funroll-loops
+    -falign-loops=2
+    -falign-jumps=2
+    -falign-functions=2
+    -fstrength-reduce
+    -ffast-math
+
+  CLIENT_CFLAGS:
+    -DUSE_OPENAL
+    -DUSE_OPENAL_DLOPEN
+    -DUSE_CURL
+    -DUSE_CURL_DLOPEN
+    -Isrc/SDL12/include
+    -DUSE_MUMBLE
+    -DUSE_VOIP
+    -DFLOATING_POINT
+    -DUSE_ALLOCA
+    -Isrc/libspeex/include
+
+  SERVER_CFLAGS:
+    -DUSE_VOIP
+
+  LDFLAGS:
+
+  LIBS:
+    -ldl
+    -lm
+
+  CLIENT_LIBS:
+    -lGL
+    -lrt
+
+  Output:
+    build/release-linux-x86_64/base/vm/cgame.qvm
+    build/release-linux-x86_64/base/vm/game.qvm
+    build/release-linux-x86_64/base/vm/ui.qvm
+
+make[2]: Entering directory `/home/kaname/Projects/trem-gpp-bots/trem-gpp-bots'
+TOOLS_CC src/tools/lcc/etc/lcc.c
+src/tools/lcc/etc/lcc.c: In function ‘stringf’:
+src/tools/lcc/etc/lcc.c:816:6: warning: variable ‘n’ set but not used [-Wunused-but-set-variable]
+TOOLS_CC src/tools/lcc/etc/bytecode.c
+TOOLS_CC src/tools/lcc/src/alloc.c
+TOOLS_CC src/tools/lcc/src/bind.c
+TOOLS_CC src/tools/lcc/src/bytecode.c
+src/tools/lcc/src/bytecode.c: In function ‘LoadSourceFile’:
+src/tools/lcc/src/bytecode.c:264:10: warning: variable ‘size’ set but not used [-Wunused-but-set-variable]
+TOOLS_CC src/tools/lcc/src/dag.c
+TOOLS_CC src/tools/lcc/lburg/lburg.c
+TOOLS_CC src/tools/lcc/lburg/gram.c
+LD build/release-linux-x86_64/tools/lburg/lburg
+LBURG src/tools/lcc/src/dagcheck.md
+TOOLS_CC_DAGCHECK build/release-linux-x86_64/tools/rcc/dagcheck.c
+TOOLS_CC src/tools/lcc/src/decl.c
+TOOLS_CC src/tools/lcc/src/enode.c
+TOOLS_CC src/tools/lcc/src/error.c
+TOOLS_CC src/tools/lcc/src/event.c
+TOOLS_CC src/tools/lcc/src/expr.c
+TOOLS_CC src/tools/lcc/src/gen.c
+TOOLS_CC src/tools/lcc/src/init.c
+TOOLS_CC src/tools/lcc/src/inits.c
+TOOLS_CC src/tools/lcc/src/input.c
+TOOLS_CC src/tools/lcc/src/lex.c
+TOOLS_CC src/tools/lcc/src/list.c
+TOOLS_CC src/tools/lcc/src/main.c
+TOOLS_CC src/tools/lcc/src/null.c
+TOOLS_CC src/tools/lcc/src/output.c
+TOOLS_CC src/tools/lcc/src/prof.c
+TOOLS_CC src/tools/lcc/src/profio.c
+TOOLS_CC src/tools/lcc/src/simp.c
+TOOLS_CC src/tools/lcc/src/stmt.c
+TOOLS_CC src/tools/lcc/src/string.c
+TOOLS_CC src/tools/lcc/src/sym.c
+TOOLS_CC src/tools/lcc/src/symbolic.c
+TOOLS_CC src/tools/lcc/src/trace.c
+TOOLS_CC src/tools/lcc/src/tree.c
+TOOLS_CC src/tools/lcc/src/types.c
+LD build/release-linux-x86_64/tools/q3rcc
+TOOLS_CC src/tools/lcc/cpp/cpp.c
+TOOLS_CC src/tools/lcc/cpp/lex.c
+TOOLS_CC src/tools/lcc/cpp/nlist.c
+TOOLS_CC src/tools/lcc/cpp/tokens.c
+src/tools/lcc/cpp/tokens.c: In function ‘puttokens’:
+src/tools/lcc/cpp/tokens.c:293:11: warning: variable ‘wlen’ set but not used [-Wunused-but-set-variable]
+src/tools/lcc/cpp/tokens.c: In function ‘flushout’:
+src/tools/lcc/cpp/tokens.c:330:6: warning: variable ‘wlen’ set but not used [-Wunused-but-set-variable]
+TOOLS_CC src/tools/lcc/cpp/macro.c
+TOOLS_CC src/tools/lcc/cpp/eval.c
+TOOLS_CC src/tools/lcc/cpp/include.c
+src/tools/lcc/cpp/include.c: In function ‘doinclude’:
+src/tools/lcc/cpp/include.c:43:19: warning: variable ‘wlen’ set but not used [-Wunused-but-set-variable]
+TOOLS_CC src/tools/lcc/cpp/hideset.c
+TOOLS_CC src/tools/lcc/cpp/getopt.c
+TOOLS_CC src/tools/lcc/cpp/unix.c
+LD build/release-linux-x86_64/tools/q3cpp
+LD build/release-linux-x86_64/tools/q3lcc
+CGAME_Q3LCC src/cgame/cg_main.c
+CGAME_Q3LCC src/game/bg_misc.c
+CGAME_Q3LCC src/game/bg_pmove.c
+CGAME_Q3LCC src/game/bg_slidemove.c
+CGAME_Q3LCC src/game/bg_lib.c
+CGAME_Q3LCC src/game/bg_alloc.c
+src/game/bg_alloc.c:57: warning: overflow in converting constant expression from `int' to `unsigned long'
+CGAME_Q3LCC src/game/bg_voice.c
+CGAME_Q3LCC src/cgame/cg_consolecmds.c
+CGAME_Q3LCC src/cgame/cg_buildable.c
+CGAME_Q3LCC src/cgame/cg_animation.c
+CGAME_Q3LCC src/cgame/cg_animmapobj.c
+CGAME_Q3LCC src/cgame/cg_draw.c
+CGAME_Q3LCC src/cgame/cg_drawtools.c
+CGAME_Q3LCC src/cgame/cg_ents.c
+CGAME_Q3LCC src/cgame/cg_event.c
+CGAME_Q3LCC src/cgame/cg_marks.c
+CGAME_Q3LCC src/cgame/cg_players.c
+CGAME_Q3LCC src/cgame/cg_playerstate.c
+CGAME_Q3LCC src/cgame/cg_predict.c
+CGAME_Q3LCC src/cgame/cg_servercmds.c
+CGAME_Q3LCC src/cgame/cg_snapshot.c
+CGAME_Q3LCC src/cgame/cg_view.c
+CGAME_Q3LCC src/cgame/cg_weapons.c
+CGAME_Q3LCC src/cgame/cg_scanner.c
+CGAME_Q3LCC src/cgame/cg_attachment.c
+CGAME_Q3LCC src/cgame/cg_trails.c
+CGAME_Q3LCC src/cgame/cg_particles.c
+CGAME_Q3LCC src/cgame/cg_tutorial.c
+UI_Q3LCC src/ui/ui_shared.c
+Q3LCC src/qcommon/q_math.c
+Q3LCC src/qcommon/q_shared.c
+TOOLS_CC src/tools/asm/q3asm.c
+src/tools/asm/q3asm.c: In function ‘TryAssembleENDPROC’:
+src/tools/asm/q3asm.c:950:10: warning: variable ‘v2’ set but not used [-Wunused-but-set-variable]
+src/tools/asm/q3asm.c:950:7: warning: variable ‘v’ set but not used [-Wunused-but-set-variable]
+TOOLS_CC src/tools/asm/cmdlib.c
+LD build/release-linux-x86_64/tools/q3asm
+Q3ASM build/release-linux-x86_64/base/vm/cgame.qvm
+GAME_Q3LCC src/game/g_main.c
+GAME_Q3LCC src/game/bg_misc.c
+GAME_Q3LCC src/game/bg_pmove.c
+GAME_Q3LCC src/game/bg_slidemove.c
+GAME_Q3LCC src/game/bg_lib.c
+GAME_Q3LCC src/game/bg_alloc.c
+src/game/bg_alloc.c:57: warning: overflow in converting constant expression from `int' to `unsigned long'
+GAME_Q3LCC src/game/bg_voice.c
+GAME_Q3LCC src/game/g_active.c
+GAME_Q3LCC src/game/g_client.c
+GAME_Q3LCC src/game/g_cmds.c
+GAME_Q3LCC src/game/g_combat.c
+GAME_Q3LCC src/game/g_physics.c
+GAME_Q3LCC src/game/g_buildable.c
+GAME_Q3LCC src/game/g_misc.c
+GAME_Q3LCC src/game/g_missile.c
+GAME_Q3LCC src/game/g_mover.c
+GAME_Q3LCC src/game/g_session.c
+GAME_Q3LCC src/game/g_spawn.c
+GAME_Q3LCC src/game/g_svcmds.c
+GAME_Q3LCC src/game/g_target.c
+GAME_Q3LCC src/game/g_team.c
+GAME_Q3LCC src/game/g_trigger.c
+GAME_Q3LCC src/game/g_utils.c
+GAME_Q3LCC src/game/g_maprotation.c
+GAME_Q3LCC src/game/g_weapon.c
+GAME_Q3LCC src/game/g_admin.c
+GAME_Q3LCC src/game/g_bot.c
+GAME_Q3LCC src/game/g_namelog.c
+Q3ASM build/release-linux-x86_64/base/vm/game.qvm
+UI_Q3LCC src/ui/ui_main.c
+UI_Q3LCC src/ui/ui_atoms.c
+UI_Q3LCC src/ui/ui_gameinfo.c
+UI_Q3LCC src/game/bg_misc.c
+UI_Q3LCC src/game/bg_lib.c
+Q3ASM build/release-linux-x86_64/base/vm/ui.qvm
+make[2]: Leaving directory `/home/kaname/Projects/trem-gpp-bots/trem-gpp-bots'
+make[1]: Leaving directory `/home/kaname/Projects/trem-gpp-bots/trem-gpp-bots'
