@@ -3433,16 +3433,21 @@ void CG_DrawSplash( void )
 	trap_S_StartLocalSound( cgs.media.splashMusic, CHAN_LOCAL_SOUND );
   }
 
+  if( cg.time - cg.splashTime > 4000 ) {
+    return;
+  } else if( cg.time - cg.splashTime > 3000 ) {
+  	t = (float)( 4000 - (cg.time - cg.splashTime)) / 1000;
+  } else {
+  	t = (float)( cg.time - cg.splashTime) / 1000;
+  }
+  
   for( i = 0; i < 3; i++ ) {
 	  color[ i ] = 1.0f;
   }
   
-  t = (float)( cg.time - cg.splashTime) / 1000;
   if(t > 1.0f) t = 1.0f;
   color[ 3 ] = t;
-
-  if( cg.splashTime + 4000 < cg.time )
-    return;
+  
   ar = ( 4.0f / 3.0f ) / ( (float)cgs.glconfig.vidWidth / cgs.glconfig.vidHeight );
   h = 82; //half the size
   w = 256 * ar; //half the size

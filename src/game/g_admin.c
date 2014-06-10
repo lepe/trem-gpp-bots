@@ -3616,7 +3616,7 @@ qboolean G_admin_botdbg( gentity_t *ent )
 					if(botent->r.svFlags & SVF_BOT) {
 						botent->bot->debug = turnoff ? qfalse : qtrue;
 						success = qtrue;
-						if(read) {  	
+						if(!turnoff && read) {  	
 							if( !Q_stricmp( verb_s, "state") ) {
 								ADMP(va("[%s] State: %d\n", name2_s, botent->bot->state));
 							} else if( !Q_stricmp( verb_s, "navstate") ) {

@@ -553,8 +553,11 @@ void BotAttackAlien( gentity_t *self )
 			else if (self->client->pers.classSelection == PCL_ALIEN_LEVEL3_UPG)//adv dragon
 			{
 				//it can shoot and attack at the same time
-				if(self->client->ps.ammo > 0 && distance > 150) {
+				//We will keep 1 for buildables
+				if(distance < 500 && self->client->ps.ammo > 0) {
+					if(self->bot->Enemy->s.eType == ET_BUILDABLE || self->client->ps.ammo > 1) {
 					   BotMidAttack( self ); 
+					}
 				}
 				if(distance > LEVEL3_CLAW_UPG_RANGE) { 
  					//BotSecAttack( self ); 

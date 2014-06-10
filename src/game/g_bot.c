@@ -238,8 +238,8 @@ void G_BotAddRandom ( team_t team ) {
 		"OptimusPrime", 
 	};
 	int reservedSlots = trap_Cvar_VariableIntegerValue( "sv_privateclients" );
-	ini = team == TEAM_ALIENS ? 0 : 25;
-	fin = team == TEAM_ALIENS ? 26 : 49;
+	ini = team == TEAM_ALIENS ? 0 : 24;
+	fin = team == TEAM_ALIENS ? 25 : 49;
 	//Do not add more than we can handle
 	if(level.humanBots + level.alienBots < reservedSlots) {
 		do {

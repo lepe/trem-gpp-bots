@@ -150,7 +150,7 @@ void BotCleanMove( gentity_t *self ) {
 		default:
 			break;
 	}
-	if(!Q_stricmp( movement, "" )) {
+	if(Q_stricmp( movement, "" )) {
 		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_CONTROL, "Clear: %s\n", movement);
 	}
 }
@@ -278,7 +278,7 @@ void BotControl( gentity_t *self, botMove move ) {
 			G_Printf("Invalid Bot Movement: %d\n", move);
 			break;
 	}
-	if(!Q_stricmp( movement, "" )) {
+	if(Q_stricmp( movement, "" )) {
 		G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_CONTROL, "Movement: %s\n", movement);
 	}
 }
