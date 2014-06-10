@@ -283,8 +283,6 @@ void BotBuy( gentity_t *self )
 	if(!G_BuildableRange( self->client->ps.origin, 100, BA_H_ARMOURY )){ return; }
 	//Clear going to ARM
 	self->bot->Struct = NULL;
-	//Get MedKit
-	BG_AddUpgradeToInventory( UP_MEDKIT, self->client->ps.stats );
 	
 	//Do not buy if its low on HP
 	if(botGetHealthPct(self) < 50) {
