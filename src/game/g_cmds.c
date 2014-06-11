@@ -1186,6 +1186,11 @@ void Cmd_CallVote_f( gentity_t *ent )
   } else {
     team = TEAM_NONE;
 	if(!Q_stricmp( cmd, "callbot" )) {
+		if(ent->client->pers.admin == NULL || ent->client->pers.admin->level <= 0) {
+			trap_SendServerCommand( ent-g_entities,
+				va( "print \"%s: Please register first. Use: /register\n\"", cmd ) );
+			return;
+		}
 		callbot = qtrue;
 	}
   }

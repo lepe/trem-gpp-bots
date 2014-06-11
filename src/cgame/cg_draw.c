@@ -3433,10 +3433,10 @@ void CG_DrawSplash( void )
 	trap_S_StartLocalSound( cgs.media.splashMusic, CHAN_LOCAL_SOUND );
   }
 
-  if( cg.time - cg.splashTime > 4000 ) {
+  if( cg.time - cg.splashTime > 6000 ) {
     return;
-  } else if( cg.time - cg.splashTime > 3000 ) {
-  	t = (float)( 4000 - (cg.time - cg.splashTime)) / 1000;
+  } else if( cg.time - cg.splashTime > 5000 ) {
+  	t = (float)( 6000 - (cg.time - cg.splashTime)) / 1000;
   } else {
   	t = (float)( cg.time - cg.splashTime) / 1000;
   }
