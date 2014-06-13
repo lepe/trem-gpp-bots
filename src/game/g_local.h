@@ -701,8 +701,8 @@ typedef struct
   team_t			teampath;
   qboolean			drawpath;
   //Bots related ----
-  int               alienBots;
-  int               humanBots;
+  int               alienBots;	//number of bots in ALIEN team
+  int               humanBots; 	//number of bots in HUMAN team
   int               extraAlienBots; //extra means that were added manually 
   int               extraHumanBots;
   int               essenceFadeTimer; //used to control how essence is faded in ant algorithm

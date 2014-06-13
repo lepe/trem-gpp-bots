@@ -1865,9 +1865,17 @@ void CalculateRanks( void )
     }
   }
   level.numNonSpectatorClients = level.numLiveAlienClients +
-    level.numLiveHumanClients;
-  level.numVotingClients[ TEAM_ALIENS ] = level.numAlienClients;
-  level.numVotingClients[ TEAM_HUMANS ] = level.numHumanClients;
+    level.numLiveHumanClients - (level.alienBots + level.humanBots);
+  if(level.numNonSpectatorClients < 0) { 
+	  level.numNonSpectatorClients = 0;
+  }
+  level.numVotingClients[ TEAM_NONE ] = level.numVotingClients[ TEAM_NONE ] - (level.alienBots + level.humanBots);
+  if(level.numVotingClients[ TEAM_NONE ] < 0) {
+	  level.numVotingClients[ TEAM_NONE ] = 0;
+  }
+  level.numVotingClients[ TEAM_ALIENS ] = level.numAlienClients - level.alienBots;
+  level.numVotingClients[ TEAM_HUMANS ] = level.numHumanClients - level.humanBots;
+  G_Printf("Voting A: %d, H: %d, NS: %d\n",level.numVotingClients[ TEAM_ALIENS ],level.numVotingClients[ TEAM_HUMANS ],level.numNonSpectatorClients);
   P[ i ] = '\0';
   trap_Cvar_Set( "P", P );
 
@@ -2560,6 +2568,7 @@ void G_CheckVote( team_t team )
   if( !level.voteTime[ team ] )
     return;
 
+  G_Printf("No voters? %d == %d ?\n",level.voteYes[ team ] + level.voteNo[ team ], level.numVotingClients[ team ]);
   if( ( level.time - level.voteTime[ team ] >= VOTE_TIME ) ||
       ( level.voteYes[ team ] + level.voteNo[ team ] == level.numVotingClients[ team ] ) )
   {
