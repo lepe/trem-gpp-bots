@@ -151,10 +151,10 @@ qboolean botAimAtTarget( gentity_t *self, gentity_t *target, qboolean pitch ) {
 	//self->bot->move.lookat[ YAW ] = ANGLE2SHORT( angleToTarget[ YAW ] );
 	//self->client->ps.delta_angles[ ROLL ] = ANGLE2SHORT( angleToTarget[ ROLL ] );
 
-    //LEPE: added if... Humans keep jumping when they are too close of a buildable
+    //LEPE: to prevent humans jumping when they are too close of a buildable
 	//it was done here for simplification as angles are already calculated. However
 	//this code should be moved to g_bot_human.c
-	if(self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS) {
+	if(self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS && target->s.eType == ET_BUILDABLE) {
         if(angleToTarget[0] > -350 && angleToTarget[0] < -180) { // down
             BotCrouch( self ); //keep down
         }

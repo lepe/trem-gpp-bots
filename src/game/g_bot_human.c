@@ -618,12 +618,13 @@ void BotAttackHuman( gentity_t *self )
 	{
 		//If its a player or bot
 		if(self->bot->Enemy->s.eType == ET_PLAYER) {
-			if(distance < 300 && 
+			if(distance < 500 && 
 				self->client->ps.weapon != WP_PAIN_SAW && 
 				self->client->ps.weapon != WP_FLAMER)
 			{
+				BotStand( self );
 				BotAddMove( self, BOT_MOVE_BACK, BOT_TIMER_ACTION);
-				BotStartMove( self, BOT_MOVE_FWD);
+				if(G_Rand() < 50 && distance < 200) BotAddMove( self, BOT_JUMP, BOT_TIMER_ACTION*2);
 				Bot_Strafe( self );
 			}
 			else
