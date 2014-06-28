@@ -727,7 +727,7 @@ void G_PathLoad( void )
 	fileHandle_t f;
 	int len;
 	char *path;
-	char *pathorigin;
+	//char *pathorigin;
 	char line[ MAX_STRING_CHARS ];
 	char map[ MAX_QPATH ];
 	int numPaths = 0;
@@ -740,7 +740,7 @@ void G_PathLoad( void )
 		return;
 	}
 	path = BG_Alloc( len + 1 );
-	pathorigin = path;
+	//pathorigin = path;
 	trap_FS_Read( path, len, f );
 	*( path + len ) = '\0';
 	trap_FS_FCloseFile( f );
@@ -748,6 +748,7 @@ void G_PathLoad( void )
 	 * We perform 2 rounds. The first one will tell us how large our array will become.
 	 * The second one is to fill the array.
 	 */
+	/*
 	i = 0;
 	while( *path )
 	{
@@ -767,14 +768,21 @@ void G_PathLoad( void )
 	}
 	path = pathorigin; //reset pointer
 	level.paths = BG_Alloc( numPaths * sizeof(path) );
+	 */
 	i = 0;
 	while( *path )
 	{
+		if( i >= sizeof( line ) - 1 )
+		{
+			G_Printf( "Error loading path.dat for map\n" );
+			return;
+		}
 		line[ i++ ] = *path;
 		line[ i ] = '\0';
 		if( *path == '\n' )
 		{
 			i = 0; 
+			if( level.numPaths >= 1000){G_Printf( "Reached path limit\n" );return;}
 			sscanf( line, "%d %f %f %f %d %d %d %d %d %d %d %d\n", 
 						&level.numPaths,
 						&level.paths[level.numPaths].coord[0], 
@@ -1875,7 +1883,6 @@ void CalculateRanks( void )
   }
   level.numVotingClients[ TEAM_ALIENS ] = level.numAlienClients - level.alienBots;
   level.numVotingClients[ TEAM_HUMANS ] = level.numHumanClients - level.humanBots;
-  G_Printf("Voting A: %d, H: %d, NS: %d\n",level.numVotingClients[ TEAM_ALIENS ],level.numVotingClients[ TEAM_HUMANS ],level.numNonSpectatorClients);
   P[ i ] = '\0';
   trap_Cvar_Set( "P", P );
 

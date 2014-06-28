@@ -124,7 +124,9 @@ void BotHumanThink( gentity_t *self )
 	//If we have an enemy and we are a builder, use blaster
 	if(self->bot->Enemy) {
 		//If we have an enemy, change the weapon
-		if(BG_InventoryContainsWeapon( WP_HBUILD, self->client->ps.stats )) G_ForceWeaponChange( self, WP_BLASTER );
+		if(self->client->ps.weapon == WP_HBUILD) {
+			G_ForceWeaponChange( self, WP_BLASTER );
+		}
 		self->bot->think.state[ THINK_LEVEL_2 ] = ATTACK;
 	} 
 	//If we are low in health and we are not healing and we have mkit, use it!
@@ -137,10 +139,10 @@ void BotHumanThink( gentity_t *self )
 	} 
 	
 	//Repair if has a ckit
-	if(BG_InventoryContainsWeapon( WP_HBUILD, self->client->ps.stats )) {
+	if(self->client->ps.weapon == WP_HBUILD) {
 		self->bot->Struct = botFindDamagedStructure( self , 300, 100 );
 		if(self->bot->Struct) {
-			self->bot->think.state[ THINK_LEVEL_2 ] = REPAIR;
+			self->bot->think.state[ THINK_LEVEL_1 ] = REPAIR;
 			G_BotDebug(self, BOT_VERB_DETAIL, BOT_DEBUG_HUMAN + BOT_DEBUG_STATE, "Suggesting Repair as LEVEL2 in HumanThink\n");
 		} else {
 			BotResetState( self, REPAIR );

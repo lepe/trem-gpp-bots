@@ -696,7 +696,8 @@ typedef struct
   int               numBuildLogs;
 
   //Path related ---
-  path				*paths;
+  //path				*paths;
+  path				paths[1000];
   int				numPaths;
   team_t			teampath;
   qboolean			drawpath;

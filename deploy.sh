@@ -89,7 +89,7 @@ fi
 if [ ! -d $GAME_DIR/$MOD ]; then
     mkdir $GEAME_DIR/$MOD;
 fi
-if [ ! -d $GAME_DIR/$MOD/bots ]; then
-    cp -R $MOD/* $GAME_DIR/$MOD/
-fi
+#if [ ! -d $GAME_DIR/$MOD/bots ]; then
+    #cp -R $MOD/* $GAME_DIR/$MOD/
+#fi
 exit 0

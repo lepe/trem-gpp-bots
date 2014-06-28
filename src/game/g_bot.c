@@ -50,6 +50,7 @@ qboolean G_BotAdd( char *name, team_t team ) {
     namelog_t *namelog;
     char name_s[ MAX_NAME_LENGTH ];
     char name_tmp_s[ MAX_NAME_LENGTH ] = "";
+    gclient_t *client;
 	
 	reservedSlots = trap_Cvar_VariableIntegerValue( "sv_privateclients" );
 
@@ -99,13 +100,7 @@ qboolean G_BotAdd( char *name, team_t team ) {
 		trap_Print("no more slots for bot\n");
 		return qfalse;
 	}
-	
-	ent = &g_entities[ clientNum ];
-	ent->inuse = qtrue;
-	ent->bot = (bot_t *)BG_Alloc( sizeof(bot_t) );
-//	ent->bot->path.crumb = BG_Alloc( sizeof(level.paths) );
-	
-	ent->r.svFlags |= SVF_BOT;
+
 	// register user information
 	userinfo[0] = '\0';
 	Info_SetValueForKey( userinfo, "name", name );
@@ -116,7 +111,14 @@ qboolean G_BotAdd( char *name, team_t team ) {
 		  Info_SetValueForKey( userinfo, "password", g_password.string);
 	}
 	trap_SetUserinfo( clientNum, userinfo );
-	
+  	client = &level.clients[ clientNum ];
+
+	ent = &g_entities[ clientNum ];
+	ent->inuse = qtrue;
+	ent->bot = (bot_t *)BG_Alloc( sizeof(bot_t) );
+//	ent->bot->path.crumb = BG_Alloc( sizeof(level.paths) );
+	ent->r.svFlags |= SVF_BOT;
+	ent->classname = "BOT";
 	// have it connect to the game as a normal client
 	if(ClientConnect(clientNum, qtrue) != NULL ) {
 		G_Printf("Something weird happened. Bot was not added.");
